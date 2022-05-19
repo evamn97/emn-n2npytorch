@@ -1,0 +1,32 @@
+Date:  
+Tue Oct 26 05:14:39 CDT 2021
+ 
+## This script runs n2n-pytorch/src/train.py from the noise2noise pytorch implementation with the following options:
+	
+	** Job name: 08-n2npt-train
+	** Parition name: gtx
+	** Nodes: 1
+	** MPI tasks: 1
+	** Time required: 15 minutes (00:15:00)
+
+
+	-- dataset: 		AFM images from Ryan (22 original images)
+							--> 400 training images
+							--> 100 validation images
+							--> 19 testing images
+	-- noise type: 		Resolution
+					 		--> style: 		LOWERED
+							--> parameter: 	P = 0.6
+	-- ckpt-overwrite: 	FALSE
+	-- epochs: 			100 (default)
+	-- batch-size:		4 (default)
+							--> total number of batches per epoch = 400/4 = 100
+	-- report-interval:	100
+	-- crop-size:		128 px
+	-- clean-targets: 	TRUE
+	-- use cuda:		TRUE
+	-- plot stats:		TRUE
+
+## End notes
+ Working directory:  
+/work2/08261/evanat/maverick2/n2n-pytorch

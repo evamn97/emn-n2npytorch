@@ -1,0 +1,13 @@
+
+Currently Loaded Modules:
+  1) intel/18.0.2   4) autotools/1.2   7) TACC
+  2) impi/18.0.2    5) cmake/3.16.1    8) python3/3.7.0
+  3) git/2.24.1     6) xalt/2.9.6      9) cuda/11.0     (g)
+
+  Where:
+   g:  built for GPU
+
+ 
+
+Creating a Pipfile for this project...
+(null): can't open file 'src/train.py': [Errno 2] No such file or directory

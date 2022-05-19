@@ -1,0 +1,29 @@
+
+Currently Loaded Modules:
+  1) intel/18.0.2   4) autotools/1.2   7) TACC
+  2) impi/18.0.2    5) cmake/3.16.1    8) python3/3.7.0
+  3) git/2.24.1     6) xalt/2.9.6      9) cuda/11.0     (g)
+
+  Where:
+   g:  built for GPU
+
+ 
+
+Traceback (most recent call last):
+  File "src/train.py", line 60, in <module>
+    n2n.train(train_loader, valid_loader)
+  File "/work2/08261/evanat/maverick2/n2n-pytorch/src/noise2noise.py", line 252, in train
+    for batch_idx, (source, target) in enumerate(train_loader):
+  File "/work2/08261/evanat/maverick2/n2n-pytorch/.venv/lib/python3.7/site-packages/torch/utils/data/dataloader.py", line 521, in __next__
+    data = self._next_data()
+  File "/work2/08261/evanat/maverick2/n2n-pytorch/.venv/lib/python3.7/site-packages/torch/utils/data/dataloader.py", line 561, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/work2/08261/evanat/maverick2/n2n-pytorch/.venv/lib/python3.7/site-packages/torch/utils/data/_utils/fetch.py", line 47, in fetch
+    return self.collate_fn(data)
+  File "/work2/08261/evanat/maverick2/n2n-pytorch/.venv/lib/python3.7/site-packages/torch/utils/data/_utils/collate.py", line 84, in default_collate
+    return [default_collate(samples) for samples in transposed]
+  File "/work2/08261/evanat/maverick2/n2n-pytorch/.venv/lib/python3.7/site-packages/torch/utils/data/_utils/collate.py", line 84, in <listcomp>
+    return [default_collate(samples) for samples in transposed]
+  File "/work2/08261/evanat/maverick2/n2n-pytorch/.venv/lib/python3.7/site-packages/torch/utils/data/_utils/collate.py", line 56, in default_collate
+    return torch.stack(batch, 0, out=out)
+RuntimeError: stack expects each tensor to be equal size, but got [3, 64, 64] at entry 0 and [3, 128, 128] at entry 1

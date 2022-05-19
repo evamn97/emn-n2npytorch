@@ -1,0 +1,30 @@
+Date:  
+Wed Dec  8 02:43:57 CST 2021
+ 
+## This script runs n2n-pytorch/src/test.py from the noise2noise pytorch implementation with the following options:
+	
+	** Job name: 103-n2npt-test
+	** Parition name: gtx
+	** Nodes: 1
+	** MPI tasks: 1
+	** Time required: 5 minutes (00:05:00)
+
+
+	-- dataset: 		New AFM images from Ryan (54 original images)
+							--> 840 training images
+							--> 210 validation images
+							--> various testing images
+	-- noise type: 		Resolution
+					 		--> style: 	LOWER
+							--> parameter: 	P = 0.6
+	-- load-ckpt:	 	ckpts/lower-clean-2021-11-11_0009/n2n-epoch100-0.00859.pt
+							--> trained on LOWER, P=0.6
+	-- show-output:		2
+	-- use cuda:		TRUE
+	-- crop-size:		512 px 
+## End notes
+Working directory:  
+/work2/08261/evanat/maverick2/n2n-pytorch
+Noise2Noise: Learning Image Restoration without Clean Data (Lehtinen et al., 2018)
+Loading checkpoint from: ckpts/lower-clean-2021-11-11_0009/n2n-epoch100-0.00859.pt
+Saving images and montages to: new_test_data/512/denoised-lower-2021-12-08_0244
