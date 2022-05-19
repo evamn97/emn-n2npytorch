@@ -1,3 +1,4 @@
+""" Splits a dataset directory into training and validation sets based on a given ratio. """
 import os
 import random
 import shutil
