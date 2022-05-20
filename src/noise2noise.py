@@ -4,7 +4,7 @@
 import torch
 import torch.nn as nn
 from torch.optim import Adam, lr_scheduler
-import torchvision.transforms as trf    # eva added this on 7-20-21
+import torchvision.transforms as trf  # eva added this on 7-20-21
 
 from unet import UNet
 from utils import *
@@ -23,6 +23,17 @@ class Noise2Noise(object):
         self.trainable = trainable
         self._compile()
 
+        # try to sync montage output with SLURM output filenames by getting job ID and name - emn 05/19/22
+        if "jobid" in os.environ:
+            self.job_id = os.environ["jobid"]
+        else:
+            self.job_id = str(int(torch.randint(100001, 1000000, (1,))[0]))
+        if "jobname" in os.environ:
+            self.job_name = os.environ["jobname"]
+        else:
+            self.job_name = self.p.noise_type
+        # if self.p.clean_targets:  # if you want to add the "-clean" modifier to filenames
+        #     self.job_name += "-clean"
 
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
@@ -41,7 +52,7 @@ class Noise2Noise(object):
 
             # Learning rate adjustment
             self.scheduler = lr_scheduler.ReduceLROnPlateau(self.optim,
-                patience=self.p.nb_epochs/4, factor=0.5, verbose=True)
+                                                            patience=self.p.nb_epochs / 4, factor=0.5, verbose=True)
 
             # Loss function
             if self.p.loss == 'hdr':
@@ -58,7 +69,6 @@ class Noise2Noise(object):
             if self.trainable:
                 self.loss = self.loss.cuda()
 
-
     def _print_params(self):
         """Formats parameters to print when training."""
 
@@ -69,21 +79,22 @@ class Noise2Noise(object):
         print('\n'.join('  {} = {}'.format(pretty(k), str(v)) for k, v in param_dict.items()))
         print()
 
-
     def save_model(self, epoch, stats, first=False):
         """Saves model to files; can be overwritten at every epoch to save disk space."""
 
         # Create directory for model checkpoints, if nonexistent
         if first:
-            if self.p.clean_targets:
-                ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-clean-%Y-%m-%d_%H%M}'
-            else:
-                ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-%Y-%m-%d_%H%M}'
-            if self.p.ckpt_overwrite:
-                if self.p.clean_targets:
-                    ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-clean-%Y-%m-%d_%H%M}'
-                else:
-                    ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-%Y-%m-%d_%H%M}'
+            # if self.p.clean_targets:
+            #     ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-clean-%Y-%m-%d_%H%M}'
+            # else:
+            #     ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-%Y-%m-%d_%H%M}'
+            # if self.p.ckpt_overwrite:
+            #     if self.p.clean_targets:
+            #         ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-clean-%Y-%m-%d}'
+            #     else:
+            #         ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-%Y-%m-%d}'
+
+            ckpt_dir_name = f'{self.job_name}'    # named based on SLURM job name - emn 05/20/22
 
             self.ckpt_dir = os.path.join(self.p.ckpt_save_path, ckpt_dir_name)
             if not os.path.isdir(self.p.ckpt_save_path):
@@ -105,7 +116,6 @@ class Noise2Noise(object):
         with open(fname_dict, 'w') as fp:
             json.dump(stats, fp, indent=2)
 
-
     def load_model(self, ckpt_fname):
         """Loads model from checkpoint file."""
 
@@ -114,7 +124,6 @@ class Noise2Noise(object):
             self.model.load_state_dict(torch.load(ckpt_fname))
         else:
             self.model.load_state_dict(torch.load(ckpt_fname, map_location='cpu'))
-
 
     def _on_epoch_end(self, stats, train_loss, epoch, epoch_start, valid_loader):
         """Tracks and saves starts after each epoch."""
@@ -140,7 +149,6 @@ class Noise2Noise(object):
             plot_per_epoch(self.ckpt_dir, 'Valid loss', stats['valid_loss'], loss_str)
             plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
 
-
     def test(self, test_loader, show):
         """Evaluates denoiser on test set."""
 
@@ -151,8 +159,8 @@ class Noise2Noise(object):
         clean_imgs = []
 
         # Create directory for denoised images
-        denoised_dir = os.path.dirname(self.p.data)
-        save_path = os.path.join(denoised_dir, f'denoised-{self.p.noise_type}-{datetime.now():%Y-%m-%d_%H%M}')
+        # save_path = f'denoised-{self.p.noise_type}-{datetime.now():%Y-%m-%d_%H%M}'
+        save_path = os.path.join(self.p.results, f'denoised-{self.job_name}-{self.job_id}')     # changed to SLURM name/ID - emn 5/20/22
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 
@@ -160,9 +168,6 @@ class Noise2Noise(object):
             # Only do first <show> images
             if show == 0 or batch_idx >= show:
                 break
-
-            if self.p.noise_type == 'doubled':      # eva added this on 7-20-21 to try out double noise style
-                target = trf.Resize(source.size()[-1]).forward(target)
 
             source_imgs.append(source)
             clean_imgs.append(target)
@@ -184,7 +189,6 @@ class Noise2Noise(object):
         for i in range(len(source_imgs)):
             img_name = test_loader.dataset.imgs[i]
             create_montage(img_name, self.p.noise_type, save_path, source_imgs[i], denoised_imgs[i], clean_imgs[i], show)
-
 
     def eval(self, valid_loader):
         """Evaluates denoiser on validation set."""
@@ -219,7 +223,6 @@ class Noise2Noise(object):
         psnr_avg = psnr_meter.avg
 
         return valid_loss, valid_time, psnr_avg
-
 
     def train(self, train_loader, valid_loader):
         """Trains denoiser on training set."""
@@ -292,7 +295,6 @@ class HDRLoss(nn.Module):
 
         super(HDRLoss, self).__init__()
         self._eps = eps
-
 
     def forward(self, denoised, target):
         """Computes loss by unpacking render buffer."""
