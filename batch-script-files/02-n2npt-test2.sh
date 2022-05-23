@@ -8,11 +8,11 @@
 #SBATCH -o ../job-out-files/%x-%j.out                	# Name of stdout output file
 #SBATCH -p gtx          						        # Queue (partition) name
 #SBATCH -N 1               						        # Total # of nodes
+#SBATCH -n 16											# Total # of cores (mpi tasks)
 #SBATCH -t 00:05:00        						        # Run time (hh:mm:ss)
 #SBATCH --mail-user=eva.natinsky@austin.utexas.edu      # address to send notification emails
 #SBATCH --mail-type=all    						        # Send email at begin and end of job
 #SBATCH -A Modeling-of-Microsca					        # Allocation name (req'd if you have more than 1)
-
 
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
 noise="lower"
@@ -49,10 +49,10 @@ echo -e "\nNoise type= ${noise} \tNoise param= ${param} \t Crop size= ${crop}"
 echo -e "Bool options: \t use-cuda=TRUE"
 # ------------------------------------------------------------------------------------------------
 
-cd ../..
+cd ..
 echo "Working directory:  "
 pwd
 
 
 # Launch code using pipenv virtual environment
-pipenv run python src/test.py -d afm_data/test/ -n ${noise} -p ${param} --show-output ${show} -c ${crop} --output ${results} --load-ckpt "${ckpt_name}" --cuda
+pdm run python src/test.py -d afm_data/test/ -n ${noise} -p ${param} --show-output ${show} -c ${crop} --output ${results} --load-ckpt "${ckpt_name}" --cuda

@@ -8,6 +8,7 @@
 #SBATCH -o ../job-out-files/%x-%j.out                	# Name of stdout output file
 #SBATCH -p gtx          						        # Queue (partition) name
 #SBATCH -N 1               						        # Total # of nodes
+#SBATCH -n 16											# Total # of cores (mpi tasks)
 #SBATCH -t 00:25:00        						        # Run time (hh:mm:ss)
 #SBATCH --mail-user=eva.natinsky@austin.utexas.edu      # address to send notification emails
 #SBATCH --mail-type=all    						        # Send email at begin and end of job
@@ -37,15 +38,12 @@ echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \tPartition: ${SLURM
 
 # !!! ----------------------------- UPDATE THESE FOR CORRECTNESS ----------------------------- !!!
 echo -e "Dataset= TGX square pillars (22 imgs), 400/100/19 (train/val/test)"
-echo -e "\nNoise type= ${noise} \tNoise param= ${param} \tReport interval= ${reporting_int} \tCrop size= ${crop}"
-# most below are usually kept the same for all N2N jobs
-echo -e "Bool options: \t ckpt-overwrite=TRUE \t clean-targets=TRUE \t use-cuda=TRUE \t plot-stats=TRUE"
 # ------------------------------------------------------------------------------------------------
 
-cd ../..
+cd ..
 echo "Working directory:  "
 pwd
 
 
 # Launch code using pipenv virtual environment
-pipenv run python src/train.py -t afm_data/train/ -v afm_data/valid/ -n ${noise} -p ${param} --loss ${loss_fun} --ckpt-save-path ckpts --ckpt-overwrite --report-interval ${reporting_int} --clean-targets -ts 400 -vs 100 --cuda --plot-stats
+pdm run python src/train.py -t afm_data/train/ -v afm_data/valid/ -n ${noise} -p ${param} --loss ${loss_fun} --ckpt-save-path ckpts --ckpt-overwrite --report-interval ${reporting_int} --clean-targets -ts 400 -vs 100 --cuda --plot-stats
