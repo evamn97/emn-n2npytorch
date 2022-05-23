@@ -17,7 +17,7 @@
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
 noise="lower"
 train_noise=${noise}  # NOTE: assumes noise type is the same as training
-param=0.4
+param=0.6
 crop=256
 show=4
 results="results"

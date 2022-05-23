@@ -4,7 +4,7 @@
 # eva_mn
 # ----------------------------------------------------
 
-#SBATCH -J 02-n2npt-test2           				    # Job name
+#SBATCH -J 02-n2npt-test2          				        # Job name
 #SBATCH -o ../job-out-files/%x-%j.out                	# Name of stdout output file
 #SBATCH -p gtx          						        # Queue (partition) name
 #SBATCH -N 1               						        # Total # of nodes
@@ -17,9 +17,9 @@
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
 noise="lower"
 train_noise=${noise}  # NOTE: assumes noise type is the same as training
-param=0.4
-crop=512
-show=2
+param=0.6
+crop=128
+show=19
 results="results"
 # -----------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ set +a    # only need to export SLURM vars
 
 # get ckpt name
 train="train"
-test="test2"
+test="test"
 ckpt_name="${jobname%${test}}-train/n2n-${train_noise}.pt"  # NOTE: this only works for ckpt-overwrite=TRUE
 
 # get from SLURM env vars
@@ -43,7 +43,7 @@ echo -e "Begin batch job... \"${SLURM_JOB_NAME}\", #${SLURM_JOB_ID}\n"
 echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \tPartition: ${SLURM_JOB_PARTITION} \nNodes: ${SLURM_JOB_NUM_NODES} \tNtasks: ${SLURM_NTASKS}"
 
 # !!! ----------------------------- UPDATE THESE FOR CORRECTNESS ----------------------------- !!!
-echo -e "Dataset= HS20MG Holes (54 imgs), 512px testing images"
+echo -e "Dataset= TGX square pillars (22 imgs), 400/100/19 (train/val/test)"
 echo -e "\nNoise type= ${noise} \tNoise param= ${param} \t Crop size= ${crop}"
 # most below are usually kept the same for all N2N jobs
 echo -e "Bool options: \t use-cuda=TRUE"
@@ -55,4 +55,4 @@ pwd
 
 
 # Launch code using pipenv virtual environment
-pipenv run python src/test.py -d new_test_data/512/ -n ${noise} -p ${param} --show-output ${show} -c ${crop} --output ${results} --load-ckpt "${ckpt_name}" --cuda
+pipenv run python src/test.py -d afm_data/test/ -n ${noise} -p ${param} --show-output ${show} -c ${crop} --output ${results} --load-ckpt "${ckpt_name}" --cuda

@@ -14,10 +14,11 @@
 #SBATCH -A Modeling-of-Microsca					        # Allocation name (req'd if you have more than 1)
 
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
-noise="lower"
-param=0.6
-reporting_int=100   # must be divisible by nbatches per epoch: nbatches = ntrain/batch-size
+noise="bernoulli"
+param=0.4
+reporting_int=100   # must be factor of nbatches: nbatches = ntrain/batch-size
 crop=128
+loss_fun="l2"
 # -----------------------------------------------------------------------
 
 module list
@@ -36,7 +37,7 @@ echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \tPartition: ${SLURM
 
 # !!! ----------------------------- UPDATE THESE FOR CORRECTNESS ----------------------------- !!!
 echo -e "Dataset= TGX square pillars (22 imgs), 400/100/19 (train/val/test)"
-echo -e "\nNoise type= ${noise} \tNoise param= ${param} \tReport interval= ${reporting_int} \tCrop size= ${crop}"
+echo -e "\nNoise type= ${noise} \tNoise param= ${param} \tLoss function= ${loss_fun} \tReport interval= ${reporting_int} \tCrop size= ${crop}"
 # most below are usually kept the same for all N2N jobs
 echo -e "Bool options: \t ckpt-overwrite=TRUE \t clean-targets=TRUE \t use-cuda=TRUE \t plot-stats=TRUE"
 # ------------------------------------------------------------------------------------------------
@@ -47,4 +48,4 @@ pwd
 
 
 # Launch code using pipenv virtual environment
-pipenv run python src/train.py -t afm_data/train/ -v afm_data/valid/ -n ${noise} -p ${param} --ckpt-save-path ckpts --ckpt-overwrite --report-interval ${reporting_int} --clean-targets -ts 400 -vs 100 --cuda --plot-stats
+pipenv run python src/train.py -t afm_data/train/ -v afm_data/valid/ -n ${noise} -p ${param} --loss ${loss_fun} --report-interval ${reporting_int} --ckpt-save-path ckpts --ckpt-overwrite -ts 400 -vs 100 --cuda --plot-stats --clean-targets

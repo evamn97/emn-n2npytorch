@@ -15,11 +15,11 @@
 
 
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
-noise="lower"
+noise="bernoulli"
 train_noise=${noise}  # NOTE: assumes noise type is the same as training
-param=0.6
-crop=128
-show=19
+param=0.4
+crop=256
+show=4
 results="results"
 # -----------------------------------------------------------------------
 
@@ -55,4 +55,4 @@ pwd
 
 
 # Launch code using pipenv virtual environment
-pipenv run python src/test.py -d afm_data/test/ -n ${noise} -p ${param} --show-output ${show} -c ${crop} --output ${results} --load-ckpt "${ckpt_name}" --cuda
+pipenv run python src/test.py -d new_test_data/256/ -n ${noise} -p ${param} --show-output ${show} -c ${crop} --output ${results} --load-ckpt "${ckpt_name}" --cuda

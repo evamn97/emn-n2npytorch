@@ -1,7 +1,0 @@
-Working directory:  
-/work2/08261/evanat/maverick2/n2n-pytorch
-Date:  
-Fri Jul 16 16:40:52 CDT 2021
-Noise2Noise: Learning Image Restoration without Clean Data (Lehtinen et al., 2018)
-Loading checkpoint from: ckpts/bernoulli-h-172835/n2n-epoch100-0.16709.pt
-Saving images and montages to: afm_data/test/denoised-bernoulli-h-164130
