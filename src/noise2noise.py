@@ -38,8 +38,6 @@ class Noise2Noise(object):
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
 
-        print('Noise2Noise: Learning Image Restoration without Clean Data (Lehtinen et al., 2018)')
-
         # Model 
         self.model = UNet(in_channels=3)
 
@@ -160,7 +158,7 @@ class Noise2Noise(object):
 
         # Create directory for denoised images
         # save_path = f'denoised-{self.p.noise_type}-{datetime.now():%Y-%m-%d_%H%M}'
-        save_path = os.path.join(self.p.results, f'denoised-{self.job_name}-{self.job_id}')     # changed to SLURM name/ID - emn 5/20/22
+        save_path = os.path.join(self.p.output, f'denoised-{self.job_name}-{self.job_id}')     # changed to SLURM name/ID - emn 5/20/22
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 
