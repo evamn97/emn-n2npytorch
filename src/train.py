@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import torch
 import torch.nn as nn
 
@@ -13,16 +14,15 @@ def parse_args():
     """Command-line argument parser for training."""
 
     # New parser
-    parser = ArgumentParser(description='PyTorch implementation of Noise2Noise from Lehtinen et al. (2018)')
+    parser = ArgumentParser(description='AFM fast scan and noisy image reconstruction')
 
     # Data parameters
-    parser.add_argument('-t', '--train-dir', help='training set path', default='./../data/train')
-    parser.add_argument('-v', '--valid-dir', help='test set path', default='./../data/valid')
-    parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='./../ckpts')
+    parser.add_argument('-d', '--data-dir',
+                        help='directory path containing train and valid (and targets, if appl.) folders',
+                        default='../data')
+    parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts')
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
     parser.add_argument('--report-interval', help='batch report interval', default=500, type=int)
-    parser.add_argument('-ts', '--train-size', help='size of train dataset', type=int)
-    parser.add_argument('-vs', '--valid-size', help='size of valid dataset', type=int)
 
     # Training hyperparameters
     parser.add_argument('-lr', '--learning-rate', help='learning rate', default=0.001, type=float)
@@ -35,12 +35,13 @@ def parse_args():
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
-                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform'],
+                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw'],
                         default='bernoulli', type=str)
     parser.add_argument('-p', '--noise-param', help='noise parameter', default=0.7, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
-    parser.add_argument('-c', '--crop-size', help='random crop size', default=128, type=int)
+    parser.add_argument('-c', '--crop-size', help='random crop size', default=0, type=int)
     parser.add_argument('--clean-targets', help='use clean targets for training', action='store_true')
+    parser.add_argument('--paired-targets', help='uses targets from "targets" folder in data directory', action='store_true')
 
     return parser.parse_args()
 
@@ -52,8 +53,10 @@ if __name__ == '__main__':
     params = parse_args()
 
     # Train/valid datasets
-    train_loader = load_dataset(params.train_dir, params.train_size, params, shuffled=True)
-    valid_loader = load_dataset(params.valid_dir, params.valid_size, params, shuffled=False)
+    train_dir = os.path.join(params.data_dir, "train")
+    valid_dir = os.path.join(params.data_dir, "valid")
+    train_loader = load_dataset(train_dir, params, shuffled=True)
+    valid_loader = load_dataset(valid_dir, params, shuffled=False)
 
     # Initialize model and train
     n2n = Noise2Noise(params, trainable=True)

@@ -14,10 +14,10 @@ def parse_args():
     """Command-line argument parser for testing."""
 
     # New parser
-    parser = ArgumentParser(description='PyTorch implementation of Noise2Noise from Lehtinen et al. (2018)')
+    parser = ArgumentParser(description='AFM fast scan and noisy image reconstruction')
 
     # Data parameters
-    parser.add_argument('-d', '--data', help='test dataset root path', default='../data')
+    parser.add_argument('-d', '--data-dir', help='test dataset root path', default='../data')
     parser.add_argument('--output', help='directory to save the results images', default='../results')
     parser.add_argument('--load-ckpt', help='load model checkpoint')
     parser.add_argument('--show-output', help='pop up window to display outputs', default=0, type=int)
@@ -25,11 +25,12 @@ def parse_args():
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
-                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform'],
+                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw'],
                         default='bernoulli', type=str)
     parser.add_argument('-p', '--noise-param', help='noise parameter', default=0.7, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
-    parser.add_argument('-c', '--crop-size', help='image crop size', default=128, type=int)
+    parser.add_argument('-c', '--crop-size', help='image crop size', default=0, type=int)
+    parser.add_argument('--paired-targets', help='uses targets from "targets" folder in test parent directory', action='store_true')
 
     return parser.parse_args()
 
@@ -42,8 +43,7 @@ if __name__ == '__main__':
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)
-    params.redux = False
     params.clean_targets = True
-    test_loader = load_dataset(params.data, 0, params, shuffled=False, single=True)
+    test_loader = load_dataset(params.data_dir, params, shuffled=False, single=True)
     n2n.load_model(params.load_ckpt)
     n2n.test(test_loader, show=params.show_output)
