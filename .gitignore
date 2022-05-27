@@ -4,10 +4,9 @@
 /test.csv
 /test_div.csv
 /results.old/
-
 /afm_data/
-/batch-script-files/
-/hs_20mg_test_data/
-/hs_20mg_train_data/
 /new_afm_data/
 /new_test_data/
+/hs_20mg_data/
+/bernoulli_utils.py
+/psnr-calc.py
