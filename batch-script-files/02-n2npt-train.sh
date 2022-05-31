@@ -21,7 +21,6 @@ train_dir="afm_data/train"
 valid_dir="afm_data/valid"
 noise="lower"
 param=0.4
-report_int=100   # must be divisible by nbatches per epoch: nbatches = ntrain/batch-size
 ckpt_save="ckpts"
 # -----------------------------------------------------------------------
 
@@ -56,7 +55,6 @@ pdm run python src/train.py \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \
   --cuda \
-  --plot-stats \
   --clean-targets
 
 

@@ -58,6 +58,16 @@ if __name__ == '__main__':
     # Parse training parameters
     params = parse_args()
 
+    # debugging
+    # params.train_dir = "../hs_20mg_data/train"
+    # params.valid_dir = "../hs_20mg_data/valid"
+    # params.target_dir = "../hs_20mg_data/targets"
+    # params.noise_type = "raw"
+    # params.report_interval = 240
+    # params.clean_targets = True
+    # params.paired_targets = True
+    # params.nb_epochs = 1
+
     # Train/valid datasets
     train_loader = load_dataset(params.train_dir, params, shuffled=True)
     valid_loader = load_dataset(params.valid_dir, params, shuffled=False)

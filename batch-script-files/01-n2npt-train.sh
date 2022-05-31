@@ -22,7 +22,6 @@ valid_dir="afm_data/valid"
 noise="bernoulli"
 param=0.4
 loss_fun="l2"       # default is l1
-report_int=100   # must be factor of nbatches: nbatches = ntrain/batch-size
 ckpt_save="ckpts"
 # -----------------------------------------------------------------------
 
@@ -55,7 +54,6 @@ pdm run python src/train.py \
   -n ${noise} \
   -p ${param} \
   --loss ${loss_fun} \
-  --report-interval ${report_int} \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \
   --cuda \

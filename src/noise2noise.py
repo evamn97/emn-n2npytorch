@@ -25,17 +25,18 @@ class Noise2Noise(object):
 
         # try to sync montage output with SLURM output filenames by getting job ID and name - emn 05/19/22
         if "jobid" in os.environ:
-            self.job_id = os.environ["jobid"]
+            self.job_id = os.environ["jobid"]  # ex: 193174
         else:
-            self.job_id = f'{datetime.now():%m%d%H%M}'
+            self.job_id = f'{datetime.now():%m%d%H%M}'  # ex: 05311336
         if "jobname" in os.environ:
-            self.job_name = os.environ["jobname"]
+            self.job_name = os.environ["jobname"] + "-" + self.p.noise_type  # ex: 01-n2npt-train-bernoulli
         else:
-            self.job_name = self.p.noise_type
-        if trainable and self.p.clean_targets:  # if you want to add the "-clean" modifier to filenames
-            self.job_name += "-clean"
-        if self.p.paired_targets:
-            self.job_name += "-paired"
+            self.job_name = self.p.noise_type  # ex: bernoulli
+            if trainable and self.p.clean_targets:
+                self.job_name += "-clean"  # ex: bernoulli-clean
+            if self.p.paired_targets:
+                self.job_name += "-paired"  # ex: bernoulli-paired
+            self.job_name += "-" + self.job_id  # ex: bernoulli-paired-05311336
 
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
@@ -82,7 +83,7 @@ class Noise2Noise(object):
 
         # Create directory for model checkpoints, if nonexistent
         if first:
-            ckpt_dir_name = f'{self.job_name}'  # named based on SLURM job name - emn 05/20/22
+            ckpt_dir_name = f'{self.job_name}'  # ex: 01-n2npt-train-bernoulli
 
             self.ckpt_dir = os.path.join(self.p.ckpt_save_path, ckpt_dir_name)
             if not os.path.isdir(self.p.ckpt_save_path):
@@ -92,11 +93,12 @@ class Noise2Noise(object):
 
         # Save checkpoint dictionary
         if self.p.ckpt_overwrite:
-            fname_unet = '{}/n2n-{}.pt'.format(self.ckpt_dir, self.p.noise_type)
+            fname_unet = '{}/n2n-{}.pt'.format(self.ckpt_dir, self.p.noise_type)  # ex: 'ckpts/01-n2npt-train-bernoulli/n2n-bernoulli.pt'
         else:
             valid_loss = stats['valid_loss'][epoch]
             fname_unet = '{}/n2n-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
-        print('Saving checkpoint to: {}\n'.format(fname_unet))
+        if self.p.plot_stats or (epoch + 1) == self.p.nb_epochs:
+            print('Saving checkpoint to: {}\n'.format(fname_unet))
         torch.save(self.model.state_dict(), fname_unet)
 
         # Save stats to JSON
@@ -117,10 +119,12 @@ class Noise2Noise(object):
         """Tracks and saves starts after each epoch."""
 
         # Evaluate model on validation set
-        print('\rTesting model on validation set... ', end='')
+        if self.p.plot_stats:
+            print('\rTesting model on validation set... ', end='')
         epoch_time = time_elapsed_since(epoch_start)[0]
         valid_loss, valid_time, valid_psnr = self.eval(valid_loader)
-        show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr)
+        if self.p.plot_stats or (epoch + 1) == self.p.nb_epochs:
+            show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr)
 
         # Decrease learning rate if plateau
         self.scheduler.step(valid_loss)
@@ -129,7 +133,8 @@ class Noise2Noise(object):
         stats['train_loss'].append(train_loss)
         stats['valid_loss'].append(valid_loss)
         stats['valid_psnr'].append(valid_psnr)
-        self.save_model(epoch, stats, epoch == 0)
+
+        self.save_model(epoch, stats, first=(epoch == 0))
 
         # Plot stats
         if self.p.plot_stats:
@@ -147,8 +152,7 @@ class Noise2Noise(object):
         clean_imgs = []
 
         # Create directory for denoised images
-        # save_path = f'denoised-{self.p.noise_type}-{datetime.now():%Y-%m-%d_%H%M}'
-        save_path = os.path.join(self.p.output, f'denoised-{self.job_name}-{self.job_id}')  # changed to SLURM name/ID - emn 5/20/22
+        save_path = os.path.join(self.p.output, f'denoised-{self.job_name}-{self.job_id}')  # ex: 'results/denoised-01-n2npt-train-bernoulli-193174/'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 
@@ -219,7 +223,9 @@ class Noise2Noise(object):
 
         self._print_params()
         num_batches = len(train_loader)
-        assert num_batches % self.p.report_interval == 0, 'Report interval must divide total number of batches'
+        if num_batches % self.p.report_interval != 0:
+            print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size). \nThe report interval has been reset to equal nbatches.\n")
+            self.p.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset
 
         # Dictionaries of tracked stats
         stats = {'noise_type': self.p.noise_type,
@@ -231,7 +237,8 @@ class Noise2Noise(object):
         # Main training loop
         train_start = datetime.now()
         for epoch in range(self.p.nb_epochs):
-            print('EPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
+            if self.p.plot_stats or (epoch + 1) == self.p.nb_epochs:
+                print('EPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
 
             # Some stats trackers
             epoch_start = datetime.now()
@@ -242,7 +249,8 @@ class Noise2Noise(object):
             # Minibatch SGD
             for batch_idx, (source, target) in enumerate(train_loader):
                 batch_start = datetime.now()
-                progress_bar(batch_idx, num_batches, self.p.report_interval, loss_meter.val)
+                if self.p.plot_stats:
+                    progress_bar(batch_idx, num_batches, self.p.report_interval, loss_meter.val)
 
                 if self.use_cuda:
                     source = source.cuda()
@@ -261,11 +269,12 @@ class Noise2Noise(object):
 
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
-                if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
-                    show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
-                    train_loss_meter.update(loss_meter.avg)
-                    loss_meter.reset()
-                    time_meter.reset()
+                if self.p.plot_stats:
+                    if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
+                        show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
+                        train_loss_meter.update(loss_meter.avg)
+                        loss_meter.reset()
+                        time_meter.reset()
 
             # Epoch end, save and reset tracker
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)

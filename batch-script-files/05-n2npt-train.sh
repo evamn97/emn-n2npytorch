@@ -22,7 +22,6 @@ valid_dir="hs_20mg_data/valid"
 target_dir="hs_20mg_data/targets"
 noise="raw"
 loss_fun="l2"       # default is l1
-report_int=240   # must be divisor of nbatches: nbatches = ntrain/batch-size, nbatches % report_int = 0
 ckpt_save="ckpts"
 # -----------------------------------------------------------------------
 
@@ -55,7 +54,6 @@ pdm run python src/train.py \
 --target-dir ${target_dir} \
 -n ${noise} \
 --loss ${loss_fun} \
---report-interval ${report_int} \
 --ckpt-save-path ${ckpt_save} \
 --ckpt-overwrite \
 --cuda \
