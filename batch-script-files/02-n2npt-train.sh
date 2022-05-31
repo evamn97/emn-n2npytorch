@@ -53,7 +53,6 @@ pdm run python src/train.py \
   -v ${valid_dir} \
   -n ${noise} \
   -p ${param} \
-  --report-interval ${report_int} \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \
   --cuda \

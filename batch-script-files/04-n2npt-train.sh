@@ -59,7 +59,6 @@ pdm run python src/train.py \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \
   --cuda \
-  --plot-stats \
   --clean-targets
 
 

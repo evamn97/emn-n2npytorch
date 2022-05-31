@@ -7,9 +7,9 @@
 #SBATCH -J 05-n2npt-train         				        # Job name
 #SBATCH -o ../job-out-files/%x-%j.out                	# Name of stdout output file
 #SBATCH -p gtx          						        # Queue (partition) name
-#SBATCH -N 1               						        # Total # of nodes
+#SBATCH -N 2               						        # Total # of nodes
 #SBATCH --ntasks-per-node 16							# Total # of tasks per node (mpi tasks)
-#SBATCH -t 00:10:00        						        # Run time (hh:mm:ss)
+#SBATCH -t 00:20:00        						        # Run time (hh:mm:ss)
 #SBATCH --mail-user=eva.natinsky@austin.utexas.edu      # address to send notification emails
 #SBATCH --mail-type=all    						        # Send email at begin and end of job
 #SBATCH -A Modeling-of-Microsca					        # Allocation name (req'd if you have more than 1)
@@ -50,17 +50,16 @@ echo -e "Working directory:  $(pwd)\n"
 
 # Launch code using pipenv virtual environment
 pdm run python src/train.py \
-  -t ${train_dir} \
-  -v ${valid_dir} \
-  --target-dir ${target_dir} \
-  -n ${noise} \
-  --loss ${loss_fun} \
-  --report-interval ${report_int} \
-  --ckpt-save-path ${ckpt_save} \
-  --ckpt-overwrite \
-  --cuda \
-  --plot-stats \
-  --paired-targets
+-t ${train_dir} \
+-v ${valid_dir} \
+--target-dir ${target_dir} \
+-n ${noise} \
+--loss ${loss_fun} \
+--report-interval ${report_int} \
+--ckpt-save-path ${ckpt_save} \
+--ckpt-overwrite \
+--cuda \
+--paired-targets
 
 
 end=$(date +%s)

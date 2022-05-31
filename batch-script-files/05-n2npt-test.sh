@@ -52,14 +52,7 @@ echo -e "Working directory:  $(pwd)\n"
 ckpt_name="ckpts/${jobname%"test"}train/n2n-${train_noise}.pt"
 
 # Launch code using pipenv virtual environment
-pdm run python src/test.py \
-  -t ${test_dir} \
-  --target-dir ${target_dir} \
-  -n ${noise} \
-  --output ${results} \
-  --load-ckpt "${ckpt_name}" \
-  --cuda \
-  --paired-targets
+pdm run python src/test.py -t ${test_dir} --target-dir ${target_dir} -n ${noise} --output ${results} --load-ckpt "${ckpt_name}" --cuda --paired-targets
 
 
 end=$(date +%s)
