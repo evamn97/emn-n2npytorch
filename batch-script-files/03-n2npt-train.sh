@@ -17,10 +17,11 @@
 start=$(date +%s)
 
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
-data_dir="afm_data"
+train_dir="afm_data/train"
+valid_dir="afm_data/valid"
 noise="gradient"
 param=0.4
-reporting_int=100   # must be divisible by nbatches per epoch: nbatches = ntrain/batch-size
+report_int=100   # must be divisible by nbatches per epoch: nbatches = ntrain/batch-size
 ckpt_save="ckpts"
 # -----------------------------------------------------------------------
 
@@ -48,11 +49,11 @@ echo -e "Working directory:  $(pwd)\n"
 
 # Launch code using pipenv virtual environment
 pdm run python src/train.py \
-  -t ${data_dir}/train/ \
-  -v ${data_dir}/valid/ \
+  -t ${train_dir} \
+  -v ${valid_dir} \
   -n ${noise} \
   -p ${param} \
-  --report-interval ${reporting_int} \
+  --report-interval ${report_int} \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \
   --cuda \

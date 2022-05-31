@@ -17,19 +17,25 @@ def parse_args():
     parser = ArgumentParser(description='AFM fast scan and noisy image reconstruction')
 
     # Data parameters
-    parser.add_argument('-d', '--data-dir',
-                        help='directory path containing train and valid (and targets, if appl.) folders',
-                        default='../data')
+    parser.add_argument('-t', '--train-dir',
+                        help='directory path containing training images',
+                        default='../data/train')
+    parser.add_argument('-v', '--valid-dir',
+                        help='directory path containing validation images',
+                        default='../data/valid')
+    parser.add_argument('--target-dir',
+                        help='directory path containing target images, if applicable.',
+                        default='../data/targets')
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts')
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
-    parser.add_argument('--report-interval', help='batch report interval', default=500, type=int)
+    parser.add_argument('--report-interval', help='batch report interval', default=100, type=int)
 
     # Training hyperparameters
     parser.add_argument('-lr', '--learning-rate', help='learning rate', default=0.001, type=float)
     parser.add_argument('-a', '--adam', help='adam parameters', nargs='+', default=[0.9, 0.99, 1e-8], type=list)
     parser.add_argument('-b', '--batch-size', help='minibatch size', default=4, type=int)
     parser.add_argument('-e', '--nb-epochs', help='number of epochs', default=100, type=int)
-    parser.add_argument('-l', '--loss', help='loss function', choices=['l1', 'l2', 'hdr'], default='l1', type=str)
+    parser.add_argument('-l', '--loss', help='loss function', choices=['l1', 'l2'], default='l1', type=str)
     parser.add_argument('--cuda', help='use cuda', action='store_true')
     parser.add_argument('--plot-stats', help='plot stats after every epoch', action='store_true')
 
@@ -52,11 +58,19 @@ if __name__ == '__main__':
     # Parse training parameters
     params = parse_args()
 
+    # **Debugging only
+    # params.train_dir = "../hs_20mg_data/train"
+    # params.valid_dir = "../hs_20mg_data/valid"
+    # params.target_dir = "../hs_20mg_data/targets"
+    # params.paired_targets = True
+    # params.clean_targets = True
+    # params.report_interval = 120
+    # params.nb_epochs = 1
+    # params.plot_stats = True
+
     # Train/valid datasets
-    train_dir = os.path.join(params.data_dir, "train")
-    valid_dir = os.path.join(params.data_dir, "valid")
-    train_loader = load_dataset(train_dir, params, shuffled=True)
-    valid_loader = load_dataset(valid_dir, params, shuffled=False)
+    train_loader = load_dataset(params.train_dir, params, shuffled=True)
+    valid_loader = load_dataset(params.valid_dir, params, shuffled=False)
 
     # Initialize model and train
     n2n = Noise2Noise(params, trainable=True)

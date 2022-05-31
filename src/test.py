@@ -17,7 +17,10 @@ def parse_args():
     parser = ArgumentParser(description='AFM fast scan and noisy image reconstruction')
 
     # Data parameters
-    parser.add_argument('-d', '--data-dir', help='test dataset root path', default='../data')
+    parser.add_argument('-t', '--test-dir', help='directory path containing testing images', default='../data/test')
+    parser.add_argument('--target-dir',
+                        help='directory path containing target images, if applicable.',
+                        default='../data/targets')
     parser.add_argument('--output', help='directory to save the results images', default='../results')
     parser.add_argument('--load-ckpt', help='load model checkpoint')
     parser.add_argument('--show-output', help='pop up window to display outputs', default=0, type=int)
@@ -30,7 +33,7 @@ def parse_args():
     parser.add_argument('-p', '--noise-param', help='noise parameter', default=0.7, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='image crop size', default=0, type=int)
-    parser.add_argument('--paired-targets', help='uses targets from "targets" folder in test parent directory', action='store_true')
+    parser.add_argument('--paired-targets', help='uses targets from "targets" directory', action='store_true')
 
     return parser.parse_args()
 
@@ -41,9 +44,16 @@ if __name__ == '__main__':
     # Parse test parameters
     params = parse_args()
 
+    # **Debugging only
+    # params.test_dir = "../hs_20mg_data/test"
+    # params.target_dir = "../hs_20mg_data/test/targets"
+    # params.load_ckpt = "../ckpts/bernoulli-clean-paired/n2n-epoch1-0.11216.pt"
+    # params.paired_targets = True
+    # params.show_output = 7
+
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)
     params.clean_targets = True
-    test_loader = load_dataset(params.data_dir, params, shuffled=False, single=True)
+    test_loader = load_dataset(params.test_dir, params, shuffled=False, single=True)
     n2n.load_model(params.load_ckpt)
     n2n.test(test_loader, show=params.show_output)

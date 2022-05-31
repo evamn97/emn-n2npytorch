@@ -17,11 +17,10 @@
 start=$(date +%s)
 
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
-data_dir="new_test_data/256/"
+test_dir="new_test_data/256/"
 noise="gradient"
 train_noise=$noise  # NOTE: assumes noise type is the same as training
 param=0.7
-show=4
 results="results"
 # -----------------------------------------------------------------------
 
@@ -54,11 +53,9 @@ ckpt_name="ckpts/${jobname%"test"}train/n2n-${train_noise}.pt"
 
 # Launch code using pipenv virtual environment
 pdm run python src/test.py \
-  -d ${data_dir} \
+  -t ${test_dir} \
   -n ${noise} \
   -p ${param} \
-  --show-output ${show} \
-  -c ${crop} \
   --output ${results} \
   --load-ckpt "${ckpt_name}" \
   --cuda

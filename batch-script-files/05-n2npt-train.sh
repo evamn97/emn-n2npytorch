@@ -1,6 +1,6 @@
 #!/bin/bash
 # ----------------------------------------------------
-# Last revised: 19 May 2022
+# Last revised: 31 May 2022
 # eva_mn
 # ----------------------------------------------------
 
@@ -17,10 +17,12 @@
 start=$(date +%s)
 
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
-data_dir="hs_20mg_train_data/"
+train_dir="hs_20mg_data/train"
+valid_dir="hs_20mg_data/valid"
+target_dir="hs_20mg_data/targets"
 noise="raw"
 loss_fun="l2"       # default is l1
-reporting_int=100   # must be factor of nbatches: nbatches = ntrain/batch-size
+report_int=240   # must be divisor of nbatches: nbatches = ntrain/batch-size, nbatches % report_int = 0
 ckpt_save="ckpts"
 # -----------------------------------------------------------------------
 
@@ -39,7 +41,7 @@ echo -e "Begin batch job... \"${SLURM_JOB_NAME}\", #${SLURM_JOB_ID}\n"
 echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \nPartition: ${SLURM_JOB_PARTITION} \tNodes: ${SLURM_JOB_NUM_NODES} \tNtasks per node: ${SLURM_NTASKS}"
 
 # !!! ----------------------------- UPDATE THIS FOR CORRECTNESS ----------------------------- !!!
-echo -e "Dataset: HS20MG holes & pillars (60 imgs), 960/240/7 (train/val/test)\n"
+echo -e "Dataset: HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
 # ------------------------------------------------------------------------------------------------
 
 cd ..
@@ -48,10 +50,12 @@ echo -e "Working directory:  $(pwd)\n"
 
 # Launch code using pipenv virtual environment
 pdm run python src/train.py \
-  -d ${data_dir} \
+  -t ${train_dir} \
+  -v ${valid_dir} \
+  --target-dir ${target_dir} \
   -n ${noise} \
   --loss ${loss_fun} \
-  --report-interval ${reporting_int} \
+  --report-interval ${report_int} \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \
   --cuda \

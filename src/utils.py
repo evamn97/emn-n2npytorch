@@ -12,8 +12,10 @@ from datetime import datetime
 from PIL import Image
 
 from matplotlib import rcParams
+
 rcParams['font.family'] = 'serif'
 import matplotlib
+
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -87,7 +89,7 @@ def reinhard_tonemap(tensor):
 
 def psnr(input, target):
     """Computes peak signal-to-noise ratio."""
-    
+
     return 10 * torch.log10(1 / F.mse_loss(input, target))
 
 
@@ -136,13 +138,11 @@ class AvgMeter(object):
     def __init__(self):
         self.reset()
 
-
     def reset(self):
         self.val = 0
         self.avg = 0.
         self.sum = 0
         self.count = 0
-
 
     def update(self, val, n=1):
         self.val = val
