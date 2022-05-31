@@ -6,6 +6,13 @@ from torchvision.transforms import functional as TVF
 import PIL.Image as Image
 import os
 from tqdm import tqdm
+import shutil
+
+
+def highest_pow_2(n):
+    p = int(np.log2(n))
+    res = int(pow(2, p))
+    return res
 
 
 def random_trf(image: PIL.Image.Image, min_dim=None, target=None):
@@ -22,32 +29,33 @@ def random_trf(image: PIL.Image.Image, min_dim=None, target=None):
     rad_angle = np.radians(angle)
     c_crop = int(P / (np.abs(np.sin(rad_angle)) + np.abs(np.cos(rad_angle))))  # get bbox size based on rotation
     min_crop = int(min_dim / (2 * np.cos(np.pi / 4)))  # get smallest bbox
+    final_crop = highest_pow_2(min_crop)  # must be power of 2
     temp_source = trf.CenterCrop(c_crop)(image.rotate(angle))  # rotate and crop to valid data
 
     if target is None:  # for augmenting unpaired images
-        transformer = trf.Compose([trf.RandomCrop(min_crop), trf.RandomHorizontalFlip(), trf.RandomVerticalFlip()])
+        transformer = trf.Compose([trf.RandomCrop(final_crop), trf.RandomHorizontalFlip(), trf.RandomVerticalFlip()])
         new_source = transformer(temp_source)
         return new_source
 
     else:  # for augmenting image pairs with the same transformations
         temp_target = trf.CenterCrop(c_crop)(target.rotate(angle))  # rotate and crop to valid data
-        c_top = random.randint(0, (c_crop - min_crop))
-        c_left = random.randint(0, (c_crop - min_crop))
+        c_top = random.randint(0, (c_crop - final_crop))
+        c_left = random.randint(0, (c_crop - final_crop))
         flips = random.choice(['h', 'v', 'both', 'none'])
 
         # flips and crops
         if flips == 'h':
-            new_source = TVF.crop(TVF.hflip(temp_source), c_top, c_left, min_crop, min_crop)
-            new_target = TVF.crop(TVF.hflip(temp_target), c_top, c_left, min_crop, min_crop)
+            new_source = TVF.crop(TVF.hflip(temp_source), c_top, c_left, final_crop, final_crop)
+            new_target = TVF.crop(TVF.hflip(temp_target), c_top, c_left, final_crop, final_crop)
         elif flips == 'v':
-            new_source = TVF.crop(TVF.vflip(temp_source), c_top, c_left, min_crop, min_crop)
-            new_target = TVF.crop(TVF.vflip(temp_target), c_top, c_left, min_crop, min_crop)
+            new_source = TVF.crop(TVF.vflip(temp_source), c_top, c_left, final_crop, final_crop)
+            new_target = TVF.crop(TVF.vflip(temp_target), c_top, c_left, final_crop, final_crop)
         elif flips == 'both':
-            new_source = TVF.crop(TVF.hflip(TVF.vflip(temp_source)), c_top, c_left, min_crop, min_crop)
-            new_target = TVF.crop(TVF.hflip(TVF.vflip(temp_target)), c_top, c_left, min_crop, min_crop)
+            new_source = TVF.crop(TVF.hflip(TVF.vflip(temp_source)), c_top, c_left, final_crop, final_crop)
+            new_target = TVF.crop(TVF.hflip(TVF.vflip(temp_target)), c_top, c_left, final_crop, final_crop)
         else:  # flips == 'none'
-            new_source = TVF.crop(temp_source, c_top, c_left, min_crop, min_crop)
-            new_target = TVF.crop(temp_target, c_top, c_left, min_crop, min_crop)
+            new_source = TVF.crop(temp_source, c_top, c_left, final_crop, final_crop)
+            new_target = TVF.crop(temp_target, c_top, c_left, final_crop, final_crop)
 
         return new_source, new_target
 
@@ -65,10 +73,9 @@ def augment(in_path, out_path, total_imgs, min_px=None):
             with os.scandir(in_path) as folder:
                 for item in folder:
                     name, ext = os.path.splitext(item.name)
-                    if ext.lower() not in {'.png'}:  # image extensions must be in this set, other items are skipped
+                    if ext.lower() not in {'.png', '.jpg', '.jpeg'}:  # image extensions must be in this set, other items are skipped
                         continue
-                    with Image.open(item.path) as im:
-                        im.convert('RGB')
+                    with Image.open(item.path).convert('RGB') as im:
                         im.load()
                     if min_px is None:
                         min_px = im.size[0]
@@ -78,7 +85,7 @@ def augment(in_path, out_path, total_imgs, min_px=None):
                     transformed_image.save(save_path)
                     pbar.update(1)
                     index += 1
-                    if index > total_imgs:
+                    if index == total_imgs:
                         break
         pbar.close()
     else:
@@ -102,11 +109,9 @@ def augment_pairs(source_path_in, source_path_out, target_path_in, target_path_o
             t_name = os.path.splitext(t.name)[0]
             if ext.lower() not in {'.png'}:  # image extensions must be in this set, other items are skipped
                 continue
-            with Image.open(s.path) as source:  # load source image
-                source.convert('RGB')
+            with Image.open(s.path).convert('RGB') as source:  # load source image
                 source.load()
-            with Image.open(t.path) as target:  # load target image
-                target.convert('RGB')
+            with Image.open(t.path).convert('RGB') as target:  # load target image
                 target.load()
             if min_px is None:  # get size from source if not specified
                 min_px = s.size[0]
@@ -116,28 +121,64 @@ def augment_pairs(source_path_in, source_path_out, target_path_in, target_path_o
             source_save_name = s_name + str(index) + ext
             target_save_name = t_name + str(index) + ext
             source_save_path = os.path.join(source_path_out, source_save_name)  # image name with index
-            target_save_path = os.path.join(target_path_out, target_save_name)  # image name with index + "_target"
+            target_save_path = os.path.join(target_path_out, target_save_name)  # image name with "target_" + index
 
             transformed_source.save(source_save_path)  # gives attribute error here but this works for PIL images
             transformed_target.save(target_save_path)
 
             pbar.update(1)
             index += 1
-            if index > total_imgs:
+            if index == total_imgs:
                 break
     pbar.close()
 
 
+def split(root_dir, ratio=0.8):
+    """ Splits a set of images into "train" and "valid" subdirectories.
+
+    """
+    all_files = [f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))]
+    print(len(all_files), " total files")
+    num_train = int(ratio * len(all_files))
+    random.shuffle(all_files)
+    train = all_files[:num_train]
+    valid = all_files[num_train:]
+
+    train_dir = os.path.join(root_dir, "train")
+    valid_dir = os.path.join(root_dir, "valid")
+    if not os.path.isdir(train_dir):
+        os.mkdir(train_dir)
+    if not os.path.isdir(valid_dir):
+        os.mkdir(valid_dir)
+
+    for img in train:
+        file = os.path.join(root_dir, img)
+        shutil.move(file, os.path.join(train_dir, img))
+    for img in valid:
+        file = os.path.join(root_dir, img)
+        shutil.move(file, os.path.join(valid_dir, img))
+
+    print(len(train), " files in train")
+    print(len(valid), " files in valid")
+
+
 if __name__ == '__main__':
-    input_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/processed_pngs"
-    aug_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/hs_20mg_train_data"
-    # augment(input_dir, aug_dir, 256, 1200)
+
+    # Augmenting data
+    # source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/TGX-Calib-grid/png-conversions"
+    # source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/conversion-debug-data"
 
     source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/png_files"
+    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/hs_20mg_data"
     target_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/processed_pngs"
-    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/hs_20mg_train_data"
-    target_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/hs_20mg_train_data/targets"
+    target_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/hs_20mg_data/targets"
+
     number = 1200
     px = 256
 
+    # augment(source_in_dir, source_out_dir, number, px)
     augment_pairs(source_in_dir, source_out_dir, target_in_dir, target_out_dir, number, px)
+
+    # Splitting data
+    split_ratio = 0.8
+    split(source_out_dir, split_ratio)

@@ -17,8 +17,8 @@
 start=$(date +%s)
 
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
-data_dir="new_test_data/256/"
-noise="bernoulli"
+data_dir="hs_20mg_data/test/"
+noise="raw"
 train_noise=$noise  # NOTE: assumes noise type is the same as training
 param=0.4
 show=4

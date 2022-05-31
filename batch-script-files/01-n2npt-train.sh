@@ -21,7 +21,7 @@ data_dir="afm_data"
 noise="bernoulli"
 param=0.4
 loss_fun="l2"       # default is l1
-reporting_int=100   # must be factor of nbatches: nbatches = ntrain/batch-size
+report_int=100   # must be factor of nbatches: nbatches = ntrain/batch-size
 ckpt_save="ckpts"
 # -----------------------------------------------------------------------
 
@@ -49,12 +49,11 @@ echo -e "Working directory:  $(pwd)\n"
 
 # Launch code using pipenv virtual environment
 pdm run python src/train.py \
-  -t ${data_dir}/train/ \
-  -v ${data_dir}/valid/ \
+  -d ${data_dir} \
   -n ${noise} \
   -p ${param} \
   --loss ${loss_fun} \
-  --report-interval ${reporting_int} \
+  --report-interval ${report_int} \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \
   --cuda \

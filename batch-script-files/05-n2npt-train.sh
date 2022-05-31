@@ -17,10 +17,11 @@
 start=$(date +%s)
 
 # !!!-------------------- SET INPUT VARS -----------------------------!!!
-data_dir="hs_20mg_train_data/"
+data_dir="hs_20mg_data"
+target_dir="hs_20mg_data/targets"
 noise="raw"
 loss_fun="l2"       # default is l1
-reporting_int=100   # must be factor of nbatches: nbatches = ntrain/batch-size
+report_int=240   # must be divisor of nbatches: nbatches = ntrain/batch-size, nbatches % report_int = 0
 ckpt_save="ckpts"
 # -----------------------------------------------------------------------
 
@@ -49,9 +50,10 @@ echo -e "Working directory:  $(pwd)\n"
 # Launch code using pipenv virtual environment
 pdm run python src/train.py \
   -d ${data_dir} \
+  -t ${target_dir} \
   -n ${noise} \
   --loss ${loss_fun} \
-  --report-interval ${reporting_int} \
+  --report-interval ${report_int} \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \
   --cuda \

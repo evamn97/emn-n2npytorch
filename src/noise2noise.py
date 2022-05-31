@@ -27,13 +27,15 @@ class Noise2Noise(object):
         if "jobid" in os.environ:
             self.job_id = os.environ["jobid"]
         else:
-            self.job_id = str(int(torch.randint(100001, 1000000, (1,))[0]))
+            self.job_id = f'{datetime.now():%m%d%H%M}'
         if "jobname" in os.environ:
             self.job_name = os.environ["jobname"]
         else:
             self.job_name = self.p.noise_type
-        # if self.p.clean_targets:  # if you want to add the "-clean" modifier to filenames
-        #     self.job_name += "-clean"
+        if trainable and self.p.clean_targets:  # if you want to add the "-clean" modifier to filenames
+            self.job_name += "-clean"
+        if self.p.paired_targets:
+            self.job_name += "-paired"
 
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
@@ -53,9 +55,7 @@ class Noise2Noise(object):
                                                             patience=self.p.nb_epochs / 4, factor=0.5, verbose=True)
 
             # Loss function
-            if self.p.loss == 'hdr':
-                self.loss = HDRLoss()
-            elif self.p.loss == 'l2':
+            if self.p.loss == 'l2':
                 self.loss = nn.MSELoss()
             else:
                 self.loss = nn.L1Loss()
@@ -82,17 +82,7 @@ class Noise2Noise(object):
 
         # Create directory for model checkpoints, if nonexistent
         if first:
-            # if self.p.clean_targets:
-            #     ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-clean-%Y-%m-%d_%H%M}'
-            # else:
-            #     ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-%Y-%m-%d_%H%M}'
-            # if self.p.ckpt_overwrite:
-            #     if self.p.clean_targets:
-            #         ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-clean-%Y-%m-%d}'
-            #     else:
-            #         ckpt_dir_name = f'{datetime.now():{self.p.noise_type}-%Y-%m-%d}'
-
-            ckpt_dir_name = f'{self.job_name}'    # named based on SLURM job name - emn 05/20/22
+            ckpt_dir_name = f'{self.job_name}'  # named based on SLURM job name - emn 05/20/22
 
             self.ckpt_dir = os.path.join(self.p.ckpt_save_path, ckpt_dir_name)
             if not os.path.isdir(self.p.ckpt_save_path):
@@ -158,7 +148,7 @@ class Noise2Noise(object):
 
         # Create directory for denoised images
         # save_path = f'denoised-{self.p.noise_type}-{datetime.now():%Y-%m-%d_%H%M}'
-        save_path = os.path.join(self.p.output, f'denoised-{self.job_name}-{self.job_id}')     # changed to SLURM name/ID - emn 5/20/22
+        save_path = os.path.join(self.p.output, f'denoised-{self.job_name}-{self.job_id}')  # changed to SLURM name/ID - emn 5/20/22
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 
@@ -283,19 +273,3 @@ class Noise2Noise(object):
 
         train_elapsed = time_elapsed_since(train_start)[0]
         print('Training done! Total elapsed time: {}\n'.format(train_elapsed))
-
-
-class HDRLoss(nn.Module):
-    """High dynamic range loss."""
-
-    def __init__(self, eps=0.01):
-        """Initializes loss with numerical stability epsilon."""
-
-        super(HDRLoss, self).__init__()
-        self._eps = eps
-
-    def forward(self, denoised, target):
-        """Computes loss by unpacking render buffer."""
-
-        loss = ((denoised - target) ** 2) / (denoised + self._eps) ** 2
-        return torch.mean(loss.view(-1))
