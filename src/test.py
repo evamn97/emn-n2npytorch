@@ -44,13 +44,6 @@ if __name__ == '__main__':
     # Parse test parameters
     params = parse_args()
 
-    # **Debugging only
-    # params.test_dir = "../hs_20mg_data/test"
-    # params.target_dir = "../hs_20mg_data/test/targets"
-    # params.load_ckpt = "../ckpts/bernoulli-clean-paired/n2n-epoch1-0.11216.pt"
-    # params.paired_targets = True
-    # params.show_output = 7
-
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)
     params.clean_targets = True
