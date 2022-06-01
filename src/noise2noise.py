@@ -85,7 +85,7 @@ class Noise2Noise(object):
         if first:
             ckpt_dir_name = f'{self.job_name}'  # ex: 01-n2npt-train-bernoulli
 
-            self.ckpt_dir = os.path.join(self.p.ckpt_save_path, ckpt_dir_name)
+            self.ckpt_dir = os.path.normpath(os.path.join(self.p.ckpt_save_path, ckpt_dir_name))
             if not os.path.isdir(self.p.ckpt_save_path):
                 os.mkdir(self.p.ckpt_save_path)
             if not os.path.isdir(self.ckpt_dir):
@@ -152,7 +152,7 @@ class Noise2Noise(object):
         clean_imgs = []
 
         # Create directory for denoised images
-        save_path = os.path.join(self.p.output, f'denoised-{self.job_name}-{self.job_id}')  # ex: 'results/denoised-01-n2npt-train-bernoulli-193174/'
+        save_path = os.path.normpath(os.path.join(self.p.output, f'denoised-{self.job_name}-{self.job_id}'))  # ex: 'results/denoised-01-n2npt-train-bernoulli-193174/'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 

@@ -49,15 +49,15 @@ echo -e "Working directory:  $(pwd)\n"
 
 # Launch code using pipenv virtual environment
 pdm run python src/train.py \
--t ${train_dir} \
--v ${valid_dir} \
---target-dir ${target_dir} \
--n ${noise} \
---loss ${loss_fun} \
---ckpt-save-path ${ckpt_save} \
---ckpt-overwrite \
---cuda \
---paired-targets
+  -t ${train_dir} \
+  -v ${valid_dir} \
+  --target-dir ${target_dir} \
+  -n ${noise} \
+  --loss ${loss_fun} \
+  --ckpt-save-path ${ckpt_save} \
+  --ckpt-overwrite \
+  --cuda \
+  --paired-targets
 
 
 end=$(date +%s)
