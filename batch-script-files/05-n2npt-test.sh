@@ -49,7 +49,7 @@ cd ..
 echo -e "Working directory:  $(pwd)\n"
 
 # get ckpt name (NOTE: this only works for ckpt-overwrite=TRUE)
-ckpt_name="ckpts/${jobname%"test"}train/n2n-${train_noise}.pt"
+ckpt_name="ckpts/${jobname%"test"}train-${train_noise}/n2n-${train_noise}.pt"
 
 # Launch code using pipenv virtual environment
 pdm run python src/test.py -t ${test_dir} --target-dir ${target_dir} -n ${noise} --output ${results} --load-ckpt "${ckpt_name}" --cuda --paired-targets

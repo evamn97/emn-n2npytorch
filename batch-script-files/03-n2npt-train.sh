@@ -39,7 +39,7 @@ echo -e "Begin batch job... \"${SLURM_JOB_NAME}\", #${SLURM_JOB_ID}\n"
 echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \nPartition: ${SLURM_JOB_PARTITION} \tNodes: ${SLURM_JOB_NUM_NODES} \tNtasks per node: ${SLURM_NTASKS}"
 
 # !!! ----------------------------- UPDATE THESE FOR CORRECTNESS ----------------------------- !!!
-echo -e "Dataset: TGX square pillars (22 imgs), 400/100/19 (train/val/test)"
+echo -e "Dataset: TGX square pillars (22 imgs), 400/100/19 (train/val/test)\n"
 # ------------------------------------------------------------------------------------------------
 
 cd ..

@@ -1,0 +1,47 @@
+Date:  Wed Jun  1 11:35:59 CDT 2022
+
+Currently Loaded Modules:
+  1) intel/18.0.2   4) autotools/1.2   7) TACC
+  2) impi/18.0.2    5) cmake/3.16.1    8) python3/3.7.0
+  3) git/2.24.1     6) xalt/2.9.6      9) cuda/11.0     (g)
+
+  Where:
+   g:  built for GPU
+
+ 
+
+Begin batch job... "04-n2npt-train", #193206
+
+Output file: 04-n2npt-train-193206.out 
+Partition: gtx 	Nodes: 1 	Ntasks per node: 16
+Dataset: TGX square pillars (22 imgs), 400/100/19 (train/val/test)
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+Training parameters: 
+  Train dir = afm_data/train
+  Valid dir = afm_data/valid
+  Target dir = ../data/targets
+  Ckpt save path = ckpts
+  Ckpt overwrite = True
+  Report interval = 100
+  Learning rate = 0.001
+  Adam = [0.9, 0.99, 1e-08]
+  Batch size = 4
+  Nb epochs = 100
+  Loss = l2
+  Cuda = True
+  Plot stats = False
+  Noise type = gradient
+  Noise param = 0.4
+  Seed = None
+  Crop size = 0
+  Clean targets = True
+  Paired targets = False
+
+EPOCH 100 / 100
+                                                                                Train time: 0:00:02 | Valid time: 0:00:00 | Valid loss: 0.00005 | Avg PSNR: 43.00 dB
+Saving checkpoint to: ckpts/04-n2npt-train-gradient/n2n-gradient.pt
+
+Training done! Total elapsed time: 0:04:33
+
+Batch job runtime was 4 minutes and 46 seconds.

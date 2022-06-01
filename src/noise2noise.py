@@ -70,8 +70,10 @@ class Noise2Noise(object):
 
     def _print_params(self):
         """Formats parameters to print when training."""
-
-        print('Training parameters: ')
+        if self.trainable:
+            print('Training parameters: ')
+        else:
+            print('Testing/Eval parameters: ')
         self.p.cuda = self.use_cuda
         param_dict = vars(self.p)
         pretty = lambda x: x.replace('_', ' ').capitalize()
@@ -146,6 +148,8 @@ class Noise2Noise(object):
         """Evaluates denoiser on test set."""
 
         self.model.train(False)
+
+        self._print_params()
 
         source_imgs = []
         denoised_imgs = []
