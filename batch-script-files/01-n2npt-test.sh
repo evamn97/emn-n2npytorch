@@ -10,19 +10,19 @@
 #SBATCH -N 1                                            # Total # of nodes
 #SBATCH --ntasks-per-node 16                            # Total # of tasks per node (mpi tasks)
 #SBATCH -t 00:05:00                                     # Run time (hh:mm:ss)
-#SBATCH --mail-user=eva.natinsky@austin.utexas.edu      # address to send notification emails
-#SBATCH --mail-type=all                                 # Send email at begin and end of job
+#SBATCH --mail-type=none                                # Send email at begin and end of job
 #SBATCH -A Modeling-of-Microsca                         # Allocation name (req'd if you have more than 1)
 
 start=$(date +%s)
 
-# !!!-------------------- SET INPUT VARS -----------------------------!!!
-test_dir="new_test_data/256/"
+# !!!----------------------------- SET INPUT VARS -----------------------------!!!
+test_dir="tgx_data/test"
+data_info="Dataset: TGX square pillars (22 imgs), 480/120/6 (train/val/test)\n"
 noise="bernoulli"
 train_noise=$noise  # NOTE: assumes noise type is the same as training
 param=0.4
 results="results"
-# -----------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 echo "Date:  $(date)"
 
@@ -38,12 +38,7 @@ set +a    # only need to export SLURM vars
 echo -e "Begin batch job... \"${SLURM_JOB_NAME}\", #${SLURM_JOB_ID}\n"
 echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \nPartition: ${SLURM_JOB_PARTITION} \tNodes: ${SLURM_JOB_NUM_NODES} \tNtasks per node: ${SLURM_NTASKS}"
 
-# !!! ----------------------------- UPDATE THESE FOR CORRECTNESS ----------------------------- !!!
-echo -e "Dataset: TGX square pillars (22 imgs), 400/100/19 (train/val/test)"
-echo -e "\nNoise type= ${noise} \tNoise param= ${param} \t Crop size= ${crop}"
-# most below are usually kept the same for all N2N jobs
-echo -e "Bool options: \t use-cuda=TRUE"
-# ------------------------------------------------------------------------------------------------
+echo -e ${data_info}
 
 cd ..
 echo -e "Working directory:  $(pwd)\n"
@@ -58,7 +53,8 @@ pdm run python src/test.py \
   -p ${param} \
   --output ${results} \
   --load-ckpt "${ckpt_name}" \
-  --cuda
+  --cuda \
+  --montage-only
 
 
 end=$(date +%s)

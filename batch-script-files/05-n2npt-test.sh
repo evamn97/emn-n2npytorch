@@ -10,19 +10,19 @@
 #SBATCH -N 1                                            # Total # of nodes
 #SBATCH --ntasks-per-node 16                            # Total # of tasks per node (mpi tasks)
 #SBATCH -t 00:05:00                                     # Run time (hh:mm:ss)
-#SBATCH --mail-user=eva.natinsky@austin.utexas.edu      # address to send notification emails
-#SBATCH --mail-type=all                                 # Send email at begin and end of job
+#SBATCH --mail-type=none                                # Send email at begin and end of job
 #SBATCH -A Modeling-of-Microsca                         # Allocation name (req'd if you have more than 1)
 
 start=$(date +%s)
 
-# !!!-------------------- SET INPUT VARS -----------------------------!!!
-test_dir="hs_20mg_data/test/"
-target_dir="hs_20mg_data/test/targets"
+# !!!----------------------------- SET INPUT VARS -----------------------------!!!
+test_dir="bw_hs20mg_data/test/"
+target_dir="bw_hs20mg_data/test/targets"
+data_info="B&W Dataset: HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
 noise="raw"
 train_noise=$noise  # NOTE: assumes noise type is the same as training
 results="results"
-# -----------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 echo "Date:  $(date)"
 
@@ -38,12 +38,7 @@ set +a    # only need to export SLURM vars
 echo -e "Begin batch job... \"${SLURM_JOB_NAME}\", #${SLURM_JOB_ID}\n"
 echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \nPartition: ${SLURM_JOB_PARTITION} \tNodes: ${SLURM_JOB_NUM_NODES} \tNtasks per node: ${SLURM_NTASKS}"
 
-# !!! ----------------------------- UPDATE THESE FOR CORRECTNESS ----------------------------- !!!
-echo -e "Dataset: TGX square pillars (22 imgs), 400/100/19 (train/val/test)"
-echo -e "\nNoise type= ${noise} \tNoise param= ${param} \t Crop size= ${crop}"
-# most below are usually kept the same for all N2N jobs
-echo -e "Bool options: \t use-cuda=TRUE"
-# ------------------------------------------------------------------------------------------------
+echo -e ${data_info}
 
 cd ..
 echo -e "Working directory:  $(pwd)\n"
@@ -52,8 +47,15 @@ echo -e "Working directory:  $(pwd)\n"
 ckpt_name="ckpts/${jobname%"test"}train-${train_noise}/n2n-${train_noise}.pt"
 
 # Launch code using pipenv virtual environment
-pdm run python src/test.py -t ${test_dir} --target-dir ${target_dir} -n ${noise} --output ${results} --load-ckpt "${ckpt_name}" --cuda --paired-targets
-
+pdm run python src/test.py \
+  -t ${test_dir} \
+  --target-dir ${target_dir} \
+  -n ${noise} \
+  --output ${results} \
+  --load-ckpt "${ckpt_name}" \
+  --cuda \
+  --paired-targets \
+  --montage-only
 
 end=$(date +%s)
 runtime_minutes=$(((end-start)/60))

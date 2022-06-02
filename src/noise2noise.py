@@ -161,9 +161,9 @@ class Noise2Noise(object):
             os.mkdir(save_path)
 
         for batch_idx, (source, target) in enumerate(test_loader):
-            # Only do first <show> images
-            if show == 0 or batch_idx >= show:
-                break
+            # # Only do first <show> images     # this is stupid bc show is also used for plot popups
+            # if show == 0 or batch_idx >= show:
+            #     break
 
             source_imgs.append(source)
             clean_imgs.append(target)
@@ -184,7 +184,7 @@ class Noise2Noise(object):
         print('Saving images and montages to: {}'.format(save_path))
         for i in range(len(source_imgs)):
             img_name = test_loader.dataset.imgs[i]
-            create_montage(img_name, self.p.noise_type, save_path, source_imgs[i], denoised_imgs[i], clean_imgs[i], show)
+            create_montage(img_name, self.p.noise_type, save_path, source_imgs[i], denoised_imgs[i], clean_imgs[i], show, montage_only=self.p.montage_only)
 
     def eval(self, valid_loader):
         """Evaluates denoiser on validation set."""

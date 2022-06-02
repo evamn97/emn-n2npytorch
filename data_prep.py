@@ -15,17 +15,21 @@ def highest_pow_2(n):
     return res
 
 
-def random_trf(image: PIL.Image.Image, min_dim=None, target=None):
+def random_trf(image: PIL.Image.Image, min_dim=None, target=None, max_angle=270):
     """ Applies random transformations to a single image or pair for data augmentation.
     :param image: Independent image, or source image if using pairs.
     :param min_dim: Minimum dimension of input image(s). For transforming sets of differently sized images, locks size of output images.
     :param target: Corresponding target in an image pair.
+    :param max_angle: maximum angle range within which to rotate the image.
     """
     P = image.size[0]
     if min_dim is None:
         min_dim = P
     rng = np.random.default_rng()
-    angle = rng.integers(0, 270)  # get random angle in degrees
+    if not max_angle <= 0:
+        angle = rng.integers(0, max_angle)  # get random angle in degrees
+    else:
+        angle = 0
     rad_angle = np.radians(angle)
     c_crop = int(P / (np.abs(np.sin(rad_angle)) + np.abs(np.cos(rad_angle))))  # get bbox size based on rotation
     min_crop = int(min_dim / (2 * np.cos(np.pi / 4)))  # get smallest bbox
@@ -60,7 +64,7 @@ def random_trf(image: PIL.Image.Image, min_dim=None, target=None):
         return new_source, new_target
 
 
-def augment(in_path, out_path, total_imgs, min_px=None):
+def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle=270):
     """ Augments a set of independent images (unpaired).
 
     """
@@ -79,7 +83,7 @@ def augment(in_path, out_path, total_imgs, min_px=None):
                         im.load()
                     if min_px is None:
                         min_px = im.size[0]
-                    transformed_image = random_trf(im, min_px)
+                    transformed_image = random_trf(im, min_dim=min_px, max_angle=max_angle)
                     save_name = name + str(index) + ext
                     save_path = os.path.join(out_path, save_name)  # image name with index
                     transformed_image.save(save_path)
@@ -92,7 +96,7 @@ def augment(in_path, out_path, total_imgs, min_px=None):
         raise AssertionError("Input path is not a directory!")
 
 
-def augment_pairs(source_path_in, source_path_out, target_path_in, total_imgs, min_px):
+def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str, total_imgs: int, min_px=None, max_angle=270):
     assert (os.path.isdir(source_path_in) and os.path.isdir(target_path_in)), "One of your input paths is not a directory!"
     if not os.path.isdir(source_path_out):
         os.mkdir(source_path_out)
@@ -114,10 +118,8 @@ def augment_pairs(source_path_in, source_path_out, target_path_in, total_imgs, m
                 source.load()
             with Image.open(t.path).convert('RGB') as target:  # load target image
                 target.load()
-            if min_px is None:  # get size from source if not specified
-                min_px = s.size[0]
 
-            transformed_source, transformed_target = random_trf(source, min_px, target)
+            transformed_source, transformed_target = random_trf(source, min_px, target, max_angle=max_angle)
 
             source_save_name = s_name + str(index) + ext
             target_save_name = t_name + str(index) + ext
@@ -134,12 +136,12 @@ def augment_pairs(source_path_in, source_path_out, target_path_in, total_imgs, m
     pbar.close()
 
 
-def split(root_dir, ratio=0.8):
+def split(root_dir: str, ratio=0.8):
     """ Splits a set of images into "train" and "valid" subdirectories.
 
     """
     all_files = [f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))]
-    print(len(all_files), " total files")
+    print(len(all_files), " total images")
     num_train = int(ratio * len(all_files))
     random.shuffle(all_files)
     train = all_files[:num_train]
@@ -159,11 +161,10 @@ def split(root_dir, ratio=0.8):
         file = os.path.join(root_dir, img)
         shutil.move(file, os.path.join(valid_dir, img))
 
-    print("{} files in train".format(len(train)))
-    print("{} files in valid".format(len(valid)))
+    print("Final split: {} files in train, {} files in valid.".format(len(train), len(valid)))
 
 
-def get_test(test_path_in, test_path_out, num, target_path_in=None):
+def get_test(test_path_in: str, test_path_out: str, num: int, target_path_in=None):
     if not os.path.isdir(test_path_out):
         os.mkdir(test_path_out)
     all_files = [f for f in os.listdir(test_path_in) if os.path.isfile(os.path.join(test_path_in, f))]
@@ -185,21 +186,22 @@ def get_test(test_path_in, test_path_out, num, target_path_in=None):
 
 if __name__ == '__main__':
     # Augmenting data
-    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/bw-png-files"
-    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/bw_hs20mg_data"
+    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/planelevel-bw-png-files"
+    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/planelevel_bw_hs20mg_data"
     target_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/bw-processed-pngs"
 
     number = 1200
     px = 256
+    max_angle = 0
 
-    # augment(source_in_dir, source_out_dir, number, px)
-    augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, px)
+    # augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=max_angle)
+    augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=max_angle)
 
     # Splitting data
     split_ratio = 0.8
     split(source_out_dir, split_ratio)
 
     # Getting test images
-    nt = 5
+    nt = 7
     test_out_dir = os.path.join(source_out_dir, "test")
     get_test(source_in_dir, test_out_dir, nt, target_in_dir)

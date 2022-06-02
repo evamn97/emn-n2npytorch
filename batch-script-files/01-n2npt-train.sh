@@ -4,26 +4,26 @@
 # eva_mn
 # ----------------------------------------------------
 
-#SBATCH -J 01-n2npt-train         				        # Job name
-#SBATCH -o ../job-out-files/%x-%j.out                	# Name of stdout output file
-#SBATCH -p gtx          						        # Queue (partition) name
-#SBATCH -N 1               						        # Total # of nodes
-#SBATCH --ntasks-per-node 16							# Total # of tasks per node (mpi tasks)
-#SBATCH -t 00:10:00        						        # Run time (hh:mm:ss)
-#SBATCH --mail-user=eva.natinsky@austin.utexas.edu      # address to send notification emails
-#SBATCH --mail-type=all    						        # Send email at begin and end of job
-#SBATCH -A Modeling-of-Microsca					        # Allocation name (req'd if you have more than 1)
+#SBATCH -J 01-n2npt-train                               # Job name
+#SBATCH -o ../job-out-files/%x-%j.out                   # Name of stdout output file
+#SBATCH -p gtx                                          # Queue (partition) name
+#SBATCH -N 1                                            # Total # of nodes
+#SBATCH --ntasks-per-node 16                            # Total # of tasks per node (mpi tasks)
+#SBATCH -t 00:10:00                                     # Run time (hh:mm:ss)
+#SBATCH --mail-type=none                                # Send email at begin and end of job
+#SBATCH -A Modeling-of-Microsca                         # Allocation name (req'd if you have more than 1)
 
 start=$(date +%s)
 
-# !!!-------------------- SET INPUT VARS -----------------------------!!!
-train_dir="afm_data/train"
-valid_dir="afm_data/valid"
+# !!!----------------------------- SET INPUT VARS -----------------------------!!!
+train_dir="tgx_data/train"
+valid_dir="tgx_data/valid"
+data_info="Dataset: TGX square pillars (22 imgs), 480/120/6 (train/val/test)\n"
 noise="bernoulli"
 param=0.4
 loss_fun="l2"       # default is l1
 ckpt_save="ckpts"
-# -----------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 echo "Date:  $(date)"
 
@@ -39,9 +39,7 @@ set +a    # only need to export SLURM vars
 echo -e "Begin batch job... \"${SLURM_JOB_NAME}\", #${SLURM_JOB_ID}\n"
 echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \nPartition: ${SLURM_JOB_PARTITION} \tNodes: ${SLURM_JOB_NUM_NODES} \tNtasks per node: ${SLURM_NTASKS}"
 
-# !!! ----------------------------- UPDATE THIS FOR CORRECTNESS ----------------------------- !!!
-echo -e "Dataset: TGX square pillars (22 imgs), 400/100/19 (train/val/test)\n"
-# ------------------------------------------------------------------------------------------------
+echo -e ${data_info}
 
 cd ..
 echo -e "Working directory:  $(pwd)\n"

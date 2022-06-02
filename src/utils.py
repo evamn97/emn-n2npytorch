@@ -93,10 +93,10 @@ def psnr(input, target):
     return 10 * torch.log10(1 / F.mse_loss(input, target))
 
 
-def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_t, show):
+def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_t, show, montage_only=False):
     """Creates montage for easy comparison."""
 
-    fig, ax = plt.subplots(1, 3, figsize=(21, 7))
+    fig, ax = plt.subplots(1, 3, figsize=(30, 10), dpi=300)
     fig.canvas.manager.set_window_title(img_name.capitalize()[:-4])
 
     # Bring tensors to CPU
@@ -125,8 +125,9 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
 
     # Save to files
     fname = os.path.splitext(img_name)[0]
-    source.save(os.path.join(save_path, f'{fname}-{noise_type}-noisy.png'))
-    denoised.save(os.path.join(save_path, f'{fname}-{noise_type}-denoised.png'))
+    if not montage_only:
+        source.save(os.path.join(save_path, f'{fname}-{noise_type}-noisy.png'))
+        denoised.save(os.path.join(save_path, f'{fname}-{noise_type}-denoised.png'))
     fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}-montage.png'), bbox_inches='tight')
 
 

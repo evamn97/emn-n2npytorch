@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument('--output', help='directory to save the results images', default='../results')
     parser.add_argument('--load-ckpt', help='load model checkpoint')
     parser.add_argument('--show-output', help='pop up window to display outputs', default=0, type=int)
+    parser.add_argument('--montage-only', help='save montage figures only (not inputs and outputs)', action='store_true')
     parser.add_argument('--cuda', help='use cuda', action='store_true')
 
     # Corruption parameters

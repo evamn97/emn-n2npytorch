@@ -4,26 +4,26 @@
 # eva_mn
 # ----------------------------------------------------
 
-#SBATCH -J 05-n2npt-train         				        # Job name
-#SBATCH -o ../job-out-files/%x-%j.out                	# Name of stdout output file
-#SBATCH -p gtx          						        # Queue (partition) name
-#SBATCH -N 2               						        # Total # of nodes
-#SBATCH --ntasks-per-node 16							# Total # of tasks per node (mpi tasks)
-#SBATCH -t 00:20:00        						        # Run time (hh:mm:ss)
-#SBATCH --mail-user=eva.natinsky@austin.utexas.edu      # address to send notification emails
-#SBATCH --mail-type=all    						        # Send email at begin and end of job
-#SBATCH -A Modeling-of-Microsca					        # Allocation name (req'd if you have more than 1)
+#SBATCH -J 05-n2npt-train                               # Job name
+#SBATCH -o ../job-out-files/%x-%j.out                   # Name of stdout output file
+#SBATCH -p gtx                                          # Queue (partition) name
+#SBATCH -N 2                                            # Total # of nodes
+#SBATCH --ntasks-per-node 16                            # Total # of tasks per node (mpi tasks)
+#SBATCH -t 00:16:00                                     # Run time (hh:mm:ss)
+#SBATCH --mail-type=none                                # Send email at begin and end of job
+#SBATCH -A Modeling-of-Microsca                         # Allocation name (req'd if you have more than 1)
 
 start=$(date +%s)
 
-# !!!-------------------- SET INPUT VARS -----------------------------!!!
-train_dir="hs_20mg_data/train"
-valid_dir="hs_20mg_data/valid"
-target_dir="hs_20mg_data/targets"
+# !!!----------------------------- SET INPUT VARS -----------------------------!!!
+train_dir="bw_hs20mg_data/train"
+valid_dir="bw_hs20mg_data/valid"
+target_dir="bw_hs20mg_data/targets"
+data_info="B&W Dataset: HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
 noise="raw"
 loss_fun="l2"       # default is l1
 ckpt_save="ckpts"
-# -----------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 echo "Date:  $(date)"
 
@@ -39,9 +39,7 @@ set +a    # only need to export SLURM vars
 echo -e "Begin batch job... \"${SLURM_JOB_NAME}\", #${SLURM_JOB_ID}\n"
 echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \nPartition: ${SLURM_JOB_PARTITION} \tNodes: ${SLURM_JOB_NUM_NODES} \tNtasks per node: ${SLURM_NTASKS}"
 
-# !!! ----------------------------- UPDATE THIS FOR CORRECTNESS ----------------------------- !!!
-echo -e "Dataset: HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
-# ------------------------------------------------------------------------------------------------
+echo -e ${data_info}
 
 cd ..
 echo -e "Working directory:  $(pwd)\n"
