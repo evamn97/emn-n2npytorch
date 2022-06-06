@@ -16,8 +16,8 @@
 start=$(date +%s)
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
-train_dir="bw_tgx_data/train"
-valid_dir="bw_tgx_data/valid"
+train_dir="tgx_data/train"
+valid_dir="tgx_data/valid"
 data_info="Dataset: B&W TGX square pillars (22 imgs), 480/120/6 (train/val/test)\n"
 noise="gradient"
 param=0.4

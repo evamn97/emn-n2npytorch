@@ -18,7 +18,7 @@ start=$(date +%s)
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
 train_dir="tgx_data/train"
 valid_dir="tgx_data/valid"
-data_info="Dataset: TGX square pillars (22 imgs), 480/120/6 (train/val/test)\n"
+data_info="Dataset: B&W TGX square pillars (22 imgs), 480/120/6 (train/val/test)\n"
 noise="bernoulli"
 param=0.4
 loss_fun="l2"       # default is l1

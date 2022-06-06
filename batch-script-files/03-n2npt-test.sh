@@ -17,7 +17,7 @@ start=$(date +%s)
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
 test_dir="tgx_data/test"
-data_info="Dataset: TGX square pillars (22 imgs), 480/120/6 (train/val/test)\n"
+data_info="Dataset: B&W TGX square pillars (22 imgs), 480/120/6 (train/val/test)\n"
 noise="gradient"
 train_noise=$noise  # NOTE: assumes noise type is the same as training
 param=0.4

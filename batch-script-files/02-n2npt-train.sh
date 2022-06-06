@@ -16,9 +16,9 @@
 start=$(date +%s)
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
-train_dir="bw_hs20mg_data/train"
-valid_dir="bw_hs20mg_data/valid"
-data_info="B&W Dataset: HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
+train_dir="hs20mg_data/train"
+valid_dir="hs20mg_data/valid"
+data_info="Dataset: B&W HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
 noise="lower"
 param=0.4
 ckpt_save="ckpts"

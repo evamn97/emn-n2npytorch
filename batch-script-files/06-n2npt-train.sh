@@ -16,10 +16,10 @@
 start=$(date +%s)
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
-train_dir="planelevel_bw_hs20mg_data/train"
-valid_dir="planelevel_bw_hs20mg_data/valid"
-target_dir="planelevel_bw_hs20mg_data/targets"
-data_info="B&W, Planeleveled Dataset: HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
+train_dir="planelevel_hs20mg_data/train"
+valid_dir="planelevel_hs20mg_data/valid"
+target_dir="planelevel_hs20mg_data/targets"
+data_info="Dataset: B&W, Planeleveled HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
 noise="raw"
 loss_fun="l2"       # default is l1
 ckpt_save="ckpts"

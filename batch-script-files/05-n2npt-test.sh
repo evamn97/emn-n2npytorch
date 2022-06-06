@@ -16,9 +16,9 @@
 start=$(date +%s)
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
-test_dir="bw_hs20mg_data/test/"
-target_dir="bw_hs20mg_data/test/targets"
-data_info="B&W Dataset: HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
+test_dir="hs20mg_data/test/"
+target_dir="hs20mg_data/test/targets"
+data_info="Dataset: B&W HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
 noise="raw"
 train_noise=$noise  # NOTE: assumes noise type is the same as training
 results="results"

@@ -1,6 +1,10 @@
+from typing import Union
+
 import PIL.Image
 import numpy as np
 import random
+
+import torch
 import torchvision.transforms as trf
 from torchvision.transforms import functional as TVF
 import PIL.Image as Image
@@ -15,30 +19,36 @@ def highest_pow_2(n):
     return res
 
 
-def random_trf(image: PIL.Image.Image, min_dim=None, target=None, max_angle=270):
+def random_trf(image: Union[torch.Tensor, PIL.Image.Image], min_dim=None, target=None, max_angle=270.0):
     """ Applies random transformations to a single image or pair for data augmentation.
     :param image: Independent image, or source image if using pairs.
     :param min_dim: Minimum dimension of input image(s). For transforming sets of differently sized images, locks size of output images.
     :param target: Corresponding target in an image pair.
     :param max_angle: maximum angle range within which to rotate the image.
     """
-    P = image.size[0]
+    if type(image) == Image.Image:
+        img = TVF.to_tensor(image)
+    else:
+        img = image
+    P = img.size()[1]
     if min_dim is None:
         min_dim = P
     rng = np.random.default_rng()
     if not max_angle <= 0:
-        angle = rng.integers(0, max_angle)  # get random angle in degrees
+        angle = rng.uniform(0, max_angle)  # get random angle in degrees
     else:
         angle = 0
     rad_angle = np.radians(angle)
     c_crop = int(P / (np.abs(np.sin(rad_angle)) + np.abs(np.cos(rad_angle))))  # get bbox size based on rotation
     min_crop = int(min_dim / (2 * np.cos(np.pi / 4)))  # get smallest bbox
     final_crop = highest_pow_2(min_crop)  # must be power of 2
-    temp_source = trf.CenterCrop(c_crop)(image.rotate(angle))  # rotate and crop to valid data
+    temp_source = trf.CenterCrop(c_crop)(TVF.rotate(img, angle))  # rotate and crop to valid data
 
     if target is None:  # for augmenting unpaired images
         transformer = trf.Compose([trf.RandomCrop(final_crop), trf.RandomHorizontalFlip(), trf.RandomVerticalFlip()])
         new_source = transformer(temp_source)
+        if type(image) == Image.Image:
+            new_source = TVF.to_pil_image(new_source)
         return new_source
 
     else:  # for augmenting image pairs with the same transformations
@@ -60,7 +70,9 @@ def random_trf(image: PIL.Image.Image, min_dim=None, target=None, max_angle=270)
         else:  # flips == 'none'
             new_source = TVF.crop(temp_source, c_top, c_left, final_crop, final_crop)
             new_target = TVF.crop(temp_target, c_top, c_left, final_crop, final_crop)
-
+        if type(image) == Image.Image:
+            new_source = TVF.to_pil_image(new_source)
+            new_target = TVF.to_pil_image(new_target)
         return new_source, new_target
 
 
@@ -186,16 +198,16 @@ def get_test(test_path_in: str, test_path_out: str, num: int, target_path_in=Non
 
 if __name__ == '__main__':
     # Augmenting data
-    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/planelevel-bw-png-files"
-    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/planelevel_bw_hs20mg_data"
-    target_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/bw-processed-pngs"
-
+    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/bw-processed-pngs"
+    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/processed_hs20mg_data"
+    target_in_dir = None
+    #
     number = 1200
     px = 256
-    max_angle = 0
+    max_angle = 300
 
-    # augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=max_angle)
-    augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=max_angle)
+    augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=max_angle)
+    # augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=max_angle)
 
     # Splitting data
     split_ratio = 0.8
