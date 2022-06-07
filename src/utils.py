@@ -96,7 +96,7 @@ def psnr(input, target):
 def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_t, show, montage_only=False):
     """Creates montage for easy comparison."""
 
-    fig, ax = plt.subplots(1, 3, figsize=(30, 10), dpi=300)
+    fig, ax = plt.subplots(1, 3, figsize=(29, 10), dpi=300)
     fig.canvas.manager.set_window_title(img_name.capitalize()[:-4])
 
     # Bring tensors to CPU
@@ -116,8 +116,9 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
     zipped = zip(titles, [source, denoised, clean])
     for j, (title, img) in enumerate(zipped):
         ax[j].imshow(img)
-        ax[j].set_title(title)
+        ax[j].set_title(title, fontsize='xx-large')
         ax[j].axis('off')
+    fig.tight_layout()
 
     # Open pop up window, if requested
     if show > 0:

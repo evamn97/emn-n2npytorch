@@ -30,6 +30,10 @@ def random_trf(image: Union[torch.Tensor, PIL.Image.Image], min_dim=None, target
         img = TVF.to_tensor(image)
     else:
         img = image
+    if type(target) == Image.Image:
+        tgt = TVF.to_tensor(target)
+    else:
+        tgt = target
     P = img.size()[1]
     if min_dim is None:
         min_dim = P
@@ -52,7 +56,7 @@ def random_trf(image: Union[torch.Tensor, PIL.Image.Image], min_dim=None, target
         return new_source
 
     else:  # for augmenting image pairs with the same transformations
-        temp_target = trf.CenterCrop(c_crop)(target.rotate(angle))  # rotate and crop to valid data
+        temp_target = trf.CenterCrop(c_crop)(TVF.rotate(tgt, angle))  # rotate and crop to valid data
         c_top = random.randint(0, (c_crop - final_crop))
         c_left = random.randint(0, (c_crop - final_crop))
         flips = random.choice(['h', 'v', 'both', 'none'])
@@ -179,14 +183,26 @@ def split(root_dir: str, ratio=0.8):
 def get_test(test_path_in: str, test_path_out: str, num: int, target_path_in=None):
     if not os.path.isdir(test_path_out):
         os.mkdir(test_path_out)
-    all_files = [f for f in os.listdir(test_path_in) if os.path.isfile(os.path.join(test_path_in, f))]
+    all_test_files = [f for f in os.listdir(test_path_in) if os.path.isfile(os.path.join(test_path_in, f))]
+    all_test_files.sort()
     print("Selecting {} test images...".format(num))
-    test_files = random.sample(all_files, num)
+    test_files = random.sample(all_test_files, num)
     for f in test_files:
         filepath = os.path.join(test_path_in, f)
         shutil.copy(filepath, test_path_out)
     if target_path_in is not None:
-        target_list = ['target_' + f for f in test_files]
+        all_target_files = [f for f in os.listdir(target_path_in) if os.path.isfile(os.path.join(target_path_in, f))]
+        all_target_files.sort()
+
+        if all_test_files == all_target_files:
+            target_list = test_files
+        elif all_test_files == ['target_' + f for f in all_target_files]:  # 'target_' in all_test_files[0] and 'target_' not in all_target_files[0]:
+            target_list = [f.replace('target_', '') for f in test_files]
+        elif all_target_files == ['target_' + f for f in all_test_files]:
+            target_list = ['target_' + f for f in test_files]
+        else:
+            raise Exception("Something in the filenames is unexpected. Check for non-matching files.")
+
         target_path_out = os.path.join(test_path_out, "targets")
         if not os.path.isdir(target_path_out):
             os.mkdir(target_path_out)
@@ -196,22 +212,46 @@ def get_test(test_path_in: str, test_path_out: str, num: int, target_path_in=Non
     print("Test images saved in: {}".format(test_path_out))
 
 
+def batch_rename(root_dir, mode, string, save_dir=None, repl=''):
+    files = [f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))]
+    if mode not in ['first', 'last', 'ext', 'replace']:
+        raise ValueError("Mode must be one of: 'first', 'last', or 'ext'. You tried mode {}".format(mode))
+    if save_dir is None:
+        save_dir = root_dir
+    for f in files:
+        if mode == 'first':
+            renamed = string + f
+        elif mode == 'last':
+            renamed = f + string
+        elif mode == 'replace':
+            assert repl != '', "The string you're replacing can't be empty!"
+            renamed = f.replace(repl, string)
+        else:  # mode == 'ext':     # default
+            renamed = os.path.splitext(f)[0] + string
+        old_path = os.path.join(root_dir, f)
+        new_path = os.path.join(save_dir, renamed)
+        if not os.path.isfile(new_path):
+            shutil.copy(old_path, new_path)
+        if root_dir == save_dir:
+            os.remove(old_path)
+
+
 if __name__ == '__main__':
     # Augmenting data
-    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/bw-processed-pngs"
-    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/processed_hs20mg_data"
-    target_in_dir = None
+    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/processed-pngs"
+    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/speed_hs20mg_data"
+    target_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/extra-processed-pngs"
     #
-    number = 1200
-    px = 256
-    max_angle = 300
+    # number = 1200
+    # px = 256
+    # max_angle = 300
 
-    augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=max_angle)
+    # augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=max_angle)
     # augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=max_angle)
 
     # Splitting data
-    split_ratio = 0.8
-    split(source_out_dir, split_ratio)
+    # split_ratio = 0.8
+    # split(source_out_dir, split_ratio)
 
     # Getting test images
     nt = 7

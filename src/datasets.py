@@ -98,6 +98,7 @@ class AbstractDataset(Dataset):
         super(AbstractDataset, self).__init__()
 
         self.imgs = []
+        self.targets = []
         self.root_dir = root_dir
         self.crop_size = crop_size
         self.clean_targets = clean_targets
@@ -126,8 +127,17 @@ class AbstractDataset(Dataset):
 
         return cropped_imgs
 
+    def _find_target(self, source_name):
+        """For paired targets, retrieves correct target based on name."""
+        res = [t for t in self.targets if source_name in t]
+        if len(res) == 1:
+            target = res[0]
+        else:
+            raise ValueError('Expected single target, got {}. Check file naming: source name must be substring in target name.'.format(len(res)))
+        return target
+
     def __getitem__(self, index):
-        """Retrieves image from data folder_path."""
+        """Retrieves image from data folder path."""
 
         raise NotImplementedError('Abstract method not implemented!')
 
@@ -146,11 +156,11 @@ class NoisyDataset(AbstractDataset):
 
         super(NoisyDataset, self).__init__(root_dir, target_dir, crop_size, clean_targets, paired_targets)
 
-        self.imgs = []
-        with os.scandir(root_dir) as folder:
-            for item in folder:
-                if any(ext in item.name.lower() for ext in ['.png', '.jpeg', '.jpg']):
-                    self.imgs.append(item.name)
+        # TODO: '.xyz'
+        ext_list = ['.png', '.jpeg', '.jpg']  # acceptable extensions/filetypes
+        self.imgs = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in ext_list]
+        if os.path.isdir(target_dir):
+            self.targets = [t for t in os.listdir(target_dir) if os.path.splitext(t)[-1].lower() in ext_list]
 
         # Noise parameters
         self.noise_type = noise_dist[0]
@@ -209,7 +219,8 @@ class NoisyDataset(AbstractDataset):
 
         # Corrupt target image, but not when clean targets are requested or pairs exist
         if self.paired_targets:  # paired targets overrides clean targets
-            trgt_name = "target_" + self.imgs[index]  # get target from name instead of relying on sorting
+            trgt_name = self._find_target(self.imgs[index])
+            # trgt_name = "target_" + self.imgs[index]  # get target from name instead of relying on sorting
             trgt_path = os.path.normpath(os.path.join(self.target_dir, trgt_name))
             with Image.open(trgt_path).convert('RGB') as trgt:
                 trgt.load()

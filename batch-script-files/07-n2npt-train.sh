@@ -20,6 +20,7 @@ train_dir="processed_hs20mg_data/train"
 valid_dir="processed_hs20mg_data/valid"
 data_info="Dataset: B&W, Processed HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test) + 4 fast-scan test images\n"
 noise="lower"
+param=0.25
 loss_fun="l2"       # default is l1
 ckpt_save="ckpts"
 # -------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ pdm run python src/train.py \
   -t ${train_dir} \
   -v ${valid_dir} \
   -n ${noise} \
+  -p ${param} \
   --loss ${loss_fun} \
   --ckpt-save-path ${ckpt_save} \
   --ckpt-overwrite \

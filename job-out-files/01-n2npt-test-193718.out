@@ -1,0 +1,38 @@
+Date:  Tue Jun  7 16:24:21 CDT 2022
+
+Currently Loaded Modules:
+  1) intel/18.0.2   4) autotools/1.2   7) TACC
+  2) impi/18.0.2    5) cmake/3.16.1    8) python3/3.7.0
+  3) git/2.24.1     6) xalt/2.9.6      9) cuda/11.0     (g)
+
+  Where:
+   g:  built for GPU
+
+ 
+
+Begin batch job... "01-n2npt-test", #193718
+
+Output file: 01-n2npt-test-193718.out 
+Partition: gtx 	Nodes: 1 	Ntasks per node: 16
+Dataset: B&W TGX square pillars (22 imgs), 480/120/6 (train/val/test)
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+Loading checkpoint from: ckpts/01-n2npt-train-bernoulli/n2n-bernoulli.pt
+Testing/Eval parameters: 
+  Test dir = tgx_data/test
+  Target dir = ../data/targets
+  Output = results
+  Load ckpt = ckpts/01-n2npt-train-bernoulli/n2n-bernoulli.pt
+  Show output = 0
+  Montage only = True
+  Cuda = True
+  Noise type = bernoulli
+  Noise param = 0.4
+  Seed = None
+  Crop size = 0
+  Paired targets = False
+  Clean targets = True
+
+Saving images and montages to: results/denoised-01-n2npt-test-bernoulli-193718
+Batch job runtime was 1 minutes and 20 seconds.

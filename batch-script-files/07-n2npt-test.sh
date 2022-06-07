@@ -16,7 +16,7 @@
 start=$(date +%s)
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
-test_dir="processed_hs20mg_data/test/"
+test_dir="processed_hs20mg_data/test/fast-scan-test"
 data_info="Dataset: B&W, Processed HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test) + 4 fast-scan test images\n"
 noise="raw"
 train_noise="lower"
