@@ -19,10 +19,18 @@ rcParams['font.family'] = 'serif'
 matplotlib.use('agg')
 
 
+def xyz_to_zfield(xyz_filepath):
+    """Loads .xyz format data and converts into a 2D numpy array of height (z) values."""
+    df = pd.read_csv(xyz_filepath, names=['x', 'y', 'z'], delimiter='\t', index_col=False)
+    p = len(set(df['y'].values))
+    z_arr = df['z'].values.reshape((p, -1))
+    return z_arr
+
+
 def create_image(img, p=0.5, style='r'):
     """ Creates noisy image for source or target."""
     ground_truth_array = np.array(img)
-    if len(ground_truth_array.shape) >= 3:  # get  array dimensions for RGB and RGBA images
+    if len(ground_truth_array.shape) == 3:  # get  array dimensions for RGB and RGBA images
         w = ground_truth_array.shape[0]
         h = ground_truth_array.shape[1]
         c = ground_truth_array.shape[2]
@@ -74,7 +82,7 @@ def create_image(img, p=0.5, style='r'):
             mask = r_mask
         img_array_noised = np.multiply(ground_truth_array, mask)
 
-    return img_array_noised
+    return np.clip(img_array_noised, 0, 255).astype(np.uint8)
 
 
 def load_dataset(root_dir, params, shuffled=False, single=False):
@@ -167,7 +175,7 @@ class NoisyDataset(AbstractDataset):
         if os.path.isdir(target_dir):
             self.targets = [t for t in os.listdir(target_dir) if os.path.splitext(t)[-1].lower() in ext_list]
         if self.paired_targets and not os.path.isdir(target_dir):
-            raise Exception("Paired targets are requested but the input target directory does not exist!")
+            raise NotADirectoryError("Paired targets are requested but the input target directory does not exist!")
 
         # Noise parameters
         self.noise_type = noise_dist[0]
@@ -206,16 +214,16 @@ class NoisyDataset(AbstractDataset):
     def __getitem__(self, index):
         """Retrieves image from folder_path and corrupts it."""
 
-        # Load PIL image    # TODO: add xyz
+        # Load image    # TODO: add xyz
         img_name = self.imgs[index]
         img_path = os.path.normpath(os.path.join(self.root_dir, self.imgs[index]))
 
         if os.path.splitext(img_name)[-1] in ['.xyz']:  # load xyz
-            xyz_df = pd.read_csv(img_path, names=['x', 'y', 'z'], delimiter='\t', index_col=False)
-            profiles = len(set(xyz_df['y'].values))
-            img = xyz_df['z'].values.reshape((profiles, -1))
+            img = xyz_to_zfield(img_path)
         else:  # load image
             with Image.open(img_path).convert('RGB') as img:
+                # just a note that conversion to RGB is on for all images bc Gwyddion grayscale images get messed up in PIL
+                # it may be possible to convert 'I' images to 'LA' mode without errors
                 img.load()
         # Random square crop
         if not self.paired_targets and self.crop_size > 0:
@@ -230,9 +238,7 @@ class NoisyDataset(AbstractDataset):
             # trgt_name = "target_" + self.imgs[index]  # get target from name instead of relying on sorting
             trgt_path = os.path.normpath(os.path.join(self.target_dir, trgt_name))
             if os.path.splitext(trgt_name)[-1] in ['.xyz']:
-                t_xyz_df = pd.read_csv(trgt_path, names=['x', 'y', 'z'], delimiter='\t', index_col=False)
-                t_profiles = len(set(t_xyz_df['y'].values))
-                trgt = t_xyz_df['z'].values.reshape((t_profiles, -1))
+                trgt = xyz_to_zfield(trgt_path)
             else:
                 with Image.open(trgt_path).convert('RGB') as trgt:
                     trgt.load()

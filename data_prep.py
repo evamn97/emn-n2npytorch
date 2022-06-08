@@ -2,11 +2,12 @@ from typing import Union
 
 import PIL.Image
 import numpy as np
+import pandas as pd
 import random
 
 import torch
 import torchvision.transforms as trf
-from torchvision.transforms import functional as TVF
+from torchvision.transforms import functional as tvF
 import PIL.Image as Image
 import os
 from tqdm import tqdm
@@ -19,6 +20,36 @@ def highest_pow_2(n):
     return res
 
 
+def xyz_to_zfield(xyz_filepath):
+    """Loads .xyz format data and converts into a 2D numpy array of height (z) values."""
+    df = pd.read_csv(xyz_filepath, names=['x', 'y', 'z'], delimiter='\t', index_col=False)
+    p = len(set(df['y'].values))
+    z_arr = df['z'].values.reshape((p, -1))
+    return z_arr
+
+
+def conversions(f_in, new_type):
+    supported = [Image.Image, torch.Tensor, np.ndarray]
+    if type(f_in) not in supported:
+        raise TypeError("Unsupported input type.")
+    if new_type not in supported:
+        raise TypeError("Unsupported conversion type.")
+    assert type(f_in) != new_type, "Input type matches conversion type."
+
+    if new_type == Image.Image:
+        if type(f_in) == Image.Image:
+            return tvF.to_pil_image(f_in)
+        elif type(f_in) == np.ndarray:
+            return Image.fromarray(f_in)
+    elif new_type == torch.Tensor:
+        return tvF.to_tensor(f_in)
+    else:  # new_type == np.ndarray
+        if type(f_in) == Image.Image:
+            return np.array(f_in)
+        elif type(f_in) == torch.Tensor:
+            return np.rot90(np.rot90(f_in.numpy(), axes=(0, 2)), k=3).squeeze()
+
+
 def random_trf(image: Union[torch.Tensor, PIL.Image.Image], min_dim=None, target=None, max_angle=270.0):
     """ Applies random transformations to a single image or pair for data augmentation.
     :param image: Independent image, or source image if using pairs.
@@ -26,15 +57,11 @@ def random_trf(image: Union[torch.Tensor, PIL.Image.Image], min_dim=None, target
     :param target: Corresponding target in an image pair.
     :param max_angle: maximum angle range within which to rotate the image.
     """
-    if type(image) == Image.Image:
-        img = TVF.to_tensor(image)
+    if type(image) != torch.Tensor:
+        img = tvF.to_tensor(image)
     else:
         img = image
-    if type(target) == Image.Image:
-        tgt = TVF.to_tensor(target)
-    else:
-        tgt = target
-    P = img.size()[1]
+    P = img.shape[1]
     if min_dim is None:
         min_dim = P
     rng = np.random.default_rng()
@@ -46,37 +73,43 @@ def random_trf(image: Union[torch.Tensor, PIL.Image.Image], min_dim=None, target
     c_crop = int(P / (np.abs(np.sin(rad_angle)) + np.abs(np.cos(rad_angle))))  # get bbox size based on rotation
     min_crop = int(min_dim / (2 * np.cos(np.pi / 4)))  # get smallest bbox
     final_crop = highest_pow_2(min_crop)  # must be power of 2
-    temp_source = trf.CenterCrop(c_crop)(TVF.rotate(img, angle))  # rotate and crop to valid data
+    temp_source = trf.CenterCrop(c_crop)(tvF.rotate(img, angle))  # rotate and crop to valid data
 
     if target is None:  # for augmenting unpaired images
         transformer = trf.Compose([trf.RandomCrop(final_crop), trf.RandomHorizontalFlip(), trf.RandomVerticalFlip()])
         new_source = transformer(temp_source)
         if type(image) == Image.Image:
-            new_source = TVF.to_pil_image(new_source)
+            new_source = tvF.to_pil_image(new_source)
         return new_source
 
     else:  # for augmenting image pairs with the same transformations
-        temp_target = trf.CenterCrop(c_crop)(TVF.rotate(tgt, angle))  # rotate and crop to valid data
+        if type(target) != torch.Tensor:
+            tgt = tvF.to_tensor(target)
+        else:
+            tgt = target
+        temp_target = trf.CenterCrop(c_crop)(tvF.rotate(tgt, angle))  # rotate and crop to valid data
         c_top = random.randint(0, (c_crop - final_crop))
         c_left = random.randint(0, (c_crop - final_crop))
         flips = random.choice(['h', 'v', 'both', 'none'])
 
         # flips and crops
         if flips == 'h':
-            new_source = TVF.crop(TVF.hflip(temp_source), c_top, c_left, final_crop, final_crop)
-            new_target = TVF.crop(TVF.hflip(temp_target), c_top, c_left, final_crop, final_crop)
+            new_source_t = tvF.crop(tvF.hflip(temp_source), c_top, c_left, final_crop, final_crop)
+            new_target_t = tvF.crop(tvF.hflip(temp_target), c_top, c_left, final_crop, final_crop)
         elif flips == 'v':
-            new_source = TVF.crop(TVF.vflip(temp_source), c_top, c_left, final_crop, final_crop)
-            new_target = TVF.crop(TVF.vflip(temp_target), c_top, c_left, final_crop, final_crop)
+            new_source_t = tvF.crop(tvF.vflip(temp_source), c_top, c_left, final_crop, final_crop)
+            new_target_t = tvF.crop(tvF.vflip(temp_target), c_top, c_left, final_crop, final_crop)
         elif flips == 'both':
-            new_source = TVF.crop(TVF.hflip(TVF.vflip(temp_source)), c_top, c_left, final_crop, final_crop)
-            new_target = TVF.crop(TVF.hflip(TVF.vflip(temp_target)), c_top, c_left, final_crop, final_crop)
+            new_source_t = tvF.crop(tvF.hflip(tvF.vflip(temp_source)), c_top, c_left, final_crop, final_crop)
+            new_target_t = tvF.crop(tvF.hflip(tvF.vflip(temp_target)), c_top, c_left, final_crop, final_crop)
         else:  # flips == 'none'
-            new_source = TVF.crop(temp_source, c_top, c_left, final_crop, final_crop)
-            new_target = TVF.crop(temp_target, c_top, c_left, final_crop, final_crop)
-        if type(image) == Image.Image:
-            new_source = TVF.to_pil_image(new_source)
-            new_target = TVF.to_pil_image(new_target)
+            new_source_t = tvF.crop(temp_source, c_top, c_left, final_crop, final_crop)
+            new_target_t = tvF.crop(temp_target, c_top, c_left, final_crop, final_crop)
+
+        # convert back to original format
+        new_source = conversions(new_source_t, type(image))
+        new_target = conversions(new_target_t, type(target))
+
         return new_source, new_target
 
 
@@ -234,26 +267,3 @@ def batch_rename(root_dir, mode, string, save_dir=None, repl=''):
             shutil.copy(old_path, new_path)
         if root_dir == save_dir:
             os.remove(old_path)
-
-
-if __name__ == '__main__':
-    # Augmenting data
-    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/processed-pngs"
-    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/speed_hs20mg_data"
-    target_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/extra-processed-pngs"
-    #
-    # number = 1200
-    # px = 256
-    # max_angle = 300
-
-    # augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=max_angle)
-    # augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=max_angle)
-
-    # Splitting data
-    # split_ratio = 0.8
-    # split(source_out_dir, split_ratio)
-
-    # Getting test images
-    nt = 7
-    test_out_dir = os.path.join(source_out_dir, "test")
-    get_test(source_in_dir, test_out_dir, nt, target_in_dir)
