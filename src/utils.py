@@ -96,7 +96,7 @@ def psnr(input, target):
 def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_t, show, montage_only=False):
     """Creates montage for easy comparison."""
 
-    fig, ax = plt.subplots(1, 3, figsize=(29, 10), dpi=300)
+    fig, ax = plt.subplots(1, 3, figsize=(29, 10), dpi=200)
     fig.canvas.manager.set_window_title(img_name.capitalize()[:-4])
 
     # Bring tensors to CPU
@@ -104,9 +104,15 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
     denoised_t = denoised_t.cpu()
     clean_t = clean_t.cpu()
 
-    source = tvF.to_pil_image(source_t)
-    denoised = tvF.to_pil_image(torch.clamp(denoised_t, 0, 1))
-    clean = tvF.to_pil_image(clean_t)
+    source = np.rot90(np.rot90(source_t.numpy(), axes=(0, 2)), k=3).squeeze()
+    denoised = np.rot90(np.rot90(torch.clamp(denoised_t, 0, 1), axes=(0, 2)), k=3).squeeze()
+    clean = np.rot90(np.rot90(clean_t.numpy(), axes=(0, 2)), k=3).squeeze()
+
+    # TODO: torch.clamp() is like clipping, why is it necessary? (like for RGB?)
+
+    # source = tvF.to_pil_image(source_t)
+    # denoised = tvF.to_pil_image(torch.clamp(denoised_t, 0, 1))
+    # clean = tvF.to_pil_image(clean_t)
 
     # Build image montage
     psnr_vals = [psnr(source_t, clean_t), psnr(denoised_t, clean_t)]
@@ -115,7 +121,7 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
               'Ground truth']
     zipped = zip(titles, [source, denoised, clean])
     for j, (title, img) in enumerate(zipped):
-        ax[j].imshow(img)
+        ax[j].imshow(img, cmap='gray')  # cmap for height fields (not normalized)
         ax[j].set_title(title, fontsize='xx-large')
         ax[j].axis('off')
     fig.tight_layout()

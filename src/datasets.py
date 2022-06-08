@@ -5,8 +5,10 @@ import os
 
 import matplotlib
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn.functional as F
+import torchvision.transforms as trf
 import torchvision.transforms.functional as tvF
 from PIL import Image
 from matplotlib import rcParams
@@ -20,9 +22,11 @@ matplotlib.use('agg')
 def create_image(img, p=0.5, style='r'):
     """ Creates noisy image for source or target."""
     ground_truth_array = np.array(img)
-    if len(ground_truth_array.shape) == 3:
-        w, h, c = ground_truth_array.shape  # get  array dimensions
-    else:
+    if len(ground_truth_array.shape) >= 3:  # get  array dimensions for RGB and RGBA images
+        w = ground_truth_array.shape[0]
+        h = ground_truth_array.shape[1]
+        c = ground_truth_array.shape[2]
+    else:  # get dims for grayscale images/height fields
         w = ground_truth_array.shape[0]
         h = ground_truth_array.shape[1]
         c = 1
@@ -109,21 +113,22 @@ class AbstractDataset(Dataset):
         """Performs random square crop of fixed size.
         Works with list so that all items get the same cropped window (e.g. for buffers).
         """
-
-        w, h = img_list[0].size
-        assert w >= self.crop_size and h >= self.crop_size, \
-            f'Error: Crop size: {self.crop_size}, Image size: ({w}, {h})'  # this assertion is redundant with resizing below
         cropped_imgs = []
-        i = np.random.randint(0, h - self.crop_size + 1)
-        j = np.random.randint(0, w - self.crop_size + 1)
 
         for img in img_list:
+            if type(img) != torch.Tensor:
+                im = tvF.to_tensor(img)
+            else:
+                im = img
+            c, h, w = im.size()
             # Resize if dimensions are too small
             if min(w, h) < self.crop_size:
-                img = tvF.resize(img, [self.crop_size, self.crop_size])
-
+                im = tvF.resize(img, [self.crop_size, self.crop_size])
+            cropped_im = trf.RandomCrop(self.crop_size)(im).numpy().squeeze()
+            if c > 1:
+                cropped_im = np.rot90(np.rot90(cropped_im, axes=(0, 2)), k=3)
             # Random crop
-            cropped_imgs.append(tvF.crop(img, i, j, self.crop_size, self.crop_size))
+            cropped_imgs.append(cropped_im)  # numpy arrays with shape (h, w, c)
 
         return cropped_imgs
 
@@ -157,10 +162,12 @@ class NoisyDataset(AbstractDataset):
         super(NoisyDataset, self).__init__(root_dir, target_dir, crop_size, clean_targets, paired_targets)
 
         # TODO: '.xyz'
-        ext_list = ['.png', '.jpeg', '.jpg']  # acceptable extensions/filetypes
+        ext_list = ['.png', '.jpeg', '.jpg', '.xyz']  # acceptable extensions/filetypes
         self.imgs = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in ext_list]
         if os.path.isdir(target_dir):
             self.targets = [t for t in os.listdir(target_dir) if os.path.splitext(t)[-1].lower() in ext_list]
+        if self.paired_targets and not os.path.isdir(target_dir):
+            raise Exception("Paired targets are requested but the input target directory does not exist!")
 
         # Noise parameters
         self.noise_type = noise_dist[0]
@@ -171,9 +178,6 @@ class NoisyDataset(AbstractDataset):
 
     def _add_noise(self, img):
         """Adds noise to image."""
-
-        w, h = img.size
-        c = len(img.getbands())
 
         # Manipulated noise options
         if self.noise_type == 'gradient':
@@ -189,46 +193,52 @@ class NoisyDataset(AbstractDataset):
         else:  # self.noise_type == 'bernoulli':
             noise_img = create_image(img, p=self.noise_param, style='r')
 
-        noise_img = np.clip(noise_img, 0, 255).astype(np.uint8)
-        return Image.fromarray(noise_img)
+        return noise_img  # returns numpy array in shape (h, w, c)
 
     def _corrupt(self, img):
         """Corrupts images."""
 
         if self.noise_type in ['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw']:
-            return self._add_noise(img)
-        elif self.noise_type in ['raw']:  # for input/target paired training
-            return img
+            return self._add_noise(img)  # numpy array (h, w, c)
         else:
             raise ValueError('Invalid noise type: {}'.format(self.noise_type))
 
     def __getitem__(self, index):
         """Retrieves image from folder_path and corrupts it."""
 
-        # Load PIL image
+        # Load PIL image    # TODO: add xyz
+        img_name = self.imgs[index]
         img_path = os.path.normpath(os.path.join(self.root_dir, self.imgs[index]))
-        with Image.open(img_path).convert('RGB') as img:
-            img.load()
 
+        if os.path.splitext(img_name)[-1] in ['.xyz']:  # load xyz
+            xyz_df = pd.read_csv(img_path, names=['x', 'y', 'z'], delimiter='\t', index_col=False)
+            profiles = len(set(xyz_df['y'].values))
+            img = xyz_df['z'].values.reshape((profiles, -1))
+        else:  # load image
+            with Image.open(img_path).convert('RGB') as img:
+                img.load()
         # Random square crop
-        if not self.paired_targets and self.crop_size != 0:
+        if not self.paired_targets and self.crop_size > 0:
             img = self._random_crop([img])[0]
-
         # Corrupt source image
         source = tvF.to_tensor(self._corrupt(img))  # see '_corrupt' for returning raw image option
 
+        # TODO: add xyz
         # Corrupt target image, but not when clean targets are requested or pairs exist
         if self.paired_targets:  # paired targets overrides clean targets
             trgt_name = self._find_target(self.imgs[index])
             # trgt_name = "target_" + self.imgs[index]  # get target from name instead of relying on sorting
             trgt_path = os.path.normpath(os.path.join(self.target_dir, trgt_name))
-            with Image.open(trgt_path).convert('RGB') as trgt:
-                trgt.load()
+            if os.path.splitext(trgt_name)[-1] in ['.xyz']:
+                t_xyz_df = pd.read_csv(trgt_path, names=['x', 'y', 'z'], delimiter='\t', index_col=False)
+                t_profiles = len(set(t_xyz_df['y'].values))
+                trgt = t_xyz_df['z'].values.reshape((t_profiles, -1))
+            else:
+                with Image.open(trgt_path).convert('RGB') as trgt:
+                    trgt.load()
             target = tvF.to_tensor(trgt)
-
         elif self.clean_targets:
             target = tvF.to_tensor(img)
-
         else:
             target = tvF.to_tensor(self._corrupt(img))
 
