@@ -34,6 +34,8 @@ def parse_args():
     parser.add_argument('-p', '--noise-param', help='noise parameter', default=0.7, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='image crop size', default=0, type=int)
+    parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)',
+                        default=3, type=int)  # added 6/13/22 to try to fix single-channel image errors
     parser.add_argument('--paired-targets', help='uses targets from "targets" directory', action='store_true')
 
     return parser.parse_args()
@@ -44,6 +46,16 @@ if __name__ == '__main__':
 
     # Parse test parameters
     params = parse_args()
+
+    # debugging only
+    params.test_dir = '../hs20mg_xyz_data/test'
+    params.target_dir = '../hs20mg_xyz_data/test/targets'
+    params.load_ckpt = '../ckpts/raw-paired-06140940/n2n-raw.pt'
+    params.montage_only = True
+    params.noise_type = 'raw'
+    # params.noise_param = 0.5
+    params.paired_targets = True
+    params.channels = 1
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)

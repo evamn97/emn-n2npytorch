@@ -100,19 +100,14 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
     fig.canvas.manager.set_window_title(img_name.capitalize()[:-4])
 
     # Bring tensors to CPU
-    source_t = source_t.cpu().narrow(0, 0, 3)
+    # source_t = source_t.cpu().narrow(0, 0, 3)     # commenting this out bc it only works for 3-channel images and may not be necessary anyway
+    source_t = source_t.cpu()
     denoised_t = denoised_t.cpu()
     clean_t = clean_t.cpu()
 
     source = np.rot90(np.rot90(source_t.numpy(), axes=(0, 2)), k=3).squeeze()
     denoised = np.rot90(np.rot90(torch.clamp(denoised_t, 0, 1), axes=(0, 2)), k=3).squeeze()
     clean = np.rot90(np.rot90(clean_t.numpy(), axes=(0, 2)), k=3).squeeze()
-
-    # TODO: torch.clamp() is like clipping, why is it necessary? (like for RGB?)
-
-    # source = tvF.to_pil_image(source_t)
-    # denoised = tvF.to_pil_image(torch.clamp(denoised_t, 0, 1))
-    # clean = tvF.to_pil_image(clean_t)
 
     # Build image montage
     psnr_vals = [psnr(source_t, clean_t), psnr(denoised_t, clean_t)]
@@ -128,11 +123,17 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
 
     # Open pop up window, if requested
     if show > 0:
+        matplotlib.use('TkAgg')
         plt.show()
 
     # Save to files
     fname = os.path.splitext(img_name)[0]
     if not montage_only:
+        source = tvF.to_pil_image(source_t)
+        denoised = tvF.to_pil_image(torch.clamp(denoised_t, 0, 1))
+        clean = tvF.to_pil_image(clean_t)
+        # torch.clamp() is like clipping, why is it necessary? (like for RGB?)
+
         source.save(os.path.join(save_path, f'{fname}-{noise_type}-noisy.png'))
         denoised.save(os.path.join(save_path, f'{fname}-{noise_type}-denoised.png'))
     fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}-montage.png'), bbox_inches='tight')

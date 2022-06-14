@@ -13,18 +13,12 @@ import torchvision.transforms.functional as tvF
 from PIL import Image
 from matplotlib import rcParams
 
+from data_prep import *
+
 from torch.utils.data import Dataset, DataLoader
 
 rcParams['font.family'] = 'serif'
 matplotlib.use('agg')
-
-
-def xyz_to_zfield(xyz_filepath):
-    """Loads .xyz format data and converts into a 2D numpy array of height (z) values."""
-    df = pd.read_csv(xyz_filepath, names=['x', 'y', 'z'], delimiter='\t', index_col=False)
-    p = len(set(df['y'].values))
-    z_arr = df['z'].values.reshape((p, -1))
-    return z_arr
 
 
 def create_image(img, p=0.5, style='r'):
@@ -92,7 +86,8 @@ def load_dataset(root_dir, params, shuffled=False, single=False):
     noise = (params.noise_type, params.noise_param)
 
     dataset = NoisyDataset(root_dir, params.target_dir, params.crop_size,
-                           clean_targets=params.clean_targets, paired_targets=params.paired_targets, noise_dist=noise, seed=params.seed)
+                           clean_targets=params.clean_targets, paired_targets=params.paired_targets,
+                           channels=params.channels, noise_dist=noise, seed=params.seed)
 
     # Use batch size of 1, if requested (e.g. test set)
     if single:
@@ -104,7 +99,7 @@ def load_dataset(root_dir, params, shuffled=False, single=False):
 class AbstractDataset(Dataset):
     """Abstract dataset class for Noise2Noise."""
 
-    def __init__(self, root_dir, target_dir, crop_size=0, clean_targets=False, paired_targets=False):
+    def __init__(self, root_dir, target_dir, crop_size=0, clean_targets=False, paired_targets=False, channels=3):
         """Initializes abstract dataset."""
 
         super(AbstractDataset, self).__init__()
@@ -116,6 +111,7 @@ class AbstractDataset(Dataset):
         self.clean_targets = clean_targets
         self.paired_targets = paired_targets
         self.target_dir = target_dir
+        self.channels = channels
 
     def _random_crop(self, img_list):
         """Performs random square crop of fixed size.
@@ -163,13 +159,12 @@ class AbstractDataset(Dataset):
 class NoisyDataset(AbstractDataset):
     """Class for injecting random noise into dataset."""
 
-    def __init__(self, root_dir, target_dir, crop_size, clean_targets=False, paired_targets=False,
+    def __init__(self, root_dir, target_dir, crop_size, clean_targets=False, paired_targets=False, channels=3,
                  noise_dist=('bernoulli', 0.7), seed=None):
         """Initializes noisy image dataset."""
 
-        super(NoisyDataset, self).__init__(root_dir, target_dir, crop_size, clean_targets, paired_targets)
+        super(NoisyDataset, self).__init__(root_dir, target_dir, crop_size, clean_targets, paired_targets, channels)
 
-        # TODO: '.xyz'
         ext_list = ['.png', '.jpeg', '.jpg', '.xyz']  # acceptable extensions/filetypes
         self.imgs = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in ext_list]
         if os.path.isdir(target_dir):
@@ -214,31 +209,46 @@ class NoisyDataset(AbstractDataset):
     def __getitem__(self, index):
         """Retrieves image from folder_path and corrupts it."""
 
-        # Load image    # TODO: add xyz
+        # Load image
         img_name = self.imgs[index]
         img_path = os.path.normpath(os.path.join(self.root_dir, self.imgs[index]))
 
         if os.path.splitext(img_name)[-1] in ['.xyz']:  # load xyz
-            img = xyz_to_zfield(img_path)
+            if self.channels == 1:
+                img = normalize(xyz_to_zfield(img_path, return3d=False))
+            else:  # channels = 3
+                temp = xyz_to_zfield(img_path, return3d=True)
+                stack_list = []
+                for ch in range(self.channels):
+                    stack_list.append(normalize(temp[:, :, ch], as_image=True))
+                img = np.stack(stack_list, axis=2)
         else:  # load image
             with Image.open(img_path).convert('RGB') as img:
                 # just a note that conversion to RGB is on for all images bc Gwyddion grayscale images get messed up in PIL
                 # it may be possible to convert 'I' images to 'LA' mode without errors
                 img.load()
+                if self.channels != 3:
+                    print('The number of channels for image files (png, jpg) must be 3. Resetting channels to 3.')
+                    self.channels = 3  # just in case channels are set incorrectly
         # Random square crop
         if not self.paired_targets and self.crop_size > 0:
             img = self._random_crop([img])[0]
         # Corrupt source image
         source = tvF.to_tensor(self._corrupt(img))  # see '_corrupt' for returning raw image option
 
-        # TODO: add xyz
         # Corrupt target image, but not when clean targets are requested or pairs exist
         if self.paired_targets:  # paired targets overrides clean targets
             trgt_name = self._find_target(self.imgs[index])
-            # trgt_name = "target_" + self.imgs[index]  # get target from name instead of relying on sorting
             trgt_path = os.path.normpath(os.path.join(self.target_dir, trgt_name))
             if os.path.splitext(trgt_name)[-1] in ['.xyz']:
-                trgt = xyz_to_zfield(trgt_path)
+                if self.channels == 1:
+                    trgt = normalize(xyz_to_zfield(trgt_path, return3d=False))
+                else:  # channels = 3
+                    temp = xyz_to_zfield(trgt_path, return3d=True)
+                    stack_list = []
+                    for ch in range(self.channels):
+                        stack_list.append(normalize(temp[:, :, ch], as_image=True))
+                    trgt = np.stack(stack_list, axis=2)
             else:
                 with Image.open(trgt_path).convert('RGB') as trgt:
                     trgt.load()

@@ -19,20 +19,22 @@ def parse_args():
     # Data parameters
     parser.add_argument('-t', '--train-dir',
                         help='directory path containing training images',
-                        default='../data/train')
+                        default='../data/train', type=str)
     parser.add_argument('-v', '--valid-dir',
                         help='directory path containing validation images',
-                        default='../data/valid')
+                        default='../data/valid', type=str)
     parser.add_argument('--target-dir',
                         help='directory path containing target images, if applicable.',
-                        default='../data/targets')
-    parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts')
+                        default='../data/targets', type=str)
+    parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts', type=str)
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
     parser.add_argument('--report-interval', help='batch report interval', default=100, type=int)
 
     # Training hyperparameters
     parser.add_argument('-lr', '--learning-rate', help='learning rate', default=0.001, type=float)
     parser.add_argument('-a', '--adam', help='adam parameters', nargs='+', default=[0.9, 0.99, 1e-8], type=list)
+    parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)',
+                        default=3, type=int)  # added 6/13/22 to try to fix single-channel image errors
     parser.add_argument('-b', '--batch-size', help='minibatch size', default=4, type=int)
     parser.add_argument('-e', '--nb-epochs', help='number of epochs', default=100, type=int)
     parser.add_argument('-l', '--loss', help='loss function', choices=['l1', 'l2'], default='l1', type=str)
@@ -59,13 +61,17 @@ if __name__ == '__main__':
     params = parse_args()
 
     # debugging only
-    params.train_dir = "../hs20mg_data/train"
-    params.valid_dir = "../hs20mg_data/valid"
-    params.target_dir = "../hs20mg_data/targets"
+    params.train_dir = "../hs20mg_xyz_data/train"
+    params.valid_dir = "../hs20mg_xyz_data/valid"
+    params.target_dir = "../hs20mg_xyz_data/targets"
     params.ckpt_overwrite = True
     params.nb_epochs = 1
+    params.channels = 1
     params.noise_type = 'raw'
     params.paired_targets = True
+    # params.clean_targets = True
+    params.cuda = True
+    params.batch_size = 12
 
     # Train/valid datasets
     train_loader = load_dataset(params.train_dir, params, shuffled=True)

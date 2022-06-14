@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import sys
 
 import torch
 import torch.nn as nn
@@ -11,6 +12,7 @@ from utils import *
 
 import os
 import json
+from tqdm import tqdm
 
 
 class Noise2Noise(object):
@@ -21,7 +23,7 @@ class Noise2Noise(object):
 
         self.p = params
         self.trainable = trainable
-        self._compile()
+        self._compile()  # creates unet
 
         # try to sync montage output with SLURM output filenames by getting job ID and name - emn 05/19/22
         if "jobid" in os.environ:
@@ -41,8 +43,8 @@ class Noise2Noise(object):
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
 
-        # Model 
-        self.model = UNet(in_channels=3)
+        # Model
+        self.model = UNet(in_channels=self.p.channels, out_channels=self.p.channels).double()  # changed this from default in_channels=3 6/13/22 emn
 
         # Set optimizer and loss, if in training mode
         if self.trainable:
@@ -112,10 +114,15 @@ class Noise2Noise(object):
         """Loads model from checkpoint file."""
 
         print('Loading checkpoint from: {}'.format(ckpt_fname))
-        if self.use_cuda:
-            self.model.load_state_dict(torch.load(ckpt_fname))
-        else:
-            self.model.load_state_dict(torch.load(ckpt_fname, map_location='cpu'))
+        try:
+            if self.use_cuda:
+                self.model.load_state_dict(torch.load(ckpt_fname))
+            else:
+                self.model.load_state_dict(torch.load(ckpt_fname, map_location='cpu'))
+        except RuntimeError:
+            raise ValueError("There is a size mismatch between the number of UNet channels and the input data. " +
+                             "Check the requested number of channels. " +
+                             "\n(PNG & JPG => 3 channels, XYZ => 1 or 3)")
 
     def _on_epoch_end(self, stats, train_loss, epoch, epoch_start, valid_loader):
         """Tracks and saves starts after each epoch."""
@@ -160,10 +167,11 @@ class Noise2Noise(object):
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 
+        pbar = tqdm(total=len(test_loader), unit='batch', desc='Testing', leave=False)
         for batch_idx, (source, target) in enumerate(test_loader):
-            # # Only do first <show> images     # this is stupid bc show is also used for plot popups
-            # if show == 0 or batch_idx >= show:
-            #     break
+
+            source = source.double()
+            target = target.double()
 
             source_imgs.append(source)
             clean_imgs.append(target)
@@ -172,8 +180,10 @@ class Noise2Noise(object):
                 source = source.cuda()
 
             # Denoise
-            denoised_img = self.model(source).detach()
+            denoised_img = self.model(source).detach().double()
             denoised_imgs.append(denoised_img)
+            pbar.update()
+        pbar.close()
 
         # Squeeze tensors
         source_imgs = [t.squeeze(0) for t in source_imgs]
@@ -195,13 +205,17 @@ class Noise2Noise(object):
         loss_meter = AvgMeter()
         psnr_meter = AvgMeter()
 
+        pbar = tqdm(total=len(valid_loader), unit='batch', desc='Validating', leave=False)
         for batch_idx, (source, target) in enumerate(valid_loader):
             if self.use_cuda:
                 source = source.cuda()
                 target = target.cuda()
 
+            source = source.double()
+            target = target.double()
+
             # Denoise
-            source_denoised = self.model(source)
+            source_denoised = self.model(source).double()
 
             # Update loss
             loss = self.loss(source_denoised, target)
@@ -213,6 +227,8 @@ class Noise2Noise(object):
                 source_denoised = source_denoised.cpu()
                 target = target.cpu()
                 psnr_meter.update(psnr(source_denoised[i], target[i]).item())
+            pbar.update()
+        pbar.close()
 
         valid_loss = loss_meter.avg
         valid_time = time_elapsed_since(valid_start)[0]
@@ -241,6 +257,7 @@ class Noise2Noise(object):
         # Main training loop
         train_start = datetime.now()
         for epoch in range(self.p.nb_epochs):
+            pbar = tqdm(total=num_batches, unit='batch', desc='Training Epoch {}'.format(epoch + 1), leave=False)
             if self.p.plot_stats or (epoch + 1) == self.p.nb_epochs:
                 print('EPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
 
@@ -260,8 +277,16 @@ class Noise2Noise(object):
                     source = source.cuda()
                     target = target.cuda()
 
+                source = source.double()
+                target = target.double()
+
                 # Denoise image
-                source_denoised = self.model(source)
+                try:
+                    source_denoised = self.model(source).double()
+                except RuntimeError:
+                    raise ValueError("There is a size mismatch between the number of UNet channels and the input data. " +
+                                     "Check the requested number of channels. " +
+                                     "\n(PNG & JPG => 3 channels, XYZ => 1 or 3)")
 
                 loss = self.loss(source_denoised, target)
                 loss_meter.update(loss.item())
@@ -279,6 +304,8 @@ class Noise2Noise(object):
                         train_loss_meter.update(loss_meter.avg)
                         loss_meter.reset()
                         time_meter.reset()
+                pbar.update()
+            pbar.close()
 
             # Epoch end, save and reset tracker
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)

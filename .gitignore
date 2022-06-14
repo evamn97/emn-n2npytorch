@@ -6,9 +6,18 @@
 /results.old
 /bernoulli_utils.py
 /psnr-calc.py
+./*_data
 /hs20mg_data
 /tgx_data
 /planelevel_hs20mg_data/
 /processed_hs20mg_data/
 /scratch.py
 /speed_hs20mg_data/
+/HS20MG_holes0000.xyz
+/HS20MG_holes0001.png
+/HS20MG_holes0002.png
+/HS20MG_holes0002 (2).png
+/HS20MG_holes0020.png
+/hs20mg_xyz_data/
+/results/planelevel_hs20mg_data/
+/xyz_test.xyz

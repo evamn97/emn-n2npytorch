@@ -8,7 +8,7 @@ import torch.nn as nn
 class UNet(nn.Module):
     """Custom U-Net architecture for Noise2Noise (see Appendix, Table 2)."""
 
-    def __init__(self, in_channels=3, out_channels=3):
+    def __init__(self, in_channels=3, out_channels=3):  # is this what forces the 3-channel images?
         """Initializes U-Net."""
 
         super(UNet, self).__init__()
@@ -76,7 +76,7 @@ class UNet(nn.Module):
         """Through encoder, then decoder by adding U-skip connections. """
 
         # Encoder
-        pool1 = self._block1(x)
+        pool1 = self._block1(x)  # requires 3-channel tensor ?
         pool2 = self._block2(pool1)
         pool3 = self._block2(pool2)
         pool4 = self._block2(pool3)
