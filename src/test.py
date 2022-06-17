@@ -48,14 +48,14 @@ if __name__ == '__main__':
     params = parse_args()
 
     # debugging only
-    params.test_dir = '../hs20mg_xyz_data/test'
-    params.target_dir = '../hs20mg_xyz_data/test/targets'
-    params.load_ckpt = '../ckpts/raw-paired-06140940/n2n-raw.pt'
-    params.montage_only = True
-    params.noise_type = 'raw'
+    # params.test_dir = '../planelevel_hs20mg_data/test'
+    # params.target_dir = '../hs20mg_xyz_data/test/targets'
+    # params.load_ckpt = '../ckpts/07-n2npt-train-lower/n2n-lower.pt'
+    # params.montage_only = True
+    # params.noise_type = 'lower'
     # params.noise_param = 0.5
-    params.paired_targets = True
-    params.channels = 1
+    # params.paired_targets = True
+    # params.channels = 1
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)

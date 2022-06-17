@@ -1,0 +1,38 @@
+Date:  Thu Jun  2 10:54:46 CDT 2022
+
+Currently Loaded Modules:
+  1) intel/18.0.2   4) autotools/1.2   7) TACC
+  2) impi/18.0.2    5) cmake/3.16.1    8) python3/3.7.0
+  3) git/2.24.1     6) xalt/2.9.6      9) cuda/11.0     (g)
+
+  Where:
+   g:  built for GPU
+
+ 
+
+Begin batch job... "03-n2npt-test", #193310
+
+Output file: 03-n2npt-test-193310.out 
+Partition: gtx 	Nodes: 1 	Ntasks per node: 16
+Dataset: TGX square pillars (22 imgs), 480/120/6 (train/val/test)
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+Loading checkpoint from: ckpts/03-n2npt-train-gradient/n2n-gradient.pt
+Testing/Eval parameters: 
+  Test dir = tgx_data/test
+  Target dir = ../data/targets
+  Output = results
+  Load ckpt = ckpts/03-n2npt-train-gradient/n2n-gradient.pt
+  Show output = 0
+  Montage only = True
+  Cuda = True
+  Noise type = gradient
+  Noise param = 0.4
+  Seed = None
+  Crop size = 0
+  Paired targets = False
+  Clean targets = True
+
+Saving images and montages to: results/denoised-03-n2npt-test-gradient-193310
+Batch job runtime was 0 minutes and 27 seconds.

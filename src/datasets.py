@@ -214,22 +214,16 @@ class NoisyDataset(AbstractDataset):
         img_path = os.path.normpath(os.path.join(self.root_dir, self.imgs[index]))
 
         if os.path.splitext(img_name)[-1] in ['.xyz']:  # load xyz
-            if self.channels == 1:
-                img = normalize(xyz_to_zfield(img_path, return3d=False))
-            else:  # channels = 3
-                temp = xyz_to_zfield(img_path, return3d=True)
-                stack_list = []
-                for ch in range(self.channels):
-                    stack_list.append(normalize(temp[:, :, ch], as_image=True))
-                img = np.stack(stack_list, axis=2)
+            img = normalize(xyz_to_zfield(img_path, return3d=False))
+            if self.channels != 1:
+                raise ValueError("The number of channels for xyz files must be 1, but got {}. Check channels input.".format(self.channels))
         else:  # load image
             with Image.open(img_path).convert('RGB') as img:
                 # just a note that conversion to RGB is on for all images bc Gwyddion grayscale images get messed up in PIL
                 # it may be possible to convert 'I' images to 'LA' mode without errors
                 img.load()
                 if self.channels != 3:
-                    print('The number of channels for image files (png, jpg) must be 3. Resetting channels to 3.')
-                    self.channels = 3  # just in case channels are set incorrectly
+                    raise ValueError("The number of channels for image files must be 3, but got {}. Check channels input.".format(self.channels))
         # Random square crop
         if not self.paired_targets and self.crop_size > 0:
             img = self._random_crop([img])[0]
@@ -241,14 +235,7 @@ class NoisyDataset(AbstractDataset):
             trgt_name = self._find_target(self.imgs[index])
             trgt_path = os.path.normpath(os.path.join(self.target_dir, trgt_name))
             if os.path.splitext(trgt_name)[-1] in ['.xyz']:
-                if self.channels == 1:
-                    trgt = normalize(xyz_to_zfield(trgt_path, return3d=False))
-                else:  # channels = 3
-                    temp = xyz_to_zfield(trgt_path, return3d=True)
-                    stack_list = []
-                    for ch in range(self.channels):
-                        stack_list.append(normalize(temp[:, :, ch], as_image=True))
-                    trgt = np.stack(stack_list, axis=2)
+                trgt = normalize(xyz_to_zfield(trgt_path, return3d=False))
             else:
                 with Image.open(trgt_path).convert('RGB') as trgt:
                     trgt.load()

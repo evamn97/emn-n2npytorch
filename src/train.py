@@ -39,7 +39,8 @@ def parse_args():
     parser.add_argument('-e', '--nb-epochs', help='number of epochs', default=100, type=int)
     parser.add_argument('-l', '--loss', help='loss function', choices=['l1', 'l2'], default='l1', type=str)
     parser.add_argument('--cuda', help='use cuda', action='store_true')
-    parser.add_argument('--plot-stats', help='plot stats after every epoch', action='store_true')
+    parser.add_argument('--verbose', help='prints training stats at report intervals', action='store_true')
+    parser.add_argument('--show-progress', help='extra verbose: shows progress bar during training epochs in addition to training stats', action='store_true')
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
@@ -61,17 +62,17 @@ if __name__ == '__main__':
     params = parse_args()
 
     # debugging only
-    params.train_dir = "../hs20mg_xyz_data/train"
-    params.valid_dir = "../hs20mg_xyz_data/valid"
-    params.target_dir = "../hs20mg_xyz_data/targets"
-    params.ckpt_overwrite = True
-    params.nb_epochs = 1
-    params.channels = 1
-    params.noise_type = 'raw'
-    params.paired_targets = True
-    # params.clean_targets = True
-    params.cuda = True
-    params.batch_size = 12
+    # params.train_dir = "../speed_hs20mg_data/train"
+    # params.valid_dir = "../speed_hs20mg_data/valid"
+    # params.target_dir = "../speed_hs20mg_data/targets"
+    # params.ckpt_overwrite = True
+    # params.nb_epochs = 1
+    # params.channels = 1
+    # params.noise_type = 'raw'
+    # params.paired_targets = True
+    # # params.clean_targets = True
+    # params.cuda = True
+    # params.batch_size = 12
 
     # Train/valid datasets
     train_loader = load_dataset(params.train_dir, params, shuffled=True)

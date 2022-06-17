@@ -105,9 +105,9 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
     denoised_t = denoised_t.cpu()
     clean_t = clean_t.cpu()
 
-    source = np.rot90(np.rot90(source_t.numpy(), axes=(0, 2)), k=3).squeeze()
-    denoised = np.rot90(np.rot90(torch.clamp(denoised_t, 0, 1), axes=(0, 2)), k=3).squeeze()
-    clean = np.rot90(np.rot90(clean_t.numpy(), axes=(0, 2)), k=3).squeeze()
+    source = tvF.to_pil_image(source_t)
+    denoised = tvF.to_pil_image(torch.clamp(denoised_t, 0, 1))
+    clean = tvF.to_pil_image(clean_t)
 
     # Build image montage
     psnr_vals = [psnr(source_t, clean_t), psnr(denoised_t, clean_t)]

@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys
 
 import torch
 import torch.nn as nn
 from torch.optim import Adam, lr_scheduler
-import torchvision.transforms as trf  # eva added this on 7-20-21
 
 from unet import UNet
 from utils import *
 
 import os
 import json
-from tqdm import tqdm
 
 
 class Noise2Noise(object):
@@ -101,7 +98,7 @@ class Noise2Noise(object):
         else:
             valid_loss = stats['valid_loss'][epoch]
             fname_unet = '{}/n2n-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
-        if self.p.plot_stats or (epoch + 1) == self.p.nb_epochs:
+        if self.p.verbose or self.p.show_progress or (epoch + 1) == self.p.nb_epochs:
             print('Saving checkpoint to: {}\n'.format(fname_unet))
         torch.save(self.model.state_dict(), fname_unet)
 
@@ -128,11 +125,11 @@ class Noise2Noise(object):
         """Tracks and saves starts after each epoch."""
 
         # Evaluate model on validation set
-        if self.p.plot_stats:
+        if self.p.verbose or self.p.show_progress:
             print('\rTesting model on validation set... ', end='')
         epoch_time = time_elapsed_since(epoch_start)[0]
         valid_loss, valid_time, valid_psnr = self.eval(valid_loader)
-        if self.p.plot_stats or (epoch + 1) == self.p.nb_epochs:
+        if self.p.verbose or self.p.show_progress or (epoch + 1) == self.p.nb_epochs:
             show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr)
 
         # Decrease learning rate if plateau
@@ -146,10 +143,9 @@ class Noise2Noise(object):
         self.save_model(epoch, stats, first=(epoch == 0))
 
         # Plot stats
-        if self.p.plot_stats:
-            loss_str = f'{self.p.loss.upper()} loss'
-            plot_per_epoch(self.ckpt_dir, 'Valid loss', stats['valid_loss'], loss_str)
-            plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
+        loss_str = f'{self.p.loss.upper()} loss'
+        plot_per_epoch(self.ckpt_dir, 'Valid loss', stats['valid_loss'], loss_str)
+        plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
 
     def test(self, test_loader, show):
         """Evaluates denoiser on test set."""
@@ -167,7 +163,6 @@ class Noise2Noise(object):
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 
-        pbar = tqdm(total=len(test_loader), unit='batch', desc='Testing', leave=False)
         for batch_idx, (source, target) in enumerate(test_loader):
 
             source = source.double()
@@ -182,8 +177,6 @@ class Noise2Noise(object):
             # Denoise
             denoised_img = self.model(source).detach().double()
             denoised_imgs.append(denoised_img)
-            pbar.update()
-        pbar.close()
 
         # Squeeze tensors
         source_imgs = [t.squeeze(0) for t in source_imgs]
@@ -205,7 +198,6 @@ class Noise2Noise(object):
         loss_meter = AvgMeter()
         psnr_meter = AvgMeter()
 
-        pbar = tqdm(total=len(valid_loader), unit='batch', desc='Validating', leave=False)
         for batch_idx, (source, target) in enumerate(valid_loader):
             if self.use_cuda:
                 source = source.cuda()
@@ -227,8 +219,6 @@ class Noise2Noise(object):
                 source_denoised = source_denoised.cpu()
                 target = target.cpu()
                 psnr_meter.update(psnr(source_denoised[i], target[i]).item())
-            pbar.update()
-        pbar.close()
 
         valid_loss = loss_meter.avg
         valid_time = time_elapsed_since(valid_start)[0]
@@ -244,7 +234,9 @@ class Noise2Noise(object):
         self._print_params()
         num_batches = len(train_loader)
         if num_batches % self.p.report_interval != 0:
-            print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size). \nThe report interval has been reset to equal nbatches.\n")
+            print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size).",
+                  "\nnbatches = {} / {} = {} : {} % {} != 0".format((num_batches * self.p.batch_size), self.p.batch_size, num_batches, self.p.report_interval, num_batches),
+                  "\nThe report interval has been reset to equal nbatches.\n")
             self.p.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset
 
         # Dictionaries of tracked stats
@@ -257,8 +249,7 @@ class Noise2Noise(object):
         # Main training loop
         train_start = datetime.now()
         for epoch in range(self.p.nb_epochs):
-            pbar = tqdm(total=num_batches, unit='batch', desc='Training Epoch {}'.format(epoch + 1), leave=False)
-            if self.p.plot_stats or (epoch + 1) == self.p.nb_epochs:
+            if self.p.verbose or self.p.show_progress or (epoch + 1) == self.p.nb_epochs:
                 print('EPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
 
             # Some stats trackers
@@ -270,7 +261,7 @@ class Noise2Noise(object):
             # Minibatch SGD
             for batch_idx, (source, target) in enumerate(train_loader):
                 batch_start = datetime.now()
-                if self.p.plot_stats:
+                if self.p.show_progress:
                     progress_bar(batch_idx, num_batches, self.p.report_interval, loss_meter.val)
 
                 if self.use_cuda:
@@ -298,14 +289,12 @@ class Noise2Noise(object):
 
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
-                if self.p.plot_stats:
-                    if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
+                if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
+                    if self.p.verbose or self.p.show_progress:
                         show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
-                        train_loss_meter.update(loss_meter.avg)
-                        loss_meter.reset()
-                        time_meter.reset()
-                pbar.update()
-            pbar.close()
+                    train_loss_meter.update(loss_meter.avg)
+                    loss_meter.reset()
+                    time_meter.reset()
 
             # Epoch end, save and reset tracker
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)

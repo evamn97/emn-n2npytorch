@@ -37,9 +37,9 @@ set +a    # only need to export SLURM vars
 
 # get from SLURM env vars
 echo -e "Begin batch job... \"${SLURM_JOB_NAME}\", #${SLURM_JOB_ID}\n"
-echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \nPartition: ${SLURM_JOB_PARTITION} \tNodes: ${SLURM_JOB_NUM_NODES} \tNtasks per node: ${SLURM_NTASKS}"
+echo -e "Output file: ${SLURM_JOB_NAME}-${SLURM_JOB_ID}.out \nPartition: ${SLURM_JOB_PARTITION} \tNodes: ${SLURM_JOB_NUM_NODES} \tNtasks per node: ${SLURM_TASKS_PER_NODE}"
 
-echo -e ${data_info}
+echo -e "${data_info}"
 
 cd ..
 echo -e "Working directory:  $(pwd)\n"
@@ -59,6 +59,7 @@ pdm run python src/train.py \
 
 
 end=$(date +%s)
-runtime_minutes=$(((end-start)/60))
-runtime_seconds=$(((end-start)%60))
-echo "Batch job runtime was ${runtime_minutes} minutes and ${runtime_seconds} seconds."
+runtime_hours=$(((end-start)/3600))
+runtime_minutes=$((((end-start)%3600)/60))
+runtime_seconds=$((((end-start)%3600)%60))
+echo -e "\nBatch job runtime was ${runtime_hours}h:${runtime_minutes}m:${runtime_seconds}s.\n "
