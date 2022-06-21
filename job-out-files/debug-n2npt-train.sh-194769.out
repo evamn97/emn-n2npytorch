@@ -1,0 +1,23 @@
+Date:  Tue Jun 21 14:16:31 CDT 2022\n
+Begin batch job... "debug-n2npt-train.sh", #194769
+Output file: debug-n2npt-train.sh-194769.out 
+
+Partition: gtx 		Nodes: 2 	Ntasks per node: 16(x2)
+
+Dataset: B&W HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+usage: train.py [-h] [-t TRAIN_DIR] [-v VALID_DIR] [--target-dir TARGET_DIR]
+                [--load-ckpt LOAD_CKPT] [--ckpt-save-path CKPT_SAVE_PATH]
+                [--ckpt-overwrite] [--report-interval REPORT_INTERVAL]
+                [-lr LEARNING_RATE] [-a ADAM [ADAM ...]] [-ch CHANNELS]
+                [-b BATCH_SIZE] [-e NB_EPOCHS] [-l {l1,l2}] [--cuda]
+                [--verbose] [--show-progress]
+                [-n {bernoulli,gradient,lower,nonuniform,raw}]
+                [-p NOISE_PARAM] [-s SEED] [-c CROP_SIZE] [--clean-targets]
+                [--paired-targets]
+train.py: error: argument --load-ckpt: expected one argument
+
+Batch job runtime was 0h:0m:40s.
+ 

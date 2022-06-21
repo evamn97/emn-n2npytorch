@@ -18,9 +18,7 @@ def parse_args():
 
     # Data parameters
     parser.add_argument('-t', '--test-dir', help='directory path containing testing images', default='../data/test')
-    parser.add_argument('--target-dir',
-                        help='directory path containing target images, if applicable.',
-                        default='../data/targets')
+    parser.add_argument('--target-dir', help='directory path containing target images, if applicable.', default='../data/targets')
     parser.add_argument('--output', help='directory to save the results images', default='../results')
     parser.add_argument('--load-ckpt', help='load model checkpoint')
     parser.add_argument('--show-output', help='pop up window to display outputs', default=0, type=int)
@@ -29,13 +27,11 @@ def parse_args():
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
-                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw'],
-                        default='bernoulli', type=str)
+                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw'], default='bernoulli', type=str)
     parser.add_argument('-p', '--noise-param', help='noise parameter', default=0.7, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='image crop size', default=0, type=int)
-    parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)',
-                        default=3, type=int)  # added 6/13/22 to try to fix single-channel image errors
+    parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)', default=3, type=int)
     parser.add_argument('--paired-targets', help='uses targets from "targets" directory', action='store_true')
 
     return parser.parse_args()

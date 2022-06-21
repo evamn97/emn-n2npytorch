@@ -17,15 +17,10 @@ def parse_args():
     parser = ArgumentParser(description='AFM fast scan and noisy image reconstruction')
 
     # Data parameters
-    parser.add_argument('-t', '--train-dir',
-                        help='directory path containing training images',
-                        default='../data/train', type=str)
-    parser.add_argument('-v', '--valid-dir',
-                        help='directory path containing validation images',
-                        default='../data/valid', type=str)
-    parser.add_argument('--target-dir',
-                        help='directory path containing target images, if applicable.',
-                        default='../data/targets', type=str)
+    parser.add_argument('-t', '--train-dir', help='directory path containing training images', default='../data/train', type=str)
+    parser.add_argument('-v', '--valid-dir', help='directory path containing validation images', default='../data/valid', type=str)
+    parser.add_argument('--target-dir', help='directory path containing target images, if applicable.', default='../data/targets', type=str)
+    parser.add_argument('--load-ckpt', help='load ckpt from a previously trained model to use in training', default=None, type=str)
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts', type=str)
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
     parser.add_argument('--report-interval', help='batch report interval', default=100, type=int)
@@ -33,8 +28,7 @@ def parse_args():
     # Training hyperparameters
     parser.add_argument('-lr', '--learning-rate', help='learning rate', default=0.001, type=float)
     parser.add_argument('-a', '--adam', help='adam parameters', nargs='+', default=[0.9, 0.99, 1e-8], type=list)
-    parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)',
-                        default=3, type=int)  # added 6/13/22 to try to fix single-channel image errors
+    parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)', default=3, type=int)
     parser.add_argument('-b', '--batch-size', help='minibatch size', default=4, type=int)
     parser.add_argument('-e', '--nb-epochs', help='number of epochs', default=100, type=int)
     parser.add_argument('-l', '--loss', help='loss function', choices=['l1', 'l2'], default='l1', type=str)
@@ -44,8 +38,7 @@ def parse_args():
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
-                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw'],
-                        default='bernoulli', type=str)
+                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw'], default='bernoulli', type=str)
     parser.add_argument('-p', '--noise-param', help='noise parameter', default=0.7, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='random crop size', default=0, type=int)
@@ -80,4 +73,12 @@ if __name__ == '__main__':
 
     # Initialize model and train
     n2n = Noise2Noise(params, trainable=True)
+
+    # try using previously trained model to build on - 06/17/22
+    if params.load_ckpt and os.path.isfile(params.load_ckpt):
+        print("\nLoading previous training model checkpoint...")
+        n2n.load_model(params.load_ckpt)
+    elif not os.path.isfile(params.load_ckpt):
+        print("\nRequested model checkpoint is not a file. Creating a new training checkpoint.")
+
     n2n.train(train_loader, valid_loader)

@@ -27,8 +27,10 @@ class Noise2Noise(object):
             self.job_id = os.environ["jobid"]  # ex: 193174
         else:
             self.job_id = f'{datetime.now():%m%d%H%M}'  # ex: 05311336
-        if "jobname" in os.environ:
+        if "jobname" in os.environ and "idv" not in os.environ["jobname"]:
             self.job_name = os.environ["jobname"] + "-" + self.p.noise_type  # ex: 01-n2npt-train-bernoulli
+        elif "filename" in os.environ:
+            self.job_name = os.environ["filename"] + "-" + self.p.noise_type  # ex: debug-n2npt-train-bernoulli (ext removed)
         else:
             self.job_name = self.p.noise_type  # ex: bernoulli
             if trainable and self.p.clean_targets:
@@ -110,15 +112,15 @@ class Noise2Noise(object):
     def load_model(self, ckpt_fname):
         """Loads model from checkpoint file."""
 
-        print('Loading checkpoint from: {}'.format(ckpt_fname))
+        print('Loading checkpoint from: {}\n'.format(ckpt_fname))
         try:
             if self.use_cuda:
                 self.model.load_state_dict(torch.load(ckpt_fname))
             else:
                 self.model.load_state_dict(torch.load(ckpt_fname, map_location='cpu'))
         except RuntimeError:
-            raise ValueError("There is a size mismatch between the number of UNet channels and the input data. " +
-                             "Check the requested number of channels. " +
+            raise ValueError("There is a mismatch between the UNet and the loaded checkpoint. " +
+                             "Try checking the requested number of channels and ensure it matches what the checkpoint was trained on. " +
                              "\n(PNG & JPG => 3 channels, XYZ => 1 or 3)")
 
     def _on_epoch_end(self, stats, train_loss, epoch, epoch_start, valid_loader):
