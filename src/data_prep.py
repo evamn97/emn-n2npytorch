@@ -10,7 +10,7 @@ from torchvision.transforms import functional as tvF
 import PIL.Image as Image
 import os
 from tqdm import tqdm
-from pathos.helpers import cpu_count
+from pathos.helpers import cpu_count, freeze_support
 from pathos.pools import ProcessPool as Pool
 import shutil
 from time import sleep
@@ -58,6 +58,16 @@ def xyz_to_zfield(xyz_filepath, return3d=False):
 def arr3d_to_xyz(arr3d, out_path):
     xyz_df = pd.DataFrame({'x': arr3d[:, :, 0].flat, 'y': arr3d[:, :, 1].flat, 'z': arr3d[:, :, 2].flat})
     xyz_df.to_csv(out_path, header=False, index=False, sep='\t')
+
+
+def find_target(targets_list, source_name):
+    """For paired targets, retrieves correct target based on name."""
+    res = [t for t in targets_list if source_name in t]
+    if len(res) == 1:
+        target = res[0]
+    else:
+        raise ValueError('Expected single target, got {}. Check file naming: source name must be substring in target name.'.format(len(res)))
+    return target
 
 
 def conversions(f_in, new_type):
@@ -150,7 +160,7 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
         raise NotADirectoryError("Input path is not a directory!")
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
-    supported = ['.png', '.jpg', '.jpeg', '.xyz']
+    supported = ['.png', '.jpg', '.jpeg', '.xyz', '.txt', '.csv']
 
     def single_aug(filename):
         name, ext = os.path.splitext(filename)
@@ -160,6 +170,8 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
                 im.load()
         elif ext.lower() in ['.xyz']:
             im = xyz_to_zfield(filepath, return3d=True)
+        elif ext.lower() in ['.txt', '.csv']:
+            im = np.loadtxt(filepath, delimiter=',')
         else:
             return None
         transformed_image = random_trf(im, min_dim=min_px, max_angle=max_angle)
@@ -169,6 +181,8 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
             transformed_image.save(save_path)
         elif ext.lower() in ['.xyz']:
             arr3d_to_xyz(transformed_image, save_path)
+        elif ext.lower() in ['.txt', '.csv']:
+            np.savetxt(save_path, transformed_image, delimiter=',')
         return 1
 
     pbar = tqdm(total=total_imgs, unit=' files', desc='Augmenting data', leave=True)  # progress bar
@@ -209,7 +223,7 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
     target_path_out = os.path.join(source_path_out, "targets")
     if not os.path.isdir(target_path_out):
         os.mkdir(target_path_out)
-    supported = ['.png', '.jpg', '.jpeg', '.xyz']
+    supported = ['.png', '.jpg', '.jpeg', '.xyz', '.txt', '.csv']
 
     def single_aug(source_file, target_file, idx):
         s_name, ext = os.path.splitext(source_file)
@@ -225,6 +239,9 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
         elif ext.lower() in ['.xyz']:
             source = xyz_to_zfield(s_path, return3d=True)
             target = xyz_to_zfield(t_path, return3d=True)
+        elif ext.lower() in ['.txt', '.csv']:
+            source = np.loadtxt(s_path, delimiter=',')
+            target = np.loadtxt(t_path, delimiter=',')
         else:
             return None
 
@@ -241,6 +258,9 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
         elif ext.lower() in ['.xyz']:
             arr3d_to_xyz(transformed_source, source_save_path)
             arr3d_to_xyz(transformed_target, target_save_path)
+        elif ext.lower() in ['.txt', '.csv']:
+            np.savetxt(source_save_path, transformed_source, delimiter=',')
+            np.savetxt(target_save_path, transformed_target, delimiter=',')
         return 1
 
     pbar = tqdm(total=total_imgs, unit=' files', desc='Augmenting data', leave=True)  # progress bar
@@ -319,20 +339,11 @@ def get_test(test_path_in: str, test_path_out: str, num: int, target_path_in=Non
         all_target_files = [f for f in os.listdir(target_path_in) if os.path.isfile(os.path.join(target_path_in, f))]
         all_target_files.sort()
 
-        if all_test_files == all_target_files:
-            target_list = test_files
-        elif all_test_files == ['target_' + f for f in all_target_files]:  # 'target_' in all_test_files[0] and 'target_' not in all_target_files[0]:
-            target_list = [f.replace('target_', '') for f in test_files]
-        elif all_target_files == ['target_' + f for f in all_test_files]:
-            target_list = ['target_' + f for f in test_files]
-        else:
-            raise Exception("Something in the filenames is unexpected. Check for non-matching files.")
-
         target_path_out = os.path.join(test_path_out, "targets")
         if not os.path.isdir(target_path_out):
             os.mkdir(target_path_out)
-        for f in target_list:
-            filepath = os.path.join(target_path_in, f)
+        for f in test_files:
+            filepath = os.path.join(target_path_in, find_target(all_target_files, f))  # get target path
             shutil.copy(filepath, target_path_out)
     print("Test images saved in: {}".format(test_path_out))
 
@@ -360,41 +371,46 @@ def batch_rename(root_dir, location, add_string, save_dir=None, to_replace=''):
         if root_dir == save_dir:
             os.remove(old_path)
 
-# if __name__ == '__main__':
-#     sleep(2)
-# ---------------------------------------------------------------- Data Augmenting ----------------------------------------------------------------
-# Augmenting data
-# source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/z-only-conversions"
-# source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/hs20mg_z0nly_data"
-# target_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/z-only-extra-processed"
-#
-# number = 1200
-# px = 256
-# m_angle = 300
 
-# augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=m_angle)
-# augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=m_angle)
+if __name__ == '__main__':
+    sleep(2)
 
-# Splitting data
-# split_ratio = 0.8
-# split(source_out_dir, split_ratio)
+    # freeze_support()
 
-# Getting test images
-# nt = 7
-# test_out_dir = os.path.join(source_out_dir, "test")
-# get_test(source_in_dir, test_out_dir, nt, target_in_dir)
-# -------------------------------------------------------------------------------------------------------------------------------------------------
-# Dropping x&y from xyz data
-# if not os.path.isdir(source_out_dir):
-#     os.mkdir(source_out_dir)
-# with os.scandir(source_in_dir) as folder:
-#     for file in folder:
-#         name = os.path.splitext(file.name)[0]
-#         save_path = os.path.join(source_out_dir, (name + '.csv'))
-#         z = xyz_to_zfield(file.path)
-#         np.savetxt(save_path, z, delimiter=',')
-# -------------------------------------------------------------------------------------------------------------------------------------------------
-# Renaming files
-# mode = 'ext'
-# new_string = '.txt'
-# batch_rename(target_in_dir, mode, new_string)
+    # ---------------------------------------------------------------- Data Augmenting ----------------------------------------------------------------
+    # Augmenting data
+    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/z-only-conversions"
+    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/hs20mg_z0nly_data"
+    target_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/z-only-extra-processed"
+
+    number = 1200
+    px = 256
+    m_angle = 300
+
+    # augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=m_angle)
+    augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=m_angle)
+
+    # Splitting data
+    split_ratio = 0.8
+    split(source_out_dir, split_ratio)
+
+    # Getting test images
+    nt = 7
+    test_out_dir = os.path.join(source_out_dir, "test")
+    get_test(source_in_dir, test_out_dir, nt, target_in_dir)
+    # -------------------------------------------------------------------------------------------------------------------------------------------------
+
+    # Dropping x&y from xyz data
+    # if not os.path.isdir(source_out_dir):
+    #     os.mkdir(source_out_dir)
+    # with os.scandir(source_in_dir) as folder:
+    #     for file in folder:
+    #         name = os.path.splitext(file.name)[0]
+    #         save_path = os.path.join(source_out_dir, (name + '.csv'))
+    #         z = xyz_to_zfield(file.path)
+    #         np.savetxt(save_path, z, delimiter=',')
+    # -------------------------------------------------------------------------------------------------------------------------------------------------
+    # Renaming files
+    # mode = 'ext'
+    # new_string = '.txt'
+    # batch_rename(target_in_dir, mode, new_string)

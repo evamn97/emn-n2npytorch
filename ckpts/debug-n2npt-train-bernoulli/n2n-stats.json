@@ -1,0 +1,13 @@
+{
+  "noise_type": "bernoulli",
+  "noise_param": 0.4,
+  "train_loss": [
+    0.003948402249621261
+  ],
+  "valid_loss": [
+    0.00023312612349111938
+  ],
+  "valid_psnr": [
+    36.65596811792249
+  ]
+}

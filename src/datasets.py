@@ -85,7 +85,7 @@ def load_dataset(root_dir, params, shuffled=False, single=False):
     # Create Torch dataset
     noise = (params.noise_type, params.noise_param)
 
-    dataset = NoisyDataset(root_dir, params.target_dir, params.crop_size,
+    dataset = NoisyDataset(root_dir, params.target_dir, params.redux, params.crop_size,
                            clean_targets=params.clean_targets, paired_targets=params.paired_targets,
                            channels=params.channels, noise_dist=noise, seed=params.seed)
 
@@ -99,7 +99,7 @@ def load_dataset(root_dir, params, shuffled=False, single=False):
 class AbstractDataset(Dataset):
     """Abstract dataset class for Noise2Noise."""
 
-    def __init__(self, root_dir, target_dir, crop_size=0, clean_targets=False, paired_targets=False, channels=3):
+    def __init__(self, root_dir, target_dir, redux=0, crop_size=0, clean_targets=False, paired_targets=False, channels=3):
         """Initializes abstract dataset."""
 
         super(AbstractDataset, self).__init__()
@@ -107,6 +107,7 @@ class AbstractDataset(Dataset):
         self.imgs = []
         self.targets = []
         self.root_dir = root_dir
+        self.redux = redux
         self.crop_size = crop_size
         self.clean_targets = clean_targets
         self.paired_targets = paired_targets
@@ -136,15 +137,6 @@ class AbstractDataset(Dataset):
 
         return cropped_imgs
 
-    def _find_target(self, source_name):
-        """For paired targets, retrieves correct target based on name."""
-        res = [t for t in self.targets if source_name in t]
-        if len(res) == 1:
-            target = res[0]
-        else:
-            raise ValueError('Expected single target, got {}. Check file naming: source name must be substring in target name.'.format(len(res)))
-        return target
-
     def __getitem__(self, index):
         """Retrieves image from data folder path."""
 
@@ -159,18 +151,25 @@ class AbstractDataset(Dataset):
 class NoisyDataset(AbstractDataset):
     """Class for injecting random noise into dataset."""
 
-    def __init__(self, root_dir, target_dir, crop_size, clean_targets=False, paired_targets=False, channels=3,
+    def __init__(self, root_dir, target_dir, redux, crop_size, clean_targets=False, paired_targets=False, channels=3,
                  noise_dist=('bernoulli', 0.7), seed=None):
         """Initializes noisy image dataset."""
 
-        super(NoisyDataset, self).__init__(root_dir, target_dir, crop_size, clean_targets, paired_targets, channels)
+        super(NoisyDataset, self).__init__(root_dir, target_dir, redux, crop_size, clean_targets, paired_targets, channels)
 
-        ext_list = ['.png', '.jpeg', '.jpg', '.xyz']  # acceptable extensions/filetypes
+        ext_list = ['.png', '.jpeg', '.jpg', '.xyz', '.txt', '.csv']  # acceptable extensions/filetypes
         self.imgs = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in ext_list]
         if os.path.isdir(target_dir):
             self.targets = [t for t in os.listdir(target_dir) if os.path.splitext(t)[-1].lower() in ext_list]
         if self.paired_targets and not os.path.isdir(target_dir):
             raise NotADirectoryError("Paired targets are requested but the input target directory does not exist!")
+
+        if redux:
+            if float(redux) > 1.0:
+                raise ValueError("redux ratio must be a float between 0.0 and 1.0")
+            new_size = int(float(redux) * len(self.imgs))
+            self.imgs = self.imgs[:new_size]  # reduce dataset size to given ratio
+            # targets are found by source name anyway so no need to change self.targets list
 
         # Noise parameters
         self.noise_type = noise_dist[0]
@@ -217,10 +216,12 @@ class NoisyDataset(AbstractDataset):
             img = normalize(xyz_to_zfield(img_path, return3d=False))
             if self.channels != 1:
                 raise ValueError("The number of channels for xyz files must be 1, but got {}. Check channels input.".format(self.channels))
+        elif os.path.splitext(img_name)[-1] in ['.txt', '.csv']:
+            img = np.loadtxt(img_path, delimiter=',')
+            if self.channels != 1:
+                raise ValueError("The number of channels for z-only files must be 1, but got {}. Check channels input.".format(self.channels))
         else:  # load image
             with Image.open(img_path).convert('RGB') as img:
-                # just a note that conversion to RGB is on for all images bc Gwyddion grayscale images get messed up in PIL
-                # it may be possible to convert 'I' images to 'LA' mode without errors
                 img.load()
                 if self.channels != 3:
                     raise ValueError("The number of channels for image files must be 3, but got {}. Check channels input.".format(self.channels))
@@ -232,10 +233,12 @@ class NoisyDataset(AbstractDataset):
 
         # Corrupt target image, but not when clean targets are requested or pairs exist
         if self.paired_targets:  # paired targets overrides clean targets
-            trgt_name = self._find_target(self.imgs[index])
+            trgt_name = find_target(self.targets, self.imgs[index])
             trgt_path = os.path.normpath(os.path.join(self.target_dir, trgt_name))
             if os.path.splitext(trgt_name)[-1] in ['.xyz']:
                 trgt = normalize(xyz_to_zfield(trgt_path, return3d=False))
+            elif os.path.splitext(trgt_name)[-1] in ['.txt', '.csv']:
+                trgt = np.loadtxt(trgt_path, delimiter=',')
             else:
                 with Image.open(trgt_path).convert('RGB') as trgt:
                     trgt.load()

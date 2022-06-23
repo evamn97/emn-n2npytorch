@@ -55,6 +55,7 @@ if __name__ == '__main__':
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)
+    params.redux = 0  # don't reduce size of test set
     params.clean_targets = True
     test_loader = load_dataset(params.test_dir, params, shuffled=False, single=True)
     n2n.load_model(params.load_ckpt)

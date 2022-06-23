@@ -4,6 +4,7 @@
 import os
 import torch
 import torch.nn as nn
+from typing import Union
 
 from datasets import load_dataset
 from noise2noise import Noise2Noise
@@ -20,6 +21,7 @@ def parse_args():
     parser.add_argument('-t', '--train-dir', help='directory path containing training images', default='../data/train', type=str)
     parser.add_argument('-v', '--valid-dir', help='directory path containing validation images', default='../data/valid', type=str)
     parser.add_argument('--target-dir', help='directory path containing target images, if applicable.', default='../data/targets', type=str)
+    parser.add_argument('-r', '--redux', help='ratio (0.1 - 0.99) of dataset size to use for training (redux=0 means no reduction). useful for quick debugging.', default=0)
     parser.add_argument('--load-ckpt', help='load ckpt from a previously trained model to use in training', default=None, type=str)
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts', type=str)
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
@@ -53,6 +55,8 @@ if __name__ == '__main__':
 
     # Parse training parameters
     params = parse_args()
+    if params.show_progress:
+        params.verbose = True  # so --show-progress can be used instead of --verbose
 
     # debugging only
     # params.train_dir = "../speed_hs20mg_data/train"
@@ -78,7 +82,7 @@ if __name__ == '__main__':
     if params.load_ckpt and os.path.isfile(params.load_ckpt):
         print("\nLoading previous training model checkpoint...")
         n2n.load_model(params.load_ckpt)
-    elif not os.path.isfile(params.load_ckpt):
-        print("\nRequested model checkpoint is not a file. Creating a new training checkpoint.")
+    elif params.load_ckpt and not os.path.isfile(params.load_ckpt):
+        print("\nRequested model checkpoint ({}) is not a file. \nCreating a new training checkpoint.\n".format(params.load_ckpt))
 
     n2n.train(train_loader, valid_loader)

@@ -11,6 +11,8 @@ from utils import *
 import os
 import json
 
+torch.set_default_dtype(torch.float64)
+
 
 class Noise2Noise(object):
     """Implementation of Noise2Noise from Lehtinen et al. (2018)."""
@@ -28,9 +30,9 @@ class Noise2Noise(object):
         else:
             self.job_id = f'{datetime.now():%m%d%H%M}'  # ex: 05311336
         if "jobname" in os.environ and "idv" not in os.environ["jobname"]:
-            self.job_name = os.environ["jobname"] + "-" + self.p.noise_type  # ex: 01-n2npt-train-bernoulli
+            self.job_name = os.environ["jobname"] + "-" + self.p.noise_type  # ex: tgx-n2npt-train-bernoulli
         elif "filename" in os.environ:
-            self.job_name = os.environ["filename"] + "-" + self.p.noise_type  # ex: debug-n2npt-train-bernoulli (ext removed)
+            self.job_name = os.environ["filename"] + "-" + self.p.noise_type  # ex: hs20mg-n2npt-train-lower (for non-slurm scripts)
         else:
             self.job_name = self.p.noise_type  # ex: bernoulli
             if trainable and self.p.clean_targets:
@@ -43,7 +45,7 @@ class Noise2Noise(object):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
 
         # Model
-        self.model = UNet(in_channels=self.p.channels, out_channels=self.p.channels).double()  # changed this from default in_channels=3 6/13/22 emn
+        self.model = UNet(in_channels=self.p.channels, out_channels=self.p.channels)  # .double()  # changed this from default in_channels=3 6/13/22 emn
 
         # Set optimizer and loss, if in training mode
         if self.trainable:
@@ -68,6 +70,7 @@ class Noise2Noise(object):
             self.model = self.model.cuda()
             if self.trainable:
                 self.loss = self.loss.cuda()
+
 
     def _print_params(self):
         """Formats parameters to print when training."""
@@ -100,7 +103,7 @@ class Noise2Noise(object):
         else:
             valid_loss = stats['valid_loss'][epoch]
             fname_unet = '{}/n2n-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
-        if self.p.verbose or self.p.show_progress or (epoch + 1) == self.p.nb_epochs:
+        if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
             print('Saving checkpoint to: {}\n'.format(fname_unet))
         torch.save(self.model.state_dict(), fname_unet)
 
@@ -121,17 +124,17 @@ class Noise2Noise(object):
         except RuntimeError:
             raise ValueError("There is a mismatch between the UNet and the loaded checkpoint. " +
                              "Try checking the requested number of channels and ensure it matches what the checkpoint was trained on. " +
-                             "\n(PNG & JPG => 3 channels, XYZ => 1 or 3)")
+                             "\n(PNG or JPG => 3 channels, XYZ and Z only => 1)")
 
     def _on_epoch_end(self, stats, train_loss, epoch, epoch_start, valid_loader):
         """Tracks and saves starts after each epoch."""
 
         # Evaluate model on validation set
-        if self.p.verbose or self.p.show_progress:
+        if self.p.verbose:
             print('\rTesting model on validation set... ', end='')
         epoch_time = time_elapsed_since(epoch_start)[0]
         valid_loss, valid_time, valid_psnr = self.eval(valid_loader)
-        if self.p.verbose or self.p.show_progress or (epoch + 1) == self.p.nb_epochs:
+        if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
             show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr)
 
         # Decrease learning rate if plateau
@@ -237,8 +240,8 @@ class Noise2Noise(object):
         num_batches = len(train_loader)
         if num_batches % self.p.report_interval != 0:
             print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size).",
-                  "\nnbatches = {} / {} = {} : {} % {} != 0".format((num_batches * self.p.batch_size), self.p.batch_size, num_batches, self.p.report_interval, num_batches),
-                  "\nThe report interval has been reset to equal nbatches.\n")
+                  "\nnbatches = {}/{} = {}, report_interval = {}:   {} % {} != 0".format((num_batches * self.p.batch_size), self.p.batch_size, num_batches, self.p.report_interval, self.p.report_interval, num_batches),
+                  "\nThe report interval has been reset to equal nbatches ({}).\n".format(num_batches))
             self.p.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset
 
         # Dictionaries of tracked stats
@@ -251,7 +254,7 @@ class Noise2Noise(object):
         # Main training loop
         train_start = datetime.now()
         for epoch in range(self.p.nb_epochs):
-            if self.p.verbose or self.p.show_progress or (epoch + 1) == self.p.nb_epochs:
+            if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
                 print('EPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
 
             # Some stats trackers
@@ -292,7 +295,7 @@ class Noise2Noise(object):
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
                 if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
-                    if self.p.verbose or self.p.show_progress:
+                    if self.p.verbose:
                         show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
                     train_loss_meter.update(loss_meter.avg)
                     loss_meter.reset()
