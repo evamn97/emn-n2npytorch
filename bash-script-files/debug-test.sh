@@ -4,7 +4,7 @@
 # eva_mn
 # ----------------------------------------------------
 
-#SBATCH -o ../job-out-files/%x.out                  	# Name of stdout output file
+#SBATCH -o ../results/%x.out                  	        # Name of stdout output file
 #SBATCH -p gtx                                          # Queue (partition) name
 #SBATCH -N 1                                            # Total # of nodes
 #SBATCH --ntasks-per-node 16                            # Total # of tasks per node (mpi tasks)
