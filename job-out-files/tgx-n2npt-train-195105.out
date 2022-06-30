@@ -1,0 +1,1159 @@
+
+Date:  Fri Jun 24 10:03:50 CDT 2022
+
+Begin batch job... 
+     File Name:       slurm_script 
+     Job Name:        tgx-n2npt-train 
+     Job ID:          195105 
+     Output file:     tgx-n2npt-train-195105.out 
+     Partition:       gtx 
+     Nodes:           2 
+     Ntasks per node: 16(x2) 
+     Dataset:         B&W TGX square pillars (22 imgs), 480/120/6 (train/val/test)
+
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+Using python executable at: /work/08261/evanat/maverick2/miniconda3/envs/imgrec/bin/python
+
+Python start time: 10:03:59.604424 CT
+data loaded in 0:00:00.006059 (hh:mm:ss.ms)
+data loaded in 0:00:00.002939 (hh:mm:ss.ms)
+N2N start time:     10:03:59.614028
+model compiled in  0:00:03.438197 (hh:mm:ss.ms) from n2n start.
+n2n initialized in 0:00:03.438297 (hh:mm:ss.ms) from n2n start.
+
+Loading previous training model checkpoint...
+Loading checkpoint from: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+training begin: 0:00:03.468149 (hh:mm:ss.ms) from python start
+Training parameters: 
+  Train dir = tgx_data/train
+  Valid dir = tgx_data/valid
+  Target dir = tgx_data/targets
+  Redux = 0
+  Load ckpt = ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+  Ckpt save path = ckpts
+  Ckpt overwrite = True
+  Report interval = 120
+  Learning rate = 0.001
+  Adam = [0.9, 0.99, 1e-08]
+  Channels = 3
+  Batch size = 4
+  Nb epochs = 100
+  Loss = l2
+  Cuda = True
+  Verbose = True
+  Show progress = False
+  Noise type = bernoulli
+  Noise param = 0.4
+  Seed = None
+  Crop size = 0
+  Clean targets = True
+  Paired targets = False
+
+EPOCH 1 / 100
+Epoch 1 finished at 0:00:14.457983 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00176 | Avg train time / batch: 73 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00059 | Avg PSNR: 33.01 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 2 / 100
+Epoch 2 finished at 0:00:26.552430 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00056 | Avg train time / batch: 77 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00055 | Avg PSNR: 33.28 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 3 / 100
+Epoch 3 finished at 0:00:38.253332 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00056 | Avg train time / batch: 77 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00056 | Avg PSNR: 33.17 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 4 / 100
+Epoch 4 finished at 0:00:49.942472 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00075 | Avg train time / batch: 77 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00054 | Avg PSNR: 33.47 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 5 / 100
+Epoch 5 finished at 0:01:01.633778 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00055 | Avg train time / batch: 77 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00053 | Avg PSNR: 33.50 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 6 / 100
+Epoch 6 finished at 0:01:13.385429 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00059 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00053 | Avg PSNR: 33.45 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 7 / 100
+Epoch 7 finished at 0:01:25.237780 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00055 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00053 | Avg PSNR: 33.39 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 8 / 100
+Epoch 8 finished at 0:01:37.091360 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00056 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00050 | Avg PSNR: 33.73 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 9 / 100
+Epoch 9 finished at 0:01:48.908042 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00053 | Avg train time / batch: 77 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00053 | Avg PSNR: 33.51 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 10 / 100
+Epoch 10 finished at 0:02:00.721468 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00055 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00057 | Avg PSNR: 33.01 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 11 / 100
+Epoch 11 finished at 0:02:12.546255 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00048 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00053 | Avg PSNR: 33.33 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 12 / 100
+Epoch 12 finished at 0:02:24.395340 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00050 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00051 | Avg PSNR: 33.59 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 13 / 100
+Epoch 13 finished at 0:02:36.178852 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00051 | Avg train time / batch: 69 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00046 | Avg PSNR: 34.13 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 14 / 100
+Epoch 14 finished at 0:02:48.363448 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00051 | Avg train time / batch: 75 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00047 | Avg PSNR: 34.00 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 15 / 100
+Epoch 15 finished at 0:03:00.159910 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00048 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00049 | Avg PSNR: 33.83 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 16 / 100
+Epoch 16 finished at 0:03:11.964387 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00051 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00045 | Avg PSNR: 34.23 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 17 / 100
+Epoch 17 finished at 0:03:23.765654 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00048 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00046 | Avg PSNR: 34.11 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 18 / 100
+Epoch 18 finished at 0:03:35.628676 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00046 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00044 | Avg PSNR: 34.42 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 19 / 100
+Epoch 19 finished at 0:03:47.472547 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00046 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00047 | Avg PSNR: 33.96 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 20 / 100
+Epoch 20 finished at 0:03:59.286458 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00050 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00046 | Avg PSNR: 34.04 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 21 / 100
+Epoch 21 finished at 0:04:11.090483 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00043 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00047 | Avg PSNR: 33.98 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 22 / 100
+Epoch 22 finished at 0:04:22.900268 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00045 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00043 | Avg PSNR: 34.43 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 23 / 100
+Epoch 23 finished at 0:04:34.786007 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00044 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00045 | Avg PSNR: 34.18 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 24 / 100
+Epoch 24 finished at 0:04:46.604094 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00047 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00043 | Avg PSNR: 34.48 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 25 / 100
+Epoch 25 finished at 0:04:58.452802 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00041 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00045 | Avg PSNR: 34.19 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 26 / 100
+Epoch 26 finished at 0:05:10.307888 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00045 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00044 | Avg PSNR: 34.31 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 27 / 100
+Epoch 27 finished at 0:05:22.141836 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00043 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00046 | Avg PSNR: 34.08 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 28 / 100
+Epoch 28 finished at 0:05:33.970682 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00044 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.66 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 29 / 100
+Epoch 29 finished at 0:05:45.849308 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00041 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00043 | Avg PSNR: 34.46 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 30 / 100
+Epoch 30 finished at 0:05:57.670801 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00042 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00046 | Avg PSNR: 34.05 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 31 / 100
+Epoch 31 finished at 0:06:09.485068 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00042 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00044 | Avg PSNR: 34.23 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 32 / 100
+Epoch 32 finished at 0:06:21.304802 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00042 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00046 | Avg PSNR: 33.99 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 33 / 100
+Epoch 33 finished at 0:06:33.119239 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00042 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.72 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 34 / 100
+Epoch 34 finished at 0:06:44.989912 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00041 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00042 | Avg PSNR: 34.48 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 35 / 100
+Epoch 35 finished at 0:06:56.806641 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00041 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.73 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 36 / 100
+Epoch 36 finished at 0:07:08.628993 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00040 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00042 | Avg PSNR: 34.45 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 37 / 100
+Epoch 37 finished at 0:07:20.468525 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00041 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00042 | Avg PSNR: 34.53 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 38 / 100
+Epoch 38 finished at 0:07:32.329876 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00041 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.74 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 39 / 100
+Epoch 39 finished at 0:07:44.146883 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00041 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00042 | Avg PSNR: 34.53 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 40 / 100
+Epoch 40 finished at 0:07:56.043477 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00038 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.77 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 41 / 100
+Epoch 41 finished at 0:08:07.867473 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00042 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00043 | Avg PSNR: 34.42 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 42 / 100
+Epoch 42 finished at 0:08:19.701199 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00038 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 35.00 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 43 / 100
+Epoch 43 finished at 0:08:31.521820 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00042 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.75 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 44 / 100
+Epoch 44 finished at 0:08:43.353588 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00037 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 34.83 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 45 / 100
+Epoch 45 finished at 0:08:55.242425 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00039 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00042 | Avg PSNR: 34.58 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 46 / 100
+Epoch 46 finished at 0:09:07.081067 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00038 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.86 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 47 / 100
+Epoch 47 finished at 0:09:18.914722 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00038 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00048 | Avg PSNR: 33.76 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 48 / 100
+Epoch 48 finished at 0:09:30.728705 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00037 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00044 | Avg PSNR: 34.39 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 49 / 100
+Epoch 49 finished at 0:09:42.552363 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00038 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.85 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 50 / 100
+Epoch 50 finished at 0:09:54.362785 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00037 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.78 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 51 / 100
+Epoch 51 finished at 0:10:06.249462 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00038 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 34.90 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 52 / 100
+Epoch 52 finished at 0:10:18.091782 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.60 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 53 / 100
+Epoch 53 finished at 0:10:29.926482 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00038 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.64 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 54 / 100
+Epoch 54 finished at 0:10:41.758418 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00037 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.68 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 55 / 100
+Epoch 55 finished at 0:10:53.599523 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00036 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.63 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 56 / 100
+Epoch 56 finished at 0:11:05.511910 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00036 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.75 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 57 / 100
+Epoch 57 finished at 0:11:17.336412 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00036 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 34.94 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 58 / 100
+Epoch 58 finished at 0:11:29.146824 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00036 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.07 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 59 / 100
+Epoch 59 finished at 0:11:40.940517 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00041 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.98 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 60 / 100
+Epoch 60 finished at 0:11:52.727539 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00034 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.71 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 61 / 100
+Epoch 61 finished at 0:12:04.517493 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 35.04 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 62 / 100
+Epoch 62 finished at 0:12:16.401795 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00037 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 34.87 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 63 / 100
+Epoch 63 finished at 0:12:28.194150 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.67 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 64 / 100
+Epoch 64 finished at 0:12:39.987077 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.75 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 65 / 100
+Epoch 65 finished at 0:12:51.767344 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 34.94 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 66 / 100
+Epoch 66 finished at 0:13:03.558532 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 34.98 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 67 / 100
+Epoch 67 finished at 0:13:15.430312 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00036 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 34.91 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 68 / 100
+Epoch 68 finished at 0:13:27.217416 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00034 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.60 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 69 / 100
+Epoch 69 finished at 0:13:39.003074 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00045 | Avg PSNR: 34.14 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 70 / 100
+Epoch 70 finished at 0:13:50.821753 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 77 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.93 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 71 / 100
+Epoch 71 finished at 0:14:02.633998 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 35.01 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 72 / 100
+Epoch 72 finished at 0:14:14.440500 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.16 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 73 / 100
+Epoch 73 finished at 0:14:26.326379 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00034 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.78 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 74 / 100
+Epoch 74 finished at 0:14:38.147530 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00034 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.02 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 75 / 100
+Epoch 75 finished at 0:14:49.934881 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00034 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.10 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 76 / 100
+Epoch 76 finished at 0:15:01.726405 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00033 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.75 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 77 / 100
+Epoch 77 finished at 0:15:13.521874 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00035 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00044 | Avg PSNR: 34.24 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 78 / 100
+Epoch 78 finished at 0:15:25.369531 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00032 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.12 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 79 / 100
+Epoch 79 finished at 0:15:37.180687 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00034 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00041 | Avg PSNR: 34.56 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 80 / 100
+Epoch 80 finished at 0:15:48.990956 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00032 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 35.02 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 81 / 100
+Epoch 81 finished at 0:16:00.799380 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00033 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.78 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 82 / 100
+Epoch 82 finished at 0:16:12.620911 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00033 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.87 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 83 / 100
+Epoch 83 finished at 0:16:24.427469 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00033 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00043 | Avg PSNR: 34.48 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 84 / 100
+Epoch 84 finished at 0:16:36.334749 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00033 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.72 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 85 / 100
+Epoch 85 finished at 0:16:48.118213 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00033 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.06 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 86 / 100
+Epoch 86 finished at 0:16:59.900425 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00044 | Avg train time / batch: 77 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.89 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 87 / 100
+Epoch 87 finished at 0:17:11.690707 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00032 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.15 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 88 / 100
+Epoch 88 finished at 0:17:23.505882 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00031 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.19 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 89 / 100
+Epoch 89 finished at 0:17:35.358266 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00033 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.20 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 90 / 100
+Epoch 90 finished at 0:17:47.163016 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00031 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 35.07 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 91 / 100
+Epoch 91 finished at 0:17:58.966920 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00032 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.12 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 92 / 100
+Epoch 92 finished at 0:18:10.777103 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00032 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.15 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 93 / 100
+Epoch 93 finished at 0:18:22.566750 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00031 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.94 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 94 / 100
+Epoch 94 finished at 0:18:34.342481 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00032 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00037 | Avg PSNR: 35.19 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 95 / 100
+Epoch 95 finished at 0:18:46.213367 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00031 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00037 | Avg PSNR: 35.28 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 96 / 100
+Epoch 96 finished at 0:18:58.023129 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00032 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 35.13 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 97 / 100
+Epoch 97 finished at 0:19:09.823385 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00032 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00040 | Avg PSNR: 34.85 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 98 / 100
+Epoch 98 finished at 0:19:21.625512 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00031 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00048 | Avg PSNR: 33.76 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 99 / 100
+Epoch 99 finished at 0:19:33.400265 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00031 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00039 | Avg PSNR: 34.96 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+EPOCH 100 / 100
+Epoch 100 finished at 0:19:45.187295 (hh:mm:ss.ms) from n2n start.
+
+                                                                                
+Batch 120 / 120 | Avg loss: 0.00030 | Avg train time / batch: 78 ms
+
+Testing model on validation set... 
+                                                                                
+Train time: 0:00:10 | Valid time: 0:00:01 | Valid loss: 0.00038 | Avg PSNR: 35.08 dB
+Saving checkpoint to: ckpts/tgx-n2npt-train-bernoulli/n2n-bernoulli.pt
+
+Training done! Total elapsed time: 0:19:43
+
+
+Batch job runtime was 0h:19m:56s.
+ 
