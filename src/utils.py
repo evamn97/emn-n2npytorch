@@ -31,7 +31,7 @@ def progress_bar(batch_idx, num_batches, report_interval, train_loss):
     """Neat progress bar to track training."""
 
     dec = int(np.ceil(np.log10(num_batches)))
-    bar_size = 21 + dec
+    bar_size = 27 + dec
     progress = (batch_idx % report_interval) / report_interval
     fill = int(progress * bar_size) + 1
     print('\rBatch {:>{dec}d} [{}{}] Train loss: {:>1.5f}'.format(batch_idx + 1, '=' * fill + '>', ' ' * (bar_size - fill), train_loss, dec=str(dec)), end='')
@@ -41,17 +41,18 @@ def time_elapsed_since(start):
     """Computes elapsed time since start."""
 
     timedelta = datetime.now() - start
-    string = str(timedelta)[:-7]
+    # string = str(timedelta)[:-7]
+    string = str(timedelta)
     ms = int(timedelta.total_seconds() * 1000)
 
-    return string, ms
+    return string, ms, timedelta
 
 
 def show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr):
     """Formats validation error stats."""
 
     clear_line()
-    print('Train time: {} | Valid time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time, valid_time, valid_loss, valid_psnr))
+    print('Train time: {} | Valid time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4], valid_time[:-4], valid_loss, valid_psnr))
 
 
 def show_on_report(batch_idx, num_batches, loss, elapsed):

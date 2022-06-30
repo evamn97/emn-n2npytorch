@@ -10,6 +10,8 @@ from utils import *
 
 import os
 import json
+import sys
+from datetime import datetime, timedelta
 
 torch.set_default_dtype(torch.float64)
 
@@ -19,10 +21,13 @@ class Noise2Noise(object):
 
     def __init__(self, params, trainable):
         """Initializes model."""
-
+        self.n2n_start = datetime.now()
+        print(f'N2N start time:     {self.n2n_start.strftime("%H:%M:%S.%f")[:-4]}')
+        self.epoch_times = []  # added 6/24/22
         self.p = params
         self.trainable = trainable
         self._compile()  # creates unet
+        self.ckpt_dir = ''
 
         # try to sync montage output with SLURM output filenames by getting job ID and name - emn 05/19/22
         if "jobid" in os.environ:
@@ -40,6 +45,10 @@ class Noise2Noise(object):
             if self.p.paired_targets:
                 self.job_name += "-paired"  # ex: bernoulli-paired
             self.job_name += "-" + self.job_id  # ex: bernoulli-paired-05311336
+
+        # debugging
+        print(f'n2n initialized in   {str(datetime.now() - self.n2n_start)[:-4]} from n2n start')
+        sys.stdout.flush()
 
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
@@ -71,7 +80,6 @@ class Noise2Noise(object):
             if self.trainable:
                 self.loss = self.loss.cuda()
 
-
     def _print_params(self):
         """Formats parameters to print when training."""
         if self.trainable:
@@ -83,6 +91,7 @@ class Noise2Noise(object):
         pretty = lambda x: x.replace('_', ' ').capitalize()
         print('\n'.join('  {} = {}'.format(pretty(k), str(v)) for k, v in param_dict.items()))
         print()
+        sys.stdout.flush()
 
     def save_model(self, epoch, stats, first=False):
         """Saves model to files; can be overwritten at every epoch to save disk space."""
@@ -90,8 +99,8 @@ class Noise2Noise(object):
         # Create directory for model checkpoints, if nonexistent
         if first:
             ckpt_dir_name = f'{self.job_name}'  # ex: 01-n2npt-train-bernoulli
-
             self.ckpt_dir = os.path.normpath(os.path.join(self.p.ckpt_save_path, ckpt_dir_name))
+
             if not os.path.isdir(self.p.ckpt_save_path):
                 os.mkdir(self.p.ckpt_save_path)
             if not os.path.isdir(self.ckpt_dir):
@@ -132,10 +141,16 @@ class Noise2Noise(object):
         # Evaluate model on validation set
         if self.p.verbose:
             print('\rTesting model on validation set... ', end='')
-        epoch_time = time_elapsed_since(epoch_start)[0]
-        valid_loss, valid_time, valid_psnr = self.eval(valid_loader)
+        epoch_time, _, epoch_time_td = time_elapsed_since(epoch_start)
+        valid_loss, valid_time, valid_time_td, valid_psnr = self.eval(valid_loader)
+
+        self.epoch_times.append(epoch_time_td + valid_time_td)
+
         if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
             show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr)
+            est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (self.p.nb_epochs - (epoch + 1))
+            print(f'Estimated time remaining: {str(est_remain)[:-7]}')
+            sys.stdout.flush()  # force print to out file
 
         # Decrease learning rate if plateau
         self.scheduler.step(valid_loss)
@@ -226,10 +241,10 @@ class Noise2Noise(object):
                 psnr_meter.update(psnr(source_denoised[i], target[i]).item())
 
         valid_loss = loss_meter.avg
-        valid_time = time_elapsed_since(valid_start)[0]
+        valid_time, _, valid_time_td = time_elapsed_since(valid_start)
         psnr_avg = psnr_meter.avg
 
-        return valid_loss, valid_time, psnr_avg
+        return valid_loss, valid_time, valid_time_td, psnr_avg
 
     def train(self, train_loader, valid_loader):
         """Trains denoiser on training set."""
@@ -296,6 +311,9 @@ class Noise2Noise(object):
                 time_meter.update(time_elapsed_since(batch_start)[1])
                 if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
                     if self.p.verbose:
+                        if self.p.show_progress:
+                            print("")
+                        print('Epoch {} finished at {} from n2n start.'.format((epoch + 1), str((datetime.now() - self.n2n_start))[:-4]))
                         show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
                     train_loss_meter.update(loss_meter.avg)
                     loss_meter.reset()
@@ -306,4 +324,5 @@ class Noise2Noise(object):
             train_loss_meter.reset()
 
         train_elapsed = time_elapsed_since(train_start)[0]
-        print('Training done! Total elapsed time: {}\n'.format(train_elapsed))
+        print('Training done! Total elapsed time: {}'.format(str(train_elapsed)[:-3]))
+        print('Average training time per epoch:   {}\n'.format(str(sum(self.epoch_times, timedelta(0)) / len(self.epoch_times))[:-3]))

@@ -1,6 +1,5 @@
 from typing import Union
 
-import PIL.Image
 import numpy as np
 import pandas as pd
 import random
@@ -9,6 +8,7 @@ import torchvision.transforms as trf
 from torchvision.transforms import functional as tvF
 import PIL.Image as Image
 import os
+import sys
 from tqdm import tqdm
 from pathos.helpers import cpu_count, freeze_support
 from pathos.pools import ProcessPool as Pool
@@ -36,28 +36,33 @@ def highest_pow_2(n):
 
 
 def xyz_to_zfield(xyz_filepath, return3d=False):
-    """Loads .xyz format data and converts into a 2D numpy array of height (z) values.
-        * NOTE: P (# profiles/rows) must be set manually for rotated images!!"""
-    df = pd.read_csv(xyz_filepath, names=['x', 'y', 'z'], delimiter='\t', index_col=False)
-    P = len(set(df['y'].values))
+    """Loads .xyz (3-column) or z-series (1 column) data and converts into a square numpy array."""
+    df = pd.read_csv(xyz_filepath, header=None, delimiter='\t', index_col=False)
+    P = int(np.sqrt(len(df)))
     try:
-        z_arr = df['z'].values.reshape((P, -1))
+        z_arr = df[df.columns[-1]].values.reshape((P, -1))
     except ValueError:
         P = highest_pow_2(P)
-        z_arr = df['z'].values.reshape((P, -1))
+        z_arr = df[df.columns[-1]].values.reshape((P, -1))
 
-    if not return3d:
-        return z_arr
-    else:
-        x_arr = df['x'].values.reshape((P, -1))
-        y_arr = df['y'].values.reshape((P, -1))
+    if return3d and len(df.columns) == 3:
+        x_arr = df[df.columns[0]].values.reshape((P, -1))
+        y_arr = df[df.columns[1]].values.reshape((P, -1))
         arr_3d = np.stack((x_arr, y_arr, z_arr), axis=2)
         return arr_3d
+    else:
+        if return3d:
+            print('Return3d was requested but input df does not have 3 columns. Returning 2D array.')
+        return z_arr
 
 
 def arr3d_to_xyz(arr3d, out_path):
-    xyz_df = pd.DataFrame({'x': arr3d[:, :, 0].flat, 'y': arr3d[:, :, 1].flat, 'z': arr3d[:, :, 2].flat})
-    xyz_df.to_csv(out_path, header=False, index=False, sep='\t')
+    if len(arr3d.shape) == 3:  # 3D array
+        xyz_df = pd.DataFrame({'x': arr3d[:, :, 0].flat, 'y': arr3d[:, :, 1].flat, 'z': arr3d[:, :, 2].flat})
+        xyz_df.to_csv(out_path, header=False, index=False, sep='\t')
+    else:  # 2D array
+        z_df = pd.DataFrame({'z': arr3d.flat})
+        z_df.to_csv(out_path, header=False, index=False, sep='\t')
 
 
 def find_target(targets_list, source_name):
@@ -79,7 +84,7 @@ def conversions(f_in, new_type):
     assert type(f_in) != new_type, "Input type matches conversion type."
 
     if new_type == Image.Image:
-        if type(f_in) == Image.Image:
+        if type(f_in) == torch.Tensor:
             return tvF.to_pil_image(f_in)
         elif type(f_in) == np.ndarray:
             return Image.fromarray(f_in)
@@ -92,11 +97,12 @@ def conversions(f_in, new_type):
             return np.rot90(np.rot90(f_in.numpy(), axes=(0, 2)), k=3).squeeze()
 
 
-def random_trf(image: Union[Image.Image, torch.Tensor, np.ndarray], min_dim=None, target=None, max_angle=270.0):
+def random_trf(image: Union[Image.Image, torch.Tensor, np.ndarray], min_dim=None, target=None, corner_priority=False, max_angle=270.0):
     """ Applies random transformations to a single image or pair for data augmentation.
     :param image: Independent image, or source image if using pairs.
     :param min_dim: Minimum dimension of input image(s). For transforming sets of differently sized images, locks size of output images.
     :param target: Corresponding target in an image pair.
+    :param corner_priority: if True, sets rotation angle to zero and forces cropping bbox on images to enclose corners of the original image.
     :param max_angle: maximum angle range within which to rotate the image.
     """
     if type(image) != torch.Tensor:
@@ -107,19 +113,31 @@ def random_trf(image: Union[Image.Image, torch.Tensor, np.ndarray], min_dim=None
     if min_dim is None:
         min_dim = P
     rng = np.random.default_rng()
-    if not max_angle <= 0:
+    if not max_angle <= 0 and not corner_priority:
         angle = rng.uniform(0, max_angle)  # get random angle in degrees
     else:
         angle = 0
     rad_angle = np.radians(angle)
     c_crop = int(P / (np.abs(np.sin(rad_angle)) + np.abs(np.cos(rad_angle))))  # get bbox size based on rotation
-    min_crop = int(min_dim / (2 * np.cos(np.pi / 4)))  # get smallest bbox
-    final_crop = highest_pow_2(min_crop)  # must be power of 2
+    min_crop = int(min_dim / (2 * np.cos(np.pi / 4)))  # get smallest bbox based on a 45 deg rotation angle
+    final_crop = highest_pow_2(min_crop)  # must be power of 2 (usually one power of 2 smaller than min_dim)
+
+    if corner_priority:
+        c_top = random.choice([0, (c_crop - final_crop)])
+        c_left = random.choice([0, (c_crop - final_crop)])
+    else:
+        c_top = random.randint(0, (c_crop - final_crop))
+        c_left = random.randint(0, (c_crop - final_crop))
+
     temp_source = trf.CenterCrop(c_crop)(tvF.rotate(img, angle))  # rotate and crop to valid data
 
     if target is None:  # for augmenting unpaired images
-        transformer = trf.Compose([trf.RandomCrop(final_crop), trf.RandomHorizontalFlip(), trf.RandomVerticalFlip()])
-        new_source_t = transformer(temp_source)
+        if corner_priority:
+            transformer = trf.Compose([trf.RandomHorizontalFlip(), trf.RandomVerticalFlip()])
+            new_source_t = tvF.crop(transformer(temp_source), c_top, c_left, final_crop, final_crop)
+        else:
+            transformer = trf.Compose([trf.RandomCrop(final_crop), trf.RandomHorizontalFlip(), trf.RandomVerticalFlip()])
+            new_source_t = transformer(temp_source)
         new_source = conversions(new_source_t, type(image))
         return new_source
 
@@ -129,11 +147,9 @@ def random_trf(image: Union[Image.Image, torch.Tensor, np.ndarray], min_dim=None
         else:
             tgt = target
         temp_target = trf.CenterCrop(c_crop)(tvF.rotate(tgt, angle))  # rotate and crop to valid data
-        c_top = random.randint(0, (c_crop - final_crop))
-        c_left = random.randint(0, (c_crop - final_crop))
-        flips = random.choice(['h', 'v', 'both', 'none'])
 
         # flips and crops
+        flips = random.choice(['h', 'v', 'both', 'none'])
         if flips == 'h':
             new_source_t = tvF.crop(tvF.hflip(temp_source), c_top, c_left, final_crop, final_crop)
             new_target_t = tvF.crop(tvF.hflip(temp_target), c_top, c_left, final_crop, final_crop)
@@ -154,7 +170,7 @@ def random_trf(image: Union[Image.Image, torch.Tensor, np.ndarray], min_dim=None
         return new_source, new_target
 
 
-def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle=270):
+def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle=270, corners=True):
     """ Augments a set of independent images (unpaired)."""
     if not os.path.isdir(in_path):
         raise NotADirectoryError("Input path is not a directory!")
@@ -162,7 +178,7 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
         os.mkdir(out_path)
     supported = ['.png', '.jpg', '.jpeg', '.xyz', '.txt', '.csv']
 
-    def single_aug(filename):
+    def single_aug(filename, idx):
         name, ext = os.path.splitext(filename)
         filepath = os.path.join(in_path, filename)
         if ext.lower() in ['.png', '.jpg', '.jpeg']:  # image extensions must be in this set, other items are skipped
@@ -171,18 +187,24 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
         elif ext.lower() in ['.xyz']:
             im = xyz_to_zfield(filepath, return3d=True)
         elif ext.lower() in ['.txt', '.csv']:
-            im = np.loadtxt(filepath, delimiter=',')
+            im = xyz_to_zfield(filepath)
         else:
             return None
-        transformed_image = random_trf(im, min_dim=min_px, max_angle=max_angle)
-        save_name = name + str(index) + ext
+
+        corner_priority = False
+        if corners:
+            corner_idx = random.choice(mini_index)
+            if idx == corner_idx:
+                corner_priority = True
+
+        transformed_image = random_trf(im, min_dim=min_px, max_angle=max_angle, corner_priority=corner_priority)
+        save_name = name + str(index) + str(idx) + ext
         save_path = os.path.join(out_path, save_name)  # image name with index
         if ext.lower() in ['.png', '.jpg', '.jpeg']:
             transformed_image.save(save_path)
-        elif ext.lower() in ['.xyz']:
+        elif ext.lower() in ['.xyz', '.txt', '.csv']:
             arr3d_to_xyz(transformed_image, save_path)
-        elif ext.lower() in ['.txt', '.csv']:
-            np.savetxt(save_path, transformed_image, delimiter=',')
+
         return 1
 
     pbar = tqdm(total=total_imgs, unit=' files', desc='Augmenting data', leave=True)  # progress bar
@@ -196,8 +218,9 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
         else:
             aug_list = all_imgs
 
+        mini_index = np.arange(0, len(aug_list))
         recorded = 0
-        results = pool.amap(single_aug, aug_list)
+        results = pool.amap(single_aug, aug_list, mini_index)
         while not results.ready():
             res = results._value
             to_update = sum(filter(None, res)) - recorded
@@ -215,7 +238,7 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
     print("Done!")
 
 
-def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str, total_imgs: int, min_px=None, max_angle=270):
+def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str, total_imgs: int, min_px=None, max_angle=270, corners=True):
     if not (os.path.isdir(source_path_in) and os.path.isdir(target_path_in)):
         raise NotADirectoryError("One of your input paths is not a directory!")
     if not os.path.isdir(source_path_out):
@@ -240,27 +263,31 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
             source = xyz_to_zfield(s_path, return3d=True)
             target = xyz_to_zfield(t_path, return3d=True)
         elif ext.lower() in ['.txt', '.csv']:
-            source = np.loadtxt(s_path, delimiter=',')
-            target = np.loadtxt(t_path, delimiter=',')
+            source = xyz_to_zfield(s_path)
+            target = xyz_to_zfield(t_path)
         else:
             return None
 
-        transformed_source, transformed_target = random_trf(source, min_px, target, max_angle=max_angle)
+        corner_priority = False
+        if corners:
+            corner_idx = random.choice(mini_index)
+            if idx == corner_idx:
+                corner_priority = True
 
-        source_save_name = s_name + str(idx) + ext
-        target_save_name = t_name + str(idx) + ext
+        transformed_source, transformed_target = random_trf(source, min_px, target, max_angle=max_angle, corner_priority=corner_priority)
+
+        source_save_name = s_name + str(index) + str(idx) + ext  # ex: HS-20MG00.ext, HS-20MG01.ext
+        target_save_name = t_name + str(index) + str(idx) + ext
         source_save_path = os.path.join(source_path_out, source_save_name)  # image name with index
         target_save_path = os.path.join(target_path_out, target_save_name)  # image name with "target_" + index
 
         if ext.lower() in ['.png', '.jpg', '.jpeg']:
             transformed_source.save(source_save_path)
             transformed_target.save(target_save_path)
-        elif ext.lower() in ['.xyz']:
+        elif ext.lower() in ['.xyz', '.txt', '.csv']:
             arr3d_to_xyz(transformed_source, source_save_path)
             arr3d_to_xyz(transformed_target, target_save_path)
-        elif ext.lower() in ['.txt', '.csv']:
-            np.savetxt(source_save_path, transformed_source, delimiter=',')
-            np.savetxt(target_save_path, transformed_target, delimiter=',')
+
         return 1
 
     pbar = tqdm(total=total_imgs, unit=' files', desc='Augmenting data', leave=True)  # progress bar
@@ -278,8 +305,10 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
             aug_source_list = all_sources
             aug_target_list = all_targets
 
+        mini_index = np.arange(0, len(aug_source_list))
+
         recorded = 0
-        results = pool.amap(single_aug, aug_source_list, aug_target_list, np.arange(index, index + len(aug_source_list)))
+        results = pool.amap(single_aug, aug_source_list, aug_target_list, mini_index)
         while not results.ready():
             res = results._value
             to_update = sum(filter(None, res)) - recorded
@@ -349,16 +378,17 @@ def get_test(test_path_in: str, test_path_out: str, num: int, target_path_in=Non
 
 
 def batch_rename(root_dir, location, add_string, save_dir=None, to_replace=''):
-    files = [f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))]
-    if location not in ['first', 'last', 'ext', 'replace']:
-        raise ValueError("Mode must be one of: 'first', 'last', or 'ext'. You tried mode {}".format(location))
+    """ Batch file renaming for all items in a given directory. """
+    files = [f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))]  # for files only
+    if location not in ['first', 'last', 'replace', 'ext']:
+        raise ValueError("Mode must be one of: 'first', 'last', 'replace', or 'ext'. You tried mode {}".format(location))
     if save_dir is None:
         save_dir = root_dir
     for fname in tqdm(files, unit=' file', desc='Renaming files'):
         if location == 'first':
             renamed = add_string + fname
         elif location == 'last':
-            renamed = fname + add_string
+            renamed = os.path.splitext(fname)[0] + add_string + os.path.splitext(fname)[1]
         elif location == 'replace':
             assert to_replace != '', "The string you're replacing can't be empty!"
             renamed = fname.replace(to_replace, add_string)
@@ -370,47 +400,4 @@ def batch_rename(root_dir, location, add_string, save_dir=None, to_replace=''):
             shutil.copy(old_path, new_path)
         if root_dir == save_dir:
             os.remove(old_path)
-
-
-if __name__ == '__main__':
-    sleep(2)
-
-    # freeze_support()
-
-    # ---------------------------------------------------------------- Data Augmenting ----------------------------------------------------------------
-    # Augmenting data
-    source_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/z-only-conversions"
-    source_out_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/hs20mg_z0nly_data"
-    target_in_dir = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/Combined-HS20MG-256/z-only-extra-processed"
-
-    number = 1200
-    px = 256
-    m_angle = 300
-
-    # augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=m_angle)
-    augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=m_angle)
-
-    # Splitting data
-    split_ratio = 0.8
-    split(source_out_dir, split_ratio)
-
-    # Getting test images
-    nt = 7
-    test_out_dir = os.path.join(source_out_dir, "test")
-    get_test(source_in_dir, test_out_dir, nt, target_in_dir)
-    # -------------------------------------------------------------------------------------------------------------------------------------------------
-
-    # Dropping x&y from xyz data
-    # if not os.path.isdir(source_out_dir):
-    #     os.mkdir(source_out_dir)
-    # with os.scandir(source_in_dir) as folder:
-    #     for file in folder:
-    #         name = os.path.splitext(file.name)[0]
-    #         save_path = os.path.join(source_out_dir, (name + '.csv'))
-    #         z = xyz_to_zfield(file.path)
-    #         np.savetxt(save_path, z, delimiter=',')
-    # -------------------------------------------------------------------------------------------------------------------------------------------------
-    # Renaming files
-    # mode = 'ext'
-    # new_string = '.txt'
-    # batch_rename(target_in_dir, mode, new_string)
+    print("Done!")

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from datetime import datetime
 
 import matplotlib
 import numpy as np
@@ -81,7 +82,6 @@ def create_image(img, p=0.5, style='r'):
 
 def load_dataset(root_dir, params, shuffled=False, single=False):
     """Loads dataset and returns corresponding data loader."""
-
     # Create Torch dataset
     noise = (params.noise_type, params.noise_param)
 
@@ -107,7 +107,7 @@ class AbstractDataset(Dataset):
         self.imgs = []
         self.targets = []
         self.root_dir = root_dir
-        self.redux = redux
+        self.redux = float(redux)
         self.crop_size = crop_size
         self.clean_targets = clean_targets
         self.paired_targets = paired_targets
@@ -164,10 +164,10 @@ class NoisyDataset(AbstractDataset):
         if self.paired_targets and not os.path.isdir(target_dir):
             raise NotADirectoryError("Paired targets are requested but the input target directory does not exist!")
 
-        if redux:
-            if float(redux) > 1.0:
-                raise ValueError("redux ratio must be a float between 0.0 and 1.0")
-            new_size = int(float(redux) * len(self.imgs))
+        if self.redux != 0:
+            if not 0.0 < self.redux < 1.0:
+                raise ValueError("redux ratio must be a float between 0.0 and 1.0 (non-inclusive)")
+            new_size = int(self.redux * len(self.imgs))
             self.imgs = self.imgs[:new_size]  # reduce dataset size to given ratio
             # targets are found by source name anyway so no need to change self.targets list
 
@@ -212,14 +212,10 @@ class NoisyDataset(AbstractDataset):
         img_name = self.imgs[index]
         img_path = os.path.normpath(os.path.join(self.root_dir, self.imgs[index]))
 
-        if os.path.splitext(img_name)[-1] in ['.xyz']:  # load xyz
+        if os.path.splitext(img_name)[-1] in ['.xyz', '.txt', '.csv']:  # load xyz
             img = normalize(xyz_to_zfield(img_path, return3d=False))
             if self.channels != 1:
                 raise ValueError("The number of channels for xyz files must be 1, but got {}. Check channels input.".format(self.channels))
-        elif os.path.splitext(img_name)[-1] in ['.txt', '.csv']:
-            img = np.loadtxt(img_path, delimiter=',')
-            if self.channels != 1:
-                raise ValueError("The number of channels for z-only files must be 1, but got {}. Check channels input.".format(self.channels))
         else:  # load image
             with Image.open(img_path).convert('RGB') as img:
                 img.load()
@@ -235,10 +231,8 @@ class NoisyDataset(AbstractDataset):
         if self.paired_targets:  # paired targets overrides clean targets
             trgt_name = find_target(self.targets, self.imgs[index])
             trgt_path = os.path.normpath(os.path.join(self.target_dir, trgt_name))
-            if os.path.splitext(trgt_name)[-1] in ['.xyz']:
+            if os.path.splitext(trgt_name)[-1] in ['.xyz', '.txt', '.csv']:
                 trgt = normalize(xyz_to_zfield(trgt_path, return3d=False))
-            elif os.path.splitext(trgt_name)[-1] in ['.txt', '.csv']:
-                trgt = np.loadtxt(trgt_path, delimiter=',')
             else:
                 with Image.open(trgt_path).convert('RGB') as trgt:
                     trgt.load()

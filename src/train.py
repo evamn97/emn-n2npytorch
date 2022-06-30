@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import torch
 import torch.nn as nn
 from typing import Union
+import datetime
 
 from datasets import load_dataset
 from noise2noise import Noise2Noise
@@ -55,21 +57,27 @@ if __name__ == '__main__':
 
     # Parse training parameters
     params = parse_args()
-    if params.show_progress:
-        params.verbose = True  # so --show-progress can be used instead of --verbose
 
     # debugging only
-    # params.train_dir = "../speed_hs20mg_data/train"
-    # params.valid_dir = "../speed_hs20mg_data/valid"
-    # params.target_dir = "../speed_hs20mg_data/targets"
+    # params.train_dir = "../hs20mg_z0nly_data/train"
+    # params.valid_dir = "../hs20mg_z0nly_data/valid"
+    # params.target_dir = "../hs20mg_z0nly_data/targets"
     # params.ckpt_overwrite = True
-    # params.nb_epochs = 1
+    # params.nb_epochs = 3
     # params.channels = 1
     # params.noise_type = 'raw'
     # params.paired_targets = True
     # # params.clean_targets = True
     # params.cuda = True
-    # params.batch_size = 12
+    # params.redux = 0.1
+    # params.show_progress = True
+
+    python_start = datetime.datetime.now()
+    local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+
+    print(f'Python start time:  {python_start.strftime("%H:%M:%S.%f")[:-4]} {local_tz}')
+    if params.show_progress:
+        params.verbose = True  # so --show-progress can be used instead of --verbose
 
     # Train/valid datasets
     train_loader = load_dataset(params.train_dir, params, shuffled=True)
@@ -85,4 +93,5 @@ if __name__ == '__main__':
     elif params.load_ckpt and not os.path.isfile(params.load_ckpt):
         print("\nRequested model checkpoint ({}) is not a file. \nCreating a new training checkpoint.\n".format(params.load_ckpt))
 
+    print(f'training begin:      {str(datetime.datetime.now() - python_start)[:-4]} from python start')
     n2n.train(train_loader, valid_loader)

@@ -1,0 +1,48 @@
+
+Date:  Thu Jun 30 09:19:36 CDT 2022
+
+Begin batch job... 
+     File Name:       slurm_script 
+     Job Name:        hs20mg-imgrec.sh 
+     Job ID:          195586 
+     Output file:     hs20mg-imgrec.sh-195586.out 
+     Partition:       v100 
+     Nodes:           1 
+     Ntasks per node: 48 
+     Dataset:         B&W HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)
+
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+This is not an idev job, using jobname to find checkpoint:
+ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+Using python executable at: /work/08261/evanat/maverick2/miniconda3/envs/imgrec/bin/python
+
+
+  File "/work/08261/evanat/maverick2/n2n-pytorch/src/train.py", line 77
+    (str(python_start:%H:%M:%S.%f)[:-4])
+                     ^
+SyntaxError: f-string: invalid syntax
+
+Date:  Thu Jun 30 09:19:41 CDT 2022
+
+N2N start time:     09:20:56.839991
+n2n initialized in   0:00:05.91 from n2n start
+Loading checkpoint from: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+Traceback (most recent call last):
+  File "/work/08261/evanat/maverick2/n2n-pytorch/src/test.py", line 61, in <module>
+    n2n.load_model(params.load_ckpt)
+  File "/work/08261/evanat/maverick2/n2n-pytorch/src/noise2noise.py", line 130, in load_model
+    self.model.load_state_dict(torch.load(ckpt_fname))
+  File "/work/08261/evanat/maverick2/miniconda3/envs/imgrec/lib/python3.9/site-packages/torch/serialization.py", line 699, in load
+    with _open_file_like(f, 'rb') as opened_file:
+  File "/work/08261/evanat/maverick2/miniconda3/envs/imgrec/lib/python3.9/site-packages/torch/serialization.py", line 231, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/work/08261/evanat/maverick2/miniconda3/envs/imgrec/lib/python3.9/site-packages/torch/serialization.py", line 212, in __init__
+    super(_open_file, self).__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: 'ckpts/hs20mg-imgrec-raw/n2n-raw.pt'
+
+Batch job runtime was 0h:1m:28s.
+ 
