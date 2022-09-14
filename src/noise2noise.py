@@ -98,7 +98,13 @@ class Noise2Noise(object):
 
         # Create directory for model checkpoints, if nonexistent
         if first:
-            ckpt_dir_name = f'{self.job_name}'  # ex: 01-n2npt-train-bernoulli
+            if self.p.load_ckpt and os.path.isfile(self.p.load_ckpt):  # indicate previous ckpt in ckpt_dir_name
+                if "retrain" in self.p.load_ckpt:
+                    ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-{}{}".format(self.p.noise_param, self.p.loss)
+                else:
+                    ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)  # ex: hs20mg-bernoulli-retrain-193174
+            else:
+                ckpt_dir_name = f'{self.job_name.replace("-imgrec", "")}-{self.p.noise_param}{self.p.loss}'  # ex: hs20mg-bernoulli
             self.ckpt_dir = os.path.normpath(os.path.join(self.p.ckpt_save_path, ckpt_dir_name))
 
             if not os.path.isdir(self.p.ckpt_save_path):
@@ -108,7 +114,8 @@ class Noise2Noise(object):
 
         # Save checkpoint dictionary
         if self.p.ckpt_overwrite:
-            fname_unet = '{}/n2n-{}.pt'.format(self.ckpt_dir, self.p.noise_type)  # ex: 'ckpts/01-n2npt-train-bernoulli/n2n-bernoulli.pt'
+            fname_unet = '{}/{}.pt'.format(self.ckpt_dir, os.path.basename(self.ckpt_dir))  # changed 7/5/2022
+            # fname_unet = '{}/n2n-{}.pt'.format(self.ckpt_dir, self.p.noise_type)  # ex: 'ckpts/01-n2npt-train-bernoulli/n2n-bernoulli.pt'
         else:
             valid_loss = stats['valid_loss'][epoch]
             fname_unet = '{}/n2n-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
@@ -164,7 +171,7 @@ class Noise2Noise(object):
 
         # Plot stats
         loss_str = f'{self.p.loss.upper()} loss'
-        plot_per_epoch(self.ckpt_dir, 'Valid loss', stats['valid_loss'], loss_str)
+        plot_per_epoch(self.ckpt_dir, ('Valid ' + loss_str), stats['valid_loss'], loss_str)
         plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
 
     def test(self, test_loader, show):
@@ -205,9 +212,13 @@ class Noise2Noise(object):
 
         # Create montage and save images
         print('Saving images and montages to: {}'.format(save_path))
+        if not os.path.isfile(os.path.join(save_path, 'psnr.txt')):
+            f = open(os.path.join(save_path, 'psnr.txt'), 'w')  # create a text file to save psnr values to
+            f.write("input\tresult\n")
+            f.close()
         for i in range(len(source_imgs)):
             img_name = test_loader.dataset.imgs[i]
-            create_montage(img_name, self.p.noise_type, save_path, source_imgs[i], denoised_imgs[i], clean_imgs[i], show, montage_only=self.p.montage_only)
+            create_montage(img_name, self.p.noise_type, self.p.noise_param, save_path, source_imgs[i], denoised_imgs[i], clean_imgs[i], show, montage_only=self.p.montage_only)
 
     def eval(self, valid_loader):
         """Evaluates denoiser on validation set."""

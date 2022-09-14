@@ -19,6 +19,7 @@ def parse_args():
     # Data parameters
     parser.add_argument('-t', '--test-dir', help='directory path containing testing images', default='../data/test')
     parser.add_argument('--target-dir', help='directory path containing target images, if applicable.', default='../data/targets')
+    parser.add_argument('-r', '--redux', help='ratio (0.1 - 0.99) of dataset size to use for training (redux=0 means no reduction). useful for quick debugging.', default=0)
     parser.add_argument('--output', help='directory to save the results images', default='../results')
     parser.add_argument('--load-ckpt', help='load model checkpoint')
     parser.add_argument('--show-output', help='pop up window to display outputs', default=0, type=int)
@@ -43,6 +44,11 @@ if __name__ == '__main__':
     # Parse test parameters
     params = parse_args()
 
+    # error handling for noise param greater than 1
+    if params.noise_param >= 1:
+        mag = len(str(int(params.noise_param)))
+        params.noise_param = params.noise_param / (10 ** mag)
+
     # debugging only
     # params.test_dir = '../planelevel_hs20mg_data/test'
     # params.target_dir = '../hs20mg_xyz_data/test/targets'
@@ -55,7 +61,6 @@ if __name__ == '__main__':
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)
-    params.redux = 0  # don't reduce size of test set
     params.clean_targets = True
     test_loader = load_dataset(params.test_dir, params, shuffled=False, single=True)
     n2n.load_model(params.load_ckpt)

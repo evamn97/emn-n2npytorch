@@ -58,13 +58,18 @@ if __name__ == '__main__':
     # Parse training parameters
     params = parse_args()
 
+    # error handling for noise param greater than 1
+    if params.noise_param >= 1:
+        mag = len(str(int(params.noise_param)))
+        params.noise_param = params.noise_param / (10 ** mag)
+
     # debugging only
-    # params.train_dir = "../hs20mg_z0nly_data/train"
-    # params.valid_dir = "../hs20mg_z0nly_data/valid"
-    # params.target_dir = "../hs20mg_z0nly_data/targets"
+    # params.train_dir = "../hs20mg_data/train"
+    # params.valid_dir = "../hs20mg_data/valid"
+    # params.target_dir = "../hs20mg_data/targets"
     # params.ckpt_overwrite = True
     # params.nb_epochs = 3
-    # params.channels = 1
+    # params.channels = 3
     # params.noise_type = 'raw'
     # params.paired_targets = True
     # # params.clean_targets = True
@@ -92,6 +97,7 @@ if __name__ == '__main__':
         n2n.load_model(params.load_ckpt)
     elif params.load_ckpt and not os.path.isfile(params.load_ckpt):
         print("\nRequested model checkpoint ({}) is not a file. \nCreating a new training checkpoint.\n".format(params.load_ckpt))
+        params.load_ckpt = None
 
     print(f'training begin:      {str(datetime.datetime.now() - python_start)[:-4]} from python start')
     n2n.train(train_loader, valid_loader)

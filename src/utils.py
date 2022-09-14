@@ -94,7 +94,7 @@ def psnr(input, target):
     return 10 * torch.log10(1 / F.mse_loss(input, target))
 
 
-def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_t, show, montage_only=False):
+def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoised_t, clean_t, show, montage_only=False):
     """Creates montage for easy comparison."""
 
     fig, ax = plt.subplots(1, 3, figsize=(29, 10), dpi=200)
@@ -118,7 +118,7 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
     zipped = zip(titles, [source, denoised, clean])
     for j, (title, img) in enumerate(zipped):
         ax[j].imshow(img, cmap='gray')  # cmap for height fields (not normalized)
-        ax[j].set_title(title, fontsize='xx-large')
+        ax[j].set_title(title, fontsize=44)
         ax[j].axis('off')
     fig.tight_layout()
 
@@ -128,6 +128,10 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
         plt.show()
 
     # Save to files
+    f = open(os.path.join(save_path, 'psnr.txt'), 'a')
+    f.write("{:.2f}\t{:.2f}\n".format(psnr_vals[0], psnr_vals[1]))
+    f.close()
+
     fname = os.path.splitext(img_name)[0]
     if not montage_only:
         source = tvF.to_pil_image(source_t)
@@ -135,9 +139,9 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
         clean = tvF.to_pil_image(clean_t)
         # torch.clamp() is like clipping, why is it necessary? (like for RGB?)
 
-        source.save(os.path.join(save_path, f'{fname}-{noise_type}-noisy.png'))
-        denoised.save(os.path.join(save_path, f'{fname}-{noise_type}-denoised.png'))
-    fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}-montage.png'), bbox_inches='tight')
+        source.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-noisy.png'))
+        denoised.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-denoised.png'))
+    fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-montage.png'), bbox_inches='tight')
 
 
 class AvgMeter(object):

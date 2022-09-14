@@ -42,6 +42,18 @@ def create_image(img, p=0.5, style='r'):
         resized = tvF.resize(tvF.resize(temp_img, [hN, wN]), [h, w])
         img_array_noised = np.array(resized)
 
+    # if style == 'l':  # lowers resolution of input image (editing for xyz images as well - doesn't work yet)
+    #     temp_img = tvF.to_tensor(img)
+    #     hN, wN = int(h * p), int(w * p)  # choose new dims based on p value
+    #     resized = tvF.resize(tvF.resize(temp_img, [hN, wN]), [h, w])
+    #     if c == 1:
+    #         img_array_noised = np.array(resized.numpy().squeeze())
+    #     else:
+    #         m_list = []
+    #         for dim in range(c):
+    #             m_list.append(resized[dim])
+    #         img_array_noised = np.dstack(m_list)
+
     elif style == 'nu':  # random noise up to +/- 10 percent values (not binary)
         ran = (np.max(ground_truth_array) - np.min(ground_truth_array)) * 0.1
         rand_noise = rng.uniform(-1 * ran, ran, (h, w))
@@ -77,7 +89,11 @@ def create_image(img, p=0.5, style='r'):
             mask = r_mask
         img_array_noised = np.multiply(ground_truth_array, mask)
 
-    return np.clip(img_array_noised, 0, 255).astype(np.uint8)
+    if c == 1:
+        final_noised = normalize(img_array_noised)
+    else:  # c == 3
+        final_noised = np.clip(img_array_noised, 0, 255).astype(np.uint8)
+    return final_noised
 
 
 def load_dataset(root_dir, params, shuffled=False, single=False):
