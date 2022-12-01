@@ -1,0 +1,787 @@
+
+Date:  Thu Jun 30 14:13:54 CDT 2022
+
+Begin batch job... 
+     File Name:       slurm_script 
+     Job Name:        hs20mg-imgrec.sh 
+     Job ID:          195617 
+     Output file:     hs20mg-imgrec.sh-195617.out 
+     Partition:       v100 
+     Nodes:           1 
+     Ntasks per node: 48 
+     Dataset:         B&W HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)
+
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+Using jobname to find checkpoint:
+ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+Using python executable at: /work/08261/evanat/maverick2/miniconda3/envs/imgrec/bin/python
+
+
+Python start time:  14:14:26.99 CDT
+N2N start time:     14:14:27.01
+n2n initialized in   0:00:05.28 from n2n start
+
+Loading previous training model checkpoint...
+Loading checkpoint from: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+training begin:      0:00:05.39 from python start
+Training parameters: 
+  Train dir = hs20mg_data/train
+  Valid dir = hs20mg_data/valid
+  Target dir = hs20mg_data/targets
+  Redux = 0
+  Load ckpt = ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+  Ckpt save path = ckpts
+  Ckpt overwrite = True
+  Report interval = 264
+  Learning rate = 0.001
+  Adam = [0.9, 0.99, 1e-08]
+  Channels = 3
+  Batch size = 4
+  Nb epochs = 100
+  Loss = l2
+  Cuda = True
+  Verbose = True
+  Show progress = False
+  Noise type = raw
+  Noise param = 0.4
+  Seed = None
+  Crop size = 0
+  Clean targets = False
+  Paired targets = True
+
+EPOCH 1 / 100
+Epoch 1 finished at 0:00:49.67 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.01014 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:44.29 | Valid time: 0:00:09.87 | Valid loss: 0.00998 | Avg PSNR: 21.24 dB
+Estimated time remaining: 1:29:22
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 2 / 100
+Epoch 2 finished at 0:01:11.47 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.01004 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.13 | Valid loss: 0.01017 | Avg PSNR: 21.44 dB
+Estimated time remaining: 0:55:28
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 3 / 100
+Epoch 3 finished at 0:01:25.46 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00977 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.09 | Valid loss: 0.01152 | Avg PSNR: 20.84 dB
+Estimated time remaining: 0:44:00
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 4 / 100
+Epoch 4 finished at 0:01:39.42 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00987 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.13 | Valid loss: 0.01009 | Avg PSNR: 21.35 dB
+Estimated time remaining: 0:38:09
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 5 / 100
+Epoch 5 finished at 0:01:53.41 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.01006 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.11 | Valid loss: 0.01000 | Avg PSNR: 21.48 dB
+Estimated time remaining: 0:34:33
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 6 / 100
+Epoch 6 finished at 0:02:07.37 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.01001 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.53 | Valid time: 0:00:02.19 | Valid loss: 0.01127 | Avg PSNR: 20.75 dB
+Estimated time remaining: 0:32:05
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 7 / 100
+Epoch 7 finished at 0:02:21.47 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.01002 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.63 | Valid time: 0:00:02.09 | Valid loss: 0.01007 | Avg PSNR: 21.53 dB
+Estimated time remaining: 0:30:14
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 8 / 100
+Epoch 8 finished at 0:02:35.45 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00997 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.14 | Valid loss: 0.01141 | Avg PSNR: 20.73 dB
+Estimated time remaining: 0:28:49
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 9 / 100
+Epoch 9 finished at 0:02:49.48 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00974 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.12 | Valid loss: 0.01008 | Avg PSNR: 21.58 dB
+Estimated time remaining: 0:27:39
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 10 / 100
+Epoch 10 finished at 0:03:03.49 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00960 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.15 | Valid loss: 0.01055 | Avg PSNR: 21.22 dB
+Estimated time remaining: 0:26:41
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 11 / 100
+Epoch 11 finished at 0:03:17.51 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00995 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.14 | Valid loss: 0.01016 | Avg PSNR: 21.25 dB
+Estimated time remaining: 0:25:50
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 12 / 100
+Epoch 12 finished at 0:03:31.56 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00968 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.58 | Valid time: 0:00:02.16 | Valid loss: 0.01021 | Avg PSNR: 21.30 dB
+Estimated time remaining: 0:25:06
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 13 / 100
+Epoch 13 finished at 0:03:45.51 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00978 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.54 | Valid time: 0:00:02.12 | Valid loss: 0.01079 | Avg PSNR: 20.87 dB
+Estimated time remaining: 0:24:26
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 14 / 100
+Epoch 14 finished at 0:03:59.47 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00991 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.58 | Valid time: 0:00:02.19 | Valid loss: 0.01003 | Avg PSNR: 21.58 dB
+Estimated time remaining: 0:23:50
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 15 / 100
+Epoch 15 finished at 0:04:13.54 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00976 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.12 | Valid loss: 0.00996 | Avg PSNR: 21.50 dB
+Estimated time remaining: 0:23:17
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 16 / 100
+Epoch 16 finished at 0:04:27.52 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00978 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.60 | Valid time: 0:00:02.15 | Valid loss: 0.01137 | Avg PSNR: 20.82 dB
+Estimated time remaining: 0:22:46
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 17 / 100
+Epoch 17 finished at 0:04:41.61 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00959 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.13 | Valid loss: 0.00970 | Avg PSNR: 21.75 dB
+Estimated time remaining: 0:22:18
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 18 / 100
+Epoch 18 finished at 0:04:55.62 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00956 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.12 | Valid loss: 0.01316 | Avg PSNR: 20.23 dB
+Estimated time remaining: 0:21:51
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 19 / 100
+Epoch 19 finished at 0:05:09.62 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00938 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.13 | Valid loss: 0.01015 | Avg PSNR: 21.49 dB
+Estimated time remaining: 0:21:25
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 20 / 100
+Epoch 20 finished at 0:05:23.63 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00935 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.13 | Valid loss: 0.01243 | Avg PSNR: 20.56 dB
+Estimated time remaining: 0:21:01
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 21 / 100
+Epoch 21 finished at 0:05:37.63 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00982 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.13 | Valid loss: 0.00969 | Avg PSNR: 21.56 dB
+Estimated time remaining: 0:20:38
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 22 / 100
+Epoch 22 finished at 0:05:51.64 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00917 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.18 | Valid loss: 0.01018 | Avg PSNR: 21.41 dB
+Estimated time remaining: 0:20:15
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 23 / 100
+Epoch 23 finished at 0:06:05.76 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00961 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.16 | Valid loss: 0.01102 | Avg PSNR: 21.26 dB
+Estimated time remaining: 0:19:54
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 24 / 100
+Epoch 24 finished at 0:06:19.81 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00932 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.16 | Valid loss: 0.01032 | Avg PSNR: 21.36 dB
+Estimated time remaining: 0:19:33
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 25 / 100
+Epoch 25 finished at 0:06:33.86 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00944 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.16 | Valid loss: 0.01074 | Avg PSNR: 21.24 dB
+Estimated time remaining: 0:19:12
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 26 / 100
+Epoch 26 finished at 0:06:47.90 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00941 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.15 | Valid loss: 0.00953 | Avg PSNR: 21.56 dB
+Estimated time remaining: 0:18:52
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 27 / 100
+Epoch 27 finished at 0:07:01.93 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00931 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.14 | Valid loss: 0.00989 | Avg PSNR: 21.80 dB
+Estimated time remaining: 0:18:33
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 28 / 100
+Epoch 28 finished at 0:07:15.96 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00914 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.52 | Valid time: 0:00:02.18 | Valid loss: 0.01033 | Avg PSNR: 21.64 dB
+Estimated time remaining: 0:18:14
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 29 / 100
+Epoch 29 finished at 0:07:29.95 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00935 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.21 | Valid loss: 0.01035 | Avg PSNR: 21.53 dB
+Estimated time remaining: 0:17:55
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 30 / 100
+Epoch 30 finished at 0:07:43.95 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00932 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.19 | Valid loss: 0.01005 | Avg PSNR: 21.64 dB
+Estimated time remaining: 0:17:36
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 31 / 100
+Epoch 31 finished at 0:07:57.93 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00929 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.17 | Valid loss: 0.01025 | Avg PSNR: 21.36 dB
+Estimated time remaining: 0:17:18
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 32 / 100
+Epoch 32 finished at 0:08:11.99 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00910 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.13 | Valid loss: 0.00956 | Avg PSNR: 21.48 dB
+Estimated time remaining: 0:17:00
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 33 / 100
+Epoch 33 finished at 0:08:26.02 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00928 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.16 | Valid loss: 0.01022 | Avg PSNR: 21.62 dB
+Estimated time remaining: 0:16:43
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 34 / 100
+Epoch 34 finished at 0:08:40.10 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00902 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.58 | Valid time: 0:00:02.15 | Valid loss: 0.01006 | Avg PSNR: 21.37 dB
+Estimated time remaining: 0:16:25
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 35 / 100
+Epoch 35 finished at 0:08:54.15 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00931 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.14 | Valid loss: 0.00989 | Avg PSNR: 21.72 dB
+Estimated time remaining: 0:16:08
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 36 / 100
+Epoch 36 finished at 0:09:08.19 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00898 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.15 | Valid loss: 0.00987 | Avg PSNR: 21.69 dB
+Estimated time remaining: 0:15:51
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 37 / 100
+Epoch 37 finished at 0:09:22.19 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00914 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.57 | Valid time: 0:00:02.16 | Valid loss: 0.00945 | Avg PSNR: 21.76 dB
+Estimated time remaining: 0:15:35
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 38 / 100
+Epoch 38 finished at 0:09:36.23 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00886 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.60 | Valid time: 0:00:02.13 | Valid loss: 0.01523 | Avg PSNR: 19.32 dB
+Estimated time remaining: 0:15:18
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 39 / 100
+Epoch 39 finished at 0:09:50.26 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00925 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.59 | Valid time: 0:00:02.16 | Valid loss: 0.00973 | Avg PSNR: 21.78 dB
+Estimated time remaining: 0:15:01
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 40 / 100
+Epoch 40 finished at 0:10:04.22 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00919 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.53 | Valid time: 0:00:02.20 | Valid loss: 0.00934 | Avg PSNR: 21.86 dB
+Estimated time remaining: 0:14:45
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 41 / 100
+Epoch 41 finished at 0:10:18.20 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00889 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.15 | Valid loss: 0.00958 | Avg PSNR: 21.76 dB
+Estimated time remaining: 0:14:29
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 42 / 100
+Epoch 42 finished at 0:10:32.13 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00900 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.52 | Valid time: 0:00:02.15 | Valid loss: 0.00949 | Avg PSNR: 21.88 dB
+Estimated time remaining: 0:14:13
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 43 / 100
+Epoch 43 finished at 0:10:46.18 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00909 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.63 | Valid time: 0:00:02.18 | Valid loss: 0.00958 | Avg PSNR: 21.75 dB
+Estimated time remaining: 0:13:57
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 44 / 100
+Epoch 44 finished at 0:11:00.25 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00889 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.17 | Valid loss: 0.00929 | Avg PSNR: 21.70 dB
+Estimated time remaining: 0:13:41
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 45 / 100
+Epoch 45 finished at 0:11:14.36 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00973 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.14 | Valid loss: 0.00984 | Avg PSNR: 21.41 dB
+Estimated time remaining: 0:13:25
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 46 / 100
+Epoch 46 finished at 0:11:28.40 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00910 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.63 | Valid time: 0:00:02.17 | Valid loss: 0.00942 | Avg PSNR: 21.84 dB
+Estimated time remaining: 0:13:09
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 47 / 100
+Epoch 47 finished at 0:11:42.46 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00919 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.19 | Valid loss: 0.01002 | Avg PSNR: 21.50 dB
+Estimated time remaining: 0:12:54
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 48 / 100
+Epoch 48 finished at 0:11:56.52 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00890 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.15 | Valid loss: 0.00930 | Avg PSNR: 21.84 dB
+Estimated time remaining: 0:12:38
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 49 / 100
+Epoch 49 finished at 0:12:10.46 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00907 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.16 | Valid loss: 0.01101 | Avg PSNR: 21.33 dB
+Estimated time remaining: 0:12:23
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 50 / 100
+Epoch 50 finished at 0:12:24.55 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00912 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.08 | Valid loss: 0.00967 | Avg PSNR: 21.75 dB
+Estimated time remaining: 0:12:07
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 51 / 100
+Epoch 51 finished at 0:12:38.51 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00885 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.18 | Valid loss: 0.00978 | Avg PSNR: 21.56 dB
+Estimated time remaining: 0:11:52
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 52 / 100
+Epoch 52 finished at 0:12:52.56 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00928 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.59 | Valid time: 0:00:02.14 | Valid loss: 0.01025 | Avg PSNR: 21.61 dB
+Estimated time remaining: 0:11:37
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 53 / 100
+Epoch 53 finished at 0:13:06.56 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00894 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.59 | Valid time: 0:00:02.13 | Valid loss: 0.00963 | Avg PSNR: 21.65 dB
+Estimated time remaining: 0:11:22
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 54 / 100
+Epoch 54 finished at 0:13:20.53 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00894 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.57 | Valid time: 0:00:02.14 | Valid loss: 0.00965 | Avg PSNR: 21.75 dB
+Estimated time remaining: 0:11:06
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 55 / 100
+Epoch 55 finished at 0:13:34.46 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00936 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.17 | Valid loss: 0.00954 | Avg PSNR: 21.74 dB
+Estimated time remaining: 0:10:51
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 56 / 100
+Epoch 56 finished at 0:13:48.50 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00914 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.15 | Valid loss: 0.00951 | Avg PSNR: 21.97 dB
+Estimated time remaining: 0:10:36
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 57 / 100
+Epoch 57 finished at 0:14:02.44 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00887 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.15 | Valid loss: 0.00966 | Avg PSNR: 21.64 dB
+Estimated time remaining: 0:10:21
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 58 / 100
+Epoch 58 finished at 0:14:16.47 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00863 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.14 | Valid loss: 0.00972 | Avg PSNR: 21.81 dB
+Estimated time remaining: 0:10:06
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 59 / 100
+Epoch 59 finished at 0:14:30.49 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00903 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.60 | Valid time: 0:00:02.15 | Valid loss: 0.00959 | Avg PSNR: 21.78 dB
+Estimated time remaining: 0:09:51
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 60 / 100
+Epoch 60 finished at 0:14:44.54 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00853 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.63 | Valid time: 0:00:02.14 | Valid loss: 0.01023 | Avg PSNR: 21.76 dB
+Estimated time remaining: 0:09:36
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 61 / 100
+Epoch 61 finished at 0:14:58.62 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00889 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.14 | Valid loss: 0.01013 | Avg PSNR: 21.09 dB
+Estimated time remaining: 0:09:21
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 62 / 100
+Epoch 62 finished at 0:15:12.64 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00870 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.13 | Valid loss: 0.00973 | Avg PSNR: 21.95 dB
+Estimated time remaining: 0:09:07
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 63 / 100
+Epoch 63 finished at 0:15:26.65 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00887 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.15 | Valid loss: 0.00959 | Avg PSNR: 21.63 dB
+Estimated time remaining: 0:08:52
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 64 / 100
+Epoch 64 finished at 0:15:40.67 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00871 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.60 | Valid time: 0:00:02.13 | Valid loss: 0.00948 | Avg PSNR: 21.88 dB
+Estimated time remaining: 0:08:37
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 65 / 100
+Epoch 65 finished at 0:15:54.67 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00848 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.60 | Valid time: 0:00:02.17 | Valid loss: 0.00940 | Avg PSNR: 21.84 dB
+Estimated time remaining: 0:08:22
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 66 / 100
+Epoch 66 finished at 0:16:08.72 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00847 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.60 | Valid time: 0:00:02.12 | Valid loss: 0.01045 | Avg PSNR: 21.40 dB
+Estimated time remaining: 0:08:08
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 67 / 100
+Epoch 67 finished at 0:16:22.79 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00876 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.17 | Valid loss: 0.00993 | Avg PSNR: 21.68 dB
+Estimated time remaining: 0:07:53
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 68 / 100
+Epoch 68 finished at 0:16:36.84 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00873 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.12 | Valid loss: 0.00971 | Avg PSNR: 21.75 dB
+Estimated time remaining: 0:07:38
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 69 / 100
+Epoch 69 finished at 0:16:51.22 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00857 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.99 | Valid time: 0:00:03.10 | Valid loss: 0.00965 | Avg PSNR: 21.68 dB
+Estimated time remaining: 0:07:24
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 70 / 100
+Epoch 70 finished at 0:17:09.55 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00837 | Avg train time / batch: 24 ms
+Testing model on validation set...                                                                                 Train time: 0:00:14.94 | Valid time: 0:00:04.08 | Valid loss: 0.00937 | Avg PSNR: 21.87 dB
+Estimated time remaining: 0:07:12
+Epoch 00070: reducing learning rate of group 0 to 5.0000e-04.
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 71 / 100
+Epoch 71 finished at 0:17:28.41 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00795 | Avg train time / batch: 25 ms
+Testing model on validation set...                                                                                 Train time: 0:00:14.49 | Valid time: 0:00:02.16 | Valid loss: 0.00902 | Avg PSNR: 22.13 dB
+Estimated time remaining: 0:06:59
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 72 / 100
+Epoch 72 finished at 0:17:42.49 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00788 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.55 | Valid time: 0:00:02.13 | Valid loss: 0.00891 | Avg PSNR: 22.09 dB
+Estimated time remaining: 0:06:44
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 73 / 100
+Epoch 73 finished at 0:17:56.46 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00791 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.56 | Valid time: 0:00:02.11 | Valid loss: 0.00957 | Avg PSNR: 21.68 dB
+Estimated time remaining: 0:06:29
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 74 / 100
+Epoch 74 finished at 0:18:10.35 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00796 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.16 | Valid loss: 0.00902 | Avg PSNR: 22.29 dB
+Estimated time remaining: 0:06:14
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 75 / 100
+Epoch 75 finished at 0:18:24.40 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00786 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.16 | Valid loss: 0.00906 | Avg PSNR: 22.16 dB
+Estimated time remaining: 0:06:00
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 76 / 100
+Epoch 76 finished at 0:18:38.41 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00789 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.58 | Valid time: 0:00:02.16 | Valid loss: 0.00924 | Avg PSNR: 22.27 dB
+Estimated time remaining: 0:05:45
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 77 / 100
+Epoch 77 finished at 0:18:52.35 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00769 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.17 | Valid loss: 0.00887 | Avg PSNR: 22.23 dB
+Estimated time remaining: 0:05:31
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 78 / 100
+Epoch 78 finished at 0:19:06.39 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00763 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.52 | Valid time: 0:00:02.19 | Valid loss: 0.00902 | Avg PSNR: 21.97 dB
+Estimated time remaining: 0:05:16
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 79 / 100
+Epoch 79 finished at 0:19:20.38 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00778 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.18 | Valid loss: 0.00882 | Avg PSNR: 22.35 dB
+Estimated time remaining: 0:05:01
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 80 / 100
+Epoch 80 finished at 0:19:34.34 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00753 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.17 | Valid loss: 0.00898 | Avg PSNR: 22.24 dB
+Estimated time remaining: 0:04:47
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 81 / 100
+Epoch 81 finished at 0:19:48.29 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00753 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.14 | Valid loss: 0.00953 | Avg PSNR: 22.01 dB
+Estimated time remaining: 0:04:32
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 82 / 100
+Epoch 82 finished at 0:20:02.23 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00765 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.52 | Valid time: 0:00:02.13 | Valid loss: 0.00890 | Avg PSNR: 22.19 dB
+Estimated time remaining: 0:04:18
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 83 / 100
+Epoch 83 finished at 0:20:16.21 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00771 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.13 | Valid loss: 0.00950 | Avg PSNR: 21.95 dB
+Estimated time remaining: 0:04:03
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 84 / 100
+Epoch 84 finished at 0:20:30.11 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00776 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.17 | Valid loss: 0.00983 | Avg PSNR: 21.90 dB
+Estimated time remaining: 0:03:49
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 85 / 100
+Epoch 85 finished at 0:20:44.06 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00762 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.17 | Valid loss: 0.00915 | Avg PSNR: 22.26 dB
+Estimated time remaining: 0:03:34
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 86 / 100
+Epoch 86 finished at 0:20:58.01 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00736 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.16 | Valid loss: 0.00928 | Avg PSNR: 22.03 dB
+Estimated time remaining: 0:03:20
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 87 / 100
+Epoch 87 finished at 0:21:11.96 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00785 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.18 | Valid loss: 0.00938 | Avg PSNR: 22.12 dB
+Estimated time remaining: 0:03:06
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 88 / 100
+Epoch 88 finished at 0:21:26.03 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00755 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.19 | Valid loss: 0.00901 | Avg PSNR: 22.17 dB
+Estimated time remaining: 0:02:51
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 89 / 100
+Epoch 89 finished at 0:21:40.19 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00746 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.13 | Valid loss: 0.00888 | Avg PSNR: 22.10 dB
+Estimated time remaining: 0:02:37
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 90 / 100
+Epoch 90 finished at 0:21:54.21 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00753 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.17 | Valid loss: 0.00896 | Avg PSNR: 22.04 dB
+Estimated time remaining: 0:02:22
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 91 / 100
+Epoch 91 finished at 0:22:08.28 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00755 | Avg train time / batch: 31 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.13 | Valid loss: 0.00904 | Avg PSNR: 22.02 dB
+Estimated time remaining: 0:02:08
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 92 / 100
+Epoch 92 finished at 0:22:22.31 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00753 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.16 | Valid loss: 0.00915 | Avg PSNR: 22.07 dB
+Estimated time remaining: 0:01:54
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 93 / 100
+Epoch 93 finished at 0:22:36.27 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00761 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.53 | Valid time: 0:00:02.13 | Valid loss: 0.00885 | Avg PSNR: 22.22 dB
+Estimated time remaining: 0:01:39
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 94 / 100
+Epoch 94 finished at 0:22:50.25 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00758 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.17 | Valid loss: 0.00934 | Avg PSNR: 22.07 dB
+Estimated time remaining: 0:01:25
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 95 / 100
+Epoch 95 finished at 0:23:04.24 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00769 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.55 | Valid time: 0:00:02.16 | Valid loss: 0.00942 | Avg PSNR: 22.06 dB
+Estimated time remaining: 0:01:11
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 96 / 100
+Epoch 96 finished at 0:23:18.28 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00753 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.61 | Valid time: 0:00:02.18 | Valid loss: 0.00911 | Avg PSNR: 22.04 dB
+Estimated time remaining: 0:00:57
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 97 / 100
+Epoch 97 finished at 0:23:32.35 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00749 | Avg train time / batch: 30 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.62 | Valid time: 0:00:02.18 | Valid loss: 0.00892 | Avg PSNR: 22.20 dB
+Estimated time remaining: 0:00:42
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 98 / 100
+Epoch 98 finished at 0:23:46.32 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00744 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.52 | Valid time: 0:00:02.22 | Valid loss: 0.00882 | Avg PSNR: 22.20 dB
+Estimated time remaining: 0:00:28
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 99 / 100
+Epoch 99 finished at 0:24:00.32 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00746 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.51 | Valid time: 0:00:02.20 | Valid loss: 0.00941 | Avg PSNR: 22.09 dB
+Estimated time remaining: 0:00:14
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+EPOCH 100 / 100
+Epoch 100 finished at 0:24:14.39 from n2n start.
+                                                                                Batch 264 / 264 | Avg loss: 0.00742 | Avg train time / batch: 29 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.54 | Valid time: 0:00:02.20 | Valid loss: 0.00891 | Avg PSNR: 22.09 dB
+Estimated time remaining: 
+Saving checkpoint to: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+Training done! Total elapsed time: 0:24:11.483
+Average training time per epoch:   0:00:14.240
+
+
+Date:  Thu Jun 30 14:38:44 CDT 2022
+
+N2N start time:     14:38:46.90
+n2n initialized in   0:00:02.22 from n2n start
+Loading checkpoint from: ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+
+Testing/Eval parameters: 
+  Test dir = hs20mg_data/test
+  Target dir = hs20mg_data/test/targets
+  Output = results
+  Load ckpt = ckpts/hs20mg-imgrec-raw/n2n-raw.pt
+  Show output = 0
+  Montage only = True
+  Cuda = True
+  Noise type = raw
+  Noise param = 0.35
+  Seed = None
+  Crop size = 0
+  Channels = 3
+  Paired targets = True
+  Redux = 0
+  Clean targets = True
+
+Saving images and montages to: results/denoised-hs20mg-imgrec-raw-195617
+
+Batch job runtime was 0h:25m:2s.
+ 

@@ -1,0 +1,43 @@
+
+Date:  Wed Jul  6 11:17:52 CDT 2022
+
+Begin batch job... 
+     File Name:       slurm_script 
+     Job Name:        xyz-hs20mg-test 
+     Job ID:          195913 
+     Output file:     xyz-hs20mg-test-195913.out 
+     Partition:       gtx 
+     Nodes:           1 
+     Ntasks per node: 16 
+     Dataset:         B&W, HS20MG holes & pillars (XYZ files) (60 original imgs), 960/240/7 (train/val/test)
+
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+Using python executable at: /work/08261/evanat/maverick2/miniconda3/envs/imgrec/bin/python
+
+N2N start time:     11:18:02.80
+n2n initialized in   0:00:03.44 from n2n start
+Loading checkpoint from: ckpts/xyz-hs20mg-raw-retrain-195852/xyz-hs20mg-raw-retrain-195852.pt
+
+Testing/Eval parameters: 
+  Test dir = hs20mg_xyz_data/test
+  Target dir = hs20mg_xyz_data/test/targets
+  Output = results
+  Load ckpt = ckpts/xyz-hs20mg-raw-retrain-195852/xyz-hs20mg-raw-retrain-195852.pt
+  Show output = 0
+  Montage only = True
+  Cuda = True
+  Noise type = raw
+  Noise param = 0.35
+  Seed = None
+  Crop size = 0
+  Channels = 1
+  Paired targets = False
+  Redux = 0
+  Clean targets = True
+
+Saving images and montages to: results/denoised-xyz-hs20mg-test-raw-195913
+
+Batch job runtime was 0h:0m:29s.
+ 

@@ -104,7 +104,7 @@ class Noise2Noise(object):
                 else:
                     ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)  # ex: hs20mg-bernoulli-retrain-193174
             else:
-                ckpt_dir_name = f'{self.job_name.replace("-imgrec", "")}-{self.p.noise_param}{self.p.loss}'  # ex: hs20mg-bernoulli
+                ckpt_dir_name = f'{self.job_name.replace("-imgrec", "")}{self.p.noise_param}{self.p.loss}'  # ex: hs20mg-bernoulli0.4l1
             self.ckpt_dir = os.path.normpath(os.path.join(self.p.ckpt_save_path, ckpt_dir_name))
 
             if not os.path.isdir(self.p.ckpt_save_path):
@@ -186,7 +186,9 @@ class Noise2Noise(object):
         clean_imgs = []
 
         # Create directory for denoised images
-        save_path = os.path.normpath(os.path.join(self.p.output, f'denoised-{self.job_name}-{self.job_id}'))  # ex: 'results/denoised-01-n2npt-train-bernoulli-193174/'
+        if not os.path.isdir(self.p.output):
+            os.mkdir(self.p.output)
+        save_path = os.path.normpath(os.path.join(self.p.output, f'{self.job_name.replace("imgrec", "denoised")}{self.p.noise_param}-{self.job_id}'))  # ex: 'results/hs20mg-bernoulli0.4l2-193174/'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 

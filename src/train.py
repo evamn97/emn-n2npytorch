@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     print(f'Python start time:  {python_start.strftime("%H:%M:%S.%f")[:-4]} {local_tz}')
     if params.show_progress:
-        params.verbose = True  # so --show-progress can be used instead of --verbose
+        params.verbose = True  # so '--show-progress' can be used instead of '--verbose'
 
     # Train/valid datasets
     train_loader = load_dataset(params.train_dir, params, shuffled=True)

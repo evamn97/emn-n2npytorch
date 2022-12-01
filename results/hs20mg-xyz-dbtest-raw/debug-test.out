@@ -1,0 +1,45 @@
+
+Date:  Wed Sep 28 09:08:52 CDT 2022
+
+Begin batch job... 
+     File Name:       slurm_script 
+     Job Name:        debug-test 
+     Job ID:          201105 
+     Output file:     debug-test-201105.out 
+     Partition:       gtx 
+     Nodes:           1 
+     Ntasks per node: 16 
+     Dataset:         B&W, HS20MG holes & pillars (XYZ files) (60 original imgs), 960/240/7 (train/val/test)
+
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+Using python executable at: /work/08261/evanat/maverick2/miniconda3/envs/imgrec/bin/python
+
+N2N start time:     09:10:10.22
+n2n initialized in   0:00:08.73 from n2n start
+Loading checkpoint from: ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw.pt
+
+Testing/Eval parameters: 
+  Test dir = xyz_dbtest_data/
+  Target dir = xyz_dbtest_data/targets
+  Redux = 0
+  Output = results
+  Load ckpt = ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw.pt
+  Show output = 0
+  Montage only = True
+  Cuda = True
+  Noise type = raw
+  Noise param = 0.1
+  Seed = None
+  Crop size = 0
+  Channels = 1
+  Paired targets = True
+  Clean targets = True
+
+/work/08261/evanat/maverick2/n2n-pytorch/src/utils.py:100: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+  fig, ax = plt.subplots(1, 3, figsize=(29, 10), dpi=200)
+Saving images and montages to: results/denoised-debug-test-raw-201105
+
+Batch job runtime was 0h:3m:8s.
+ 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # --------------------------------------------------------------------------------------------------
-# Last revised: 30 June 2022
+# Last revised: 27 November 2022
 # eva_mn
 # --------------------------------------------------------------------------------------------------
 
@@ -22,25 +22,44 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-train_dir="hs20mg_xyz_data/train"
-valid_dir="hs20mg_xyz_data/valid"
-target_dir="hs20mg_xyz_data/targets"
-test_dir="hs20mg_xyz_data/test"
-test_target_dir="hs20mg_xyz_data/test/targets"
-data_info="B&W, HS20MG holes & pillars (XYZ Files) (60 original imgs), 960/240/7 (train/val/test)\n"
+train_dir="hs20mg_xyz_planeleveled_data/train"
+valid_dir="hs20mg_xyz_planeleveled_data/valid"
+target_dir="hs20mg_xyz_planeleveled_data/targets"
+test_dir="hs20mg_xyz_planeleveled_data/test/targets"
+test_target_dir="hs20mg_xyz_planeleveled_data/test/targets"
+data_info="HS20MG holes & pillars (planeleveled), 960/240/7 (train/val/test)\n"
 channels=1
 
 redux=0
-train_noise="raw"
+noise="raw"
 train_param=0.4
-ckpt_save="ckpts"
+ckpt_save="ckpts/xyz-hs20mg-${noise}"
 report=240
 epochs=100
-loss_fun='l1'
+loss_fun='l2'
 
-test_noise=${train_noise}
-test_param=0.35
-results="results"
+test_param=0.4
+
+# --------------------------------------------------------------------------------------------------
+ckpt_spec="${train_param}${loss_fun}"
+
+# get ckpt name (set substring to remove from jobname if necessary)
+sub="-imgrec"
+# because idev jobs don't follow the rules for some reason
+idev="idv"
+if [[ $jobname == *"$idev"* ]]  
+then
+    ckpt_string="${filename%$sub}-${noise}"
+    echo "This is an idev job, using filename in place of jobname to find checkpoint:"
+else
+    ckpt_string="${jobname%$sub}-${noise}"
+    echo "Using jobname to find checkpoint:"
+fi
+
+ckpt="ckpts/${ckpt_string}/${ckpt_string}-${ckpt_spec}/${ckpt_string}-${ckpt_spec}.pt"
+echo -e "${ckpt}\n"
+
+results="results/${ckpt_string}"
 
 # --------------------------------------------------------------------------------------------------
 
@@ -78,23 +97,6 @@ else
 fi
 
 
-# get ckpt name (set substring to remove from jobname if necessary)
-sub="-imgrec"
-# because idev jobs don't follow the rules for some reason
-idev="idv"
-if [[ $jobname == *"$idev"* ]]  
-then
-    ckpt_string="${filename%$sub}-${train_noise}"
-    echo "This is an idev job, using filename in place of jobname to find checkpoint:"
-else
-    ckpt_string="${jobname%$sub}-${train_noise}"
-    echo "Using jobname to find checkpoint:"
-fi
-
-ckpt="ckpts/${ckpt_string}/${ckpt_string}.pt"
-echo -e "${ckpt}\n"
-
-
 echo -e "Using python executable at: $(which python)\n\n"
 
 
@@ -104,7 +106,7 @@ python src/train.py \
     -v ${valid_dir} \
     --target-dir ${target_dir} \
     -r ${redux} \
-    -n ${train_noise} \
+    -n ${noise} \
     -p ${train_param} \
     --ckpt-save-path ${ckpt_save} \
     --ckpt-overwrite \
@@ -114,14 +116,14 @@ python src/train.py \
     -l ${loss_fun} \
     --cuda \
     --paired-targets \
-    --verbose \
-    --load-ckpt "${ckpt}"
+    --verbose
+    # --load-ckpt "${ckpt}"
 
 
 exit_code="$?"
 echo -e "Training ended with exit code: ${exit_code}"
 
-
+# Launch testing code if training was successful
 if [[ $exit_code == 0 ]]
 then
     echo -e "\n----------------------------------------------------------------------------------------------\n"
@@ -131,14 +133,14 @@ then
     python src/test.py \
         -t ${test_dir} \
         --target-dir ${test_target_dir} \
-        -n ${test_noise} \
+        -n ${noise} \
         -p ${test_param} \
         --output ${results} \
         --load-ckpt "${ckpt}" \
         --ch ${channels} \
         --cuda \
-        --paired-targets \
-        # --montage-only
+        --montage-only \
+        --paired-targets
 fi
 
 

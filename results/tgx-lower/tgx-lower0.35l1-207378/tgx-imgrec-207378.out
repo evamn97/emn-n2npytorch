@@ -1,0 +1,788 @@
+Using jobname to find checkpoint:
+ckpts/tgx-lower/tgx-lower-0.4l1/tgx-lower-0.4l1.pt
+
+
+Date:  Sun Nov 27 22:20:38 CST 2022
+
+Begin batch job... 
+     File Name:       slurm_script 
+     Job Name:        tgx-imgrec 
+     Job ID:          207378 
+     Output file:     tgx-imgrec-207378.out 
+     Partition:       v100 
+     Nodes:           1 
+     Ntasks per node: 48 
+     Dataset:         TGX square pillars (22 imgs), 480/120/6 (train/val/test)
+
+
+Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
+
+Using python executable at: /work/08261/evanat/maverick2/miniconda3/envs/imgrec/bin/python
+
+
+Python start time:  22:21:45.81 CST
+N2N start time:     22:21:45.83
+n2n initialized in   0:00:08.30 from n2n start
+training begin:      0:00:08.32 from python start
+Training parameters: 
+  Train dir = tgx_data/train
+  Valid dir = tgx_data/valid
+  Target dir = tgx_data/targets
+  Redux = 0
+  Load ckpt = None
+  Ckpt save path = ckpts/tgx-lower
+  Ckpt overwrite = True
+  Report interval = 120
+  Learning rate = 0.001
+  Adam = [0.9, 0.99, 1e-08]
+  Channels = 3
+  Batch size = 4
+  Nb epochs = 100
+  Loss = l1
+  Cuda = True
+  Verbose = True
+  Show progress = False
+  Noise type = lower
+  Noise param = 0.4
+  Seed = None
+  Crop size = 0
+  Clean targets = True
+  Paired targets = False
+
+EPOCH 1 / 100
+Epoch 1 finished at 0:00:19.96 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.08118 | Avg train time / batch: 38 ms
+Testing model on validation set...                                                                                 Train time: 0:00:11.66 | Valid time: 0:00:01.99 | Valid loss: 0.02114 | Avg PSNR: 28.93 dB
+Estimated time remaining: 0:22:31
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 2 / 100
+Epoch 2 finished at 0:00:25.08 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.02044 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.41 | Valid loss: 0.01525 | Avg PSNR: 31.36 dB
+Estimated time remaining: 0:13:20
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 3 / 100
+Epoch 3 finished at 0:00:27.99 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01639 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.27 | Valid time: 0:00:00.41 | Valid loss: 0.01597 | Avg PSNR: 32.15 dB
+Estimated time remaining: 0:10:14
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 4 / 100
+Epoch 4 finished at 0:00:30.96 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01607 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.32 | Valid time: 0:00:00.41 | Valid loss: 0.01354 | Avg PSNR: 33.08 dB
+Estimated time remaining: 0:08:42
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 5 / 100
+Epoch 5 finished at 0:00:33.90 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01418 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.42 | Valid loss: 0.01775 | Avg PSNR: 32.11 dB
+Estimated time remaining: 0:07:45
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 6 / 100
+Epoch 6 finished at 0:00:36.90 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01442 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.34 | Valid time: 0:00:00.42 | Valid loss: 0.01232 | Avg PSNR: 33.83 dB
+Estimated time remaining: 0:07:06
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 7 / 100
+Epoch 7 finished at 0:00:39.96 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01492 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.32 | Valid time: 0:00:00.40 | Valid loss: 0.01502 | Avg PSNR: 33.01 dB
+Estimated time remaining: 0:06:38
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 8 / 100
+Epoch 8 finished at 0:00:42.91 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01396 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.41 | Valid loss: 0.01254 | Avg PSNR: 33.93 dB
+Estimated time remaining: 0:06:15
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 9 / 100
+Epoch 9 finished at 0:00:45.90 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01351 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.33 | Valid time: 0:00:00.41 | Valid loss: 0.01149 | Avg PSNR: 34.24 dB
+Estimated time remaining: 0:05:58
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 10 / 100
+Epoch 10 finished at 0:00:48.91 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01253 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.34 | Valid time: 0:00:00.42 | Valid loss: 0.01144 | Avg PSNR: 34.25 dB
+Estimated time remaining: 0:05:43
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 11 / 100
+Epoch 11 finished at 0:00:51.89 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01340 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.42 | Valid loss: 0.01519 | Avg PSNR: 33.20 dB
+Estimated time remaining: 0:05:31
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 12 / 100
+Epoch 12 finished at 0:00:54.92 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01300 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.31 | Valid time: 0:00:00.40 | Valid loss: 0.01149 | Avg PSNR: 34.32 dB
+Estimated time remaining: 0:05:20
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 13 / 100
+Epoch 13 finished at 0:00:57.90 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01337 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.32 | Valid time: 0:00:00.42 | Valid loss: 0.01202 | Avg PSNR: 34.13 dB
+Estimated time remaining: 0:05:10
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 14 / 100
+Epoch 14 finished at 0:01:00.89 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01217 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.32 | Valid time: 0:00:00.41 | Valid loss: 0.01287 | Avg PSNR: 34.10 dB
+Estimated time remaining: 0:05:01
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 15 / 100
+Epoch 15 finished at 0:01:03.79 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01316 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.41 | Valid loss: 0.01246 | Avg PSNR: 34.12 dB
+Estimated time remaining: 0:04:53
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 16 / 100
+Epoch 16 finished at 0:01:06.68 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01152 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.23 | Valid time: 0:00:00.39 | Valid loss: 0.01200 | Avg PSNR: 34.32 dB
+Estimated time remaining: 0:04:45
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 17 / 100
+Epoch 17 finished at 0:01:09.58 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01217 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.39 | Valid loss: 0.01678 | Avg PSNR: 32.88 dB
+Estimated time remaining: 0:04:38
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 18 / 100
+Epoch 18 finished at 0:01:12.52 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01199 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.23 | Valid time: 0:00:00.40 | Valid loss: 0.01183 | Avg PSNR: 34.54 dB
+Estimated time remaining: 0:04:32
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 19 / 100
+Epoch 19 finished at 0:01:15.44 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01221 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.41 | Valid loss: 0.01314 | Avg PSNR: 33.81 dB
+Estimated time remaining: 0:04:26
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 20 / 100
+Epoch 20 finished at 0:01:18.36 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01182 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.39 | Valid loss: 0.01411 | Avg PSNR: 33.85 dB
+Estimated time remaining: 0:04:20
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 21 / 100
+Epoch 21 finished at 0:01:21.26 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01152 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.41 | Valid loss: 0.01073 | Avg PSNR: 34.85 dB
+Estimated time remaining: 0:04:15
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 22 / 100
+Epoch 22 finished at 0:01:24.17 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01148 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.24 | Valid time: 0:00:00.40 | Valid loss: 0.01602 | Avg PSNR: 33.12 dB
+Estimated time remaining: 0:04:09
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 23 / 100
+Epoch 23 finished at 0:01:27.04 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01215 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.22 | Valid time: 0:00:00.39 | Valid loss: 0.01346 | Avg PSNR: 33.88 dB
+Estimated time remaining: 0:04:04
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 24 / 100
+Epoch 24 finished at 0:01:29.99 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01150 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.39 | Valid loss: 0.01063 | Avg PSNR: 34.87 dB
+Estimated time remaining: 0:03:59
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 25 / 100
+Epoch 25 finished at 0:01:32.87 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01123 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.23 | Valid time: 0:00:00.39 | Valid loss: 0.01027 | Avg PSNR: 34.99 dB
+Estimated time remaining: 0:03:55
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 26 / 100
+Epoch 26 finished at 0:01:35.74 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01135 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.22 | Valid time: 0:00:00.39 | Valid loss: 0.01064 | Avg PSNR: 34.89 dB
+Estimated time remaining: 0:03:50
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 27 / 100
+Epoch 27 finished at 0:01:38.63 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01092 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.24 | Valid time: 0:00:00.39 | Valid loss: 0.01070 | Avg PSNR: 34.88 dB
+Estimated time remaining: 0:03:46
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 28 / 100
+Epoch 28 finished at 0:01:41.50 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01055 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.21 | Valid time: 0:00:00.39 | Valid loss: 0.01072 | Avg PSNR: 34.87 dB
+Estimated time remaining: 0:03:41
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 29 / 100
+Epoch 29 finished at 0:01:44.41 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01158 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.21 | Valid time: 0:00:00.39 | Valid loss: 0.01047 | Avg PSNR: 34.86 dB
+Estimated time remaining: 0:03:37
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 30 / 100
+Epoch 30 finished at 0:01:47.28 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01123 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.23 | Valid time: 0:00:00.41 | Valid loss: 0.01396 | Avg PSNR: 33.89 dB
+Estimated time remaining: 0:03:33
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 31 / 100
+Epoch 31 finished at 0:01:50.17 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01045 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.22 | Valid time: 0:00:00.40 | Valid loss: 0.00995 | Avg PSNR: 35.04 dB
+Estimated time remaining: 0:03:29
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 32 / 100
+Epoch 32 finished at 0:01:53.03 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01053 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.21 | Valid time: 0:00:00.40 | Valid loss: 0.01427 | Avg PSNR: 33.69 dB
+Estimated time remaining: 0:03:25
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 33 / 100
+Epoch 33 finished at 0:01:55.90 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01099 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.21 | Valid time: 0:00:00.39 | Valid loss: 0.01341 | Avg PSNR: 33.99 dB
+Estimated time remaining: 0:03:21
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 34 / 100
+Epoch 34 finished at 0:01:58.80 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01004 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.41 | Valid loss: 0.01016 | Avg PSNR: 34.99 dB
+Estimated time remaining: 0:03:17
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 35 / 100
+Epoch 35 finished at 0:02:01.78 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01039 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.39 | Valid loss: 0.01005 | Avg PSNR: 34.98 dB
+Estimated time remaining: 0:03:14
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 36 / 100
+Epoch 36 finished at 0:02:04.62 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01051 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.18 | Valid time: 0:00:00.39 | Valid loss: 0.00994 | Avg PSNR: 35.01 dB
+Estimated time remaining: 0:03:10
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 37 / 100
+Epoch 37 finished at 0:02:07.47 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01018 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.20 | Valid time: 0:00:00.39 | Valid loss: 0.01565 | Avg PSNR: 33.32 dB
+Estimated time remaining: 0:03:06
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 38 / 100
+Epoch 38 finished at 0:02:10.41 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01030 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.39 | Valid loss: 0.01048 | Avg PSNR: 34.93 dB
+Estimated time remaining: 0:03:03
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 39 / 100
+Epoch 39 finished at 0:02:13.33 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00963 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.27 | Valid time: 0:00:00.40 | Valid loss: 0.01102 | Avg PSNR: 34.81 dB
+Estimated time remaining: 0:03:00
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 40 / 100
+Epoch 40 finished at 0:02:16.29 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01102 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.39 | Valid loss: 0.01101 | Avg PSNR: 34.68 dB
+Estimated time remaining: 0:02:56
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 41 / 100
+Epoch 41 finished at 0:02:19.18 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01019 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.24 | Valid time: 0:00:00.41 | Valid loss: 0.01013 | Avg PSNR: 34.91 dB
+Estimated time remaining: 0:02:53
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 42 / 100
+Epoch 42 finished at 0:02:22.15 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01044 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.30 | Valid time: 0:00:00.39 | Valid loss: 0.01144 | Avg PSNR: 34.67 dB
+Estimated time remaining: 0:02:50
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 43 / 100
+Epoch 43 finished at 0:02:25.05 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01009 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.24 | Valid time: 0:00:00.41 | Valid loss: 0.01175 | Avg PSNR: 34.45 dB
+Estimated time remaining: 0:02:46
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 44 / 100
+Epoch 44 finished at 0:02:27.99 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00986 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.40 | Valid loss: 0.01020 | Avg PSNR: 34.90 dB
+Estimated time remaining: 0:02:43
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 45 / 100
+Epoch 45 finished at 0:02:30.95 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00993 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.30 | Valid time: 0:00:00.40 | Valid loss: 0.01111 | Avg PSNR: 34.63 dB
+Estimated time remaining: 0:02:40
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 46 / 100
+Epoch 46 finished at 0:02:33.98 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00976 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.40 | Valid loss: 0.01494 | Avg PSNR: 33.54 dB
+Estimated time remaining: 0:02:37
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 47 / 100
+Epoch 47 finished at 0:02:36.88 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.01039 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.23 | Valid time: 0:00:00.41 | Valid loss: 0.01086 | Avg PSNR: 34.79 dB
+Estimated time remaining: 0:02:34
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 48 / 100
+Epoch 48 finished at 0:02:39.83 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00948 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.28 | Valid time: 0:00:00.39 | Valid loss: 0.01122 | Avg PSNR: 34.61 dB
+Estimated time remaining: 0:02:30
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 49 / 100
+Epoch 49 finished at 0:02:42.73 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00975 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.24 | Valid time: 0:00:00.38 | Valid loss: 0.01221 | Avg PSNR: 34.25 dB
+Estimated time remaining: 0:02:27
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 50 / 100
+Epoch 50 finished at 0:02:45.63 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00932 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.41 | Valid loss: 0.01012 | Avg PSNR: 34.86 dB
+Estimated time remaining: 0:02:24
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 51 / 100
+Epoch 51 finished at 0:02:48.60 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00952 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.40 | Valid loss: 0.01066 | Avg PSNR: 34.74 dB
+Estimated time remaining: 0:02:21
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 52 / 100
+Epoch 52 finished at 0:02:51.52 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00968 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.40 | Valid loss: 0.01155 | Avg PSNR: 34.45 dB
+Estimated time remaining: 0:02:18
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 53 / 100
+Epoch 53 finished at 0:02:54.48 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00954 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.41 | Valid loss: 0.01016 | Avg PSNR: 34.77 dB
+Estimated time remaining: 0:02:15
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 54 / 100
+Epoch 54 finished at 0:02:57.46 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00961 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.31 | Valid time: 0:00:00.40 | Valid loss: 0.01033 | Avg PSNR: 34.71 dB
+Estimated time remaining: 0:02:12
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 55 / 100
+Epoch 55 finished at 0:03:00.41 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00937 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.28 | Valid time: 0:00:00.42 | Valid loss: 0.01006 | Avg PSNR: 34.81 dB
+Estimated time remaining: 0:02:09
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 56 / 100
+Epoch 56 finished at 0:03:03.41 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00864 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.31 | Valid time: 0:00:00.40 | Valid loss: 0.01116 | Avg PSNR: 34.57 dB
+Estimated time remaining: 0:02:06
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 57 / 100
+Epoch 57 finished at 0:03:06.48 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00995 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.37 | Valid time: 0:00:00.41 | Valid loss: 0.01089 | Avg PSNR: 34.58 dB
+Estimated time remaining: 0:02:03
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 58 / 100
+Epoch 58 finished at 0:03:09.46 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00884 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.30 | Valid time: 0:00:00.43 | Valid loss: 0.01040 | Avg PSNR: 34.78 dB
+Estimated time remaining: 0:02:00
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 59 / 100
+Epoch 59 finished at 0:03:12.44 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00964 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.42 | Valid loss: 0.01303 | Avg PSNR: 33.94 dB
+Estimated time remaining: 0:01:57
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 60 / 100
+Epoch 60 finished at 0:03:15.44 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00894 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.32 | Valid time: 0:00:00.42 | Valid loss: 0.01007 | Avg PSNR: 34.74 dB
+Estimated time remaining: 0:01:54
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 61 / 100
+Epoch 61 finished at 0:03:18.44 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00942 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.32 | Valid time: 0:00:00.40 | Valid loss: 0.01005 | Avg PSNR: 34.75 dB
+Estimated time remaining: 0:01:51
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 62 / 100
+Epoch 62 finished at 0:03:21.46 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00922 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.43 | Valid loss: 0.01079 | Avg PSNR: 34.58 dB
+Estimated time remaining: 0:01:48
+Epoch 00062: reducing learning rate of group 0 to 5.0000e-04.
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 63 / 100
+Epoch 63 finished at 0:03:24.48 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00764 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.33 | Valid time: 0:00:00.43 | Valid loss: 0.00984 | Avg PSNR: 34.85 dB
+Estimated time remaining: 0:01:45
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 64 / 100
+Epoch 64 finished at 0:03:27.45 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00785 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.28 | Valid time: 0:00:00.42 | Valid loss: 0.01028 | Avg PSNR: 34.72 dB
+Estimated time remaining: 0:01:42
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 65 / 100
+Epoch 65 finished at 0:03:30.46 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00739 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.32 | Valid time: 0:00:00.43 | Valid loss: 0.00987 | Avg PSNR: 34.78 dB
+Estimated time remaining: 0:01:39
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 66 / 100
+Epoch 66 finished at 0:03:33.43 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00748 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.28 | Valid time: 0:00:00.42 | Valid loss: 0.00984 | Avg PSNR: 34.84 dB
+Estimated time remaining: 0:01:36
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 67 / 100
+Epoch 67 finished at 0:03:36.38 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00730 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.40 | Valid loss: 0.00990 | Avg PSNR: 34.76 dB
+Estimated time remaining: 0:01:34
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 68 / 100
+Epoch 68 finished at 0:03:39.40 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00758 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.30 | Valid time: 0:00:00.40 | Valid loss: 0.01013 | Avg PSNR: 34.70 dB
+Estimated time remaining: 0:01:31
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 69 / 100
+Epoch 69 finished at 0:03:42.36 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00733 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.30 | Valid time: 0:00:00.43 | Valid loss: 0.01302 | Avg PSNR: 33.99 dB
+Estimated time remaining: 0:01:28
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 70 / 100
+Epoch 70 finished at 0:03:45.36 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00772 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.31 | Valid time: 0:00:00.41 | Valid loss: 0.01008 | Avg PSNR: 34.65 dB
+Estimated time remaining: 0:01:25
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 71 / 100
+Epoch 71 finished at 0:03:48.38 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00740 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.34 | Valid time: 0:00:00.42 | Valid loss: 0.00993 | Avg PSNR: 34.69 dB
+Estimated time remaining: 0:01:22
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 72 / 100
+Epoch 72 finished at 0:03:51.38 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00708 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.31 | Valid time: 0:00:00.41 | Valid loss: 0.00994 | Avg PSNR: 34.65 dB
+Estimated time remaining: 0:01:19
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 73 / 100
+Epoch 73 finished at 0:03:54.46 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00741 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.36 | Valid time: 0:00:00.40 | Valid loss: 0.01029 | Avg PSNR: 34.61 dB
+Estimated time remaining: 0:01:16
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 74 / 100
+Epoch 74 finished at 0:03:57.45 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00748 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.32 | Valid time: 0:00:00.41 | Valid loss: 0.00994 | Avg PSNR: 34.65 dB
+Estimated time remaining: 0:01:13
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 75 / 100
+Epoch 75 finished at 0:04:00.42 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00727 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.30 | Valid time: 0:00:00.42 | Valid loss: 0.01009 | Avg PSNR: 34.56 dB
+Estimated time remaining: 0:01:10
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 76 / 100
+Epoch 76 finished at 0:04:03.40 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00732 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.38 | Valid loss: 0.01002 | Avg PSNR: 34.62 dB
+Estimated time remaining: 0:01:08
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 77 / 100
+Epoch 77 finished at 0:04:06.29 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00711 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.38 | Valid loss: 0.01002 | Avg PSNR: 34.65 dB
+Estimated time remaining: 0:01:05
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 78 / 100
+Epoch 78 finished at 0:04:09.20 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00738 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.27 | Valid time: 0:00:00.41 | Valid loss: 0.01021 | Avg PSNR: 34.60 dB
+Estimated time remaining: 0:01:02
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 79 / 100
+Epoch 79 finished at 0:04:12.18 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00725 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.41 | Valid loss: 0.01077 | Avg PSNR: 34.39 dB
+Estimated time remaining: 0:00:59
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 80 / 100
+Epoch 80 finished at 0:04:15.08 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00727 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.23 | Valid time: 0:00:00.39 | Valid loss: 0.01116 | Avg PSNR: 34.41 dB
+Estimated time remaining: 0:00:56
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 81 / 100
+Epoch 81 finished at 0:04:18.02 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00705 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.28 | Valid time: 0:00:00.40 | Valid loss: 0.00996 | Avg PSNR: 34.61 dB
+Estimated time remaining: 0:00:53
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 82 / 100
+Epoch 82 finished at 0:04:20.94 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00728 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.40 | Valid loss: 0.01019 | Avg PSNR: 34.51 dB
+Estimated time remaining: 0:00:50
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 83 / 100
+Epoch 83 finished at 0:04:23.83 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00701 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.22 | Valid time: 0:00:00.39 | Valid loss: 0.01017 | Avg PSNR: 34.52 dB
+Estimated time remaining: 0:00:47
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 84 / 100
+Epoch 84 finished at 0:04:26.82 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00729 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.28 | Valid time: 0:00:00.39 | Valid loss: 0.01301 | Avg PSNR: 33.79 dB
+Estimated time remaining: 0:00:45
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 85 / 100
+Epoch 85 finished at 0:04:29.72 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00700 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.40 | Valid loss: 0.01001 | Avg PSNR: 34.61 dB
+Estimated time remaining: 0:00:42
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 86 / 100
+Epoch 86 finished at 0:04:32.63 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00713 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.24 | Valid time: 0:00:00.41 | Valid loss: 0.01008 | Avg PSNR: 34.55 dB
+Estimated time remaining: 0:00:39
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 87 / 100
+Epoch 87 finished at 0:04:35.56 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00682 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.41 | Valid loss: 0.01025 | Avg PSNR: 34.49 dB
+Estimated time remaining: 0:00:36
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 88 / 100
+Epoch 88 finished at 0:04:38.57 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00696 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.34 | Valid time: 0:00:00.39 | Valid loss: 0.01022 | Avg PSNR: 34.53 dB
+Estimated time remaining: 0:00:33
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 89 / 100
+Epoch 89 finished at 0:04:41.50 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00702 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.28 | Valid time: 0:00:00.38 | Valid loss: 0.01008 | Avg PSNR: 34.50 dB
+Estimated time remaining: 0:00:30
+Epoch 00089: reducing learning rate of group 0 to 2.5000e-04.
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 90 / 100
+Epoch 90 finished at 0:04:44.39 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00651 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.19 | Valid time: 0:00:00.39 | Valid loss: 0.01016 | Avg PSNR: 34.50 dB
+Estimated time remaining: 0:00:28
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 91 / 100
+Epoch 91 finished at 0:04:47.27 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00638 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.22 | Valid time: 0:00:00.38 | Valid loss: 0.01011 | Avg PSNR: 34.51 dB
+Estimated time remaining: 0:00:25
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 92 / 100
+Epoch 92 finished at 0:04:50.15 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00630 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.23 | Valid time: 0:00:00.41 | Valid loss: 0.01014 | Avg PSNR: 34.45 dB
+Estimated time remaining: 0:00:22
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 93 / 100
+Epoch 93 finished at 0:04:53.04 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00639 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.23 | Valid time: 0:00:00.41 | Valid loss: 0.01009 | Avg PSNR: 34.46 dB
+Estimated time remaining: 0:00:19
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 94 / 100
+Epoch 94 finished at 0:04:55.95 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00628 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.24 | Valid time: 0:00:00.41 | Valid loss: 0.01011 | Avg PSNR: 34.42 dB
+Estimated time remaining: 0:00:16
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 95 / 100
+Epoch 95 finished at 0:04:58.91 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00626 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.40 | Valid loss: 0.01013 | Avg PSNR: 34.44 dB
+Estimated time remaining: 0:00:14
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 96 / 100
+Epoch 96 finished at 0:05:01.83 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00624 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.27 | Valid time: 0:00:00.40 | Valid loss: 0.01016 | Avg PSNR: 34.39 dB
+Estimated time remaining: 0:00:11
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 97 / 100
+Epoch 97 finished at 0:05:04.75 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00625 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.27 | Valid time: 0:00:00.42 | Valid loss: 0.01015 | Avg PSNR: 34.38 dB
+Estimated time remaining: 0:00:08
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 98 / 100
+Epoch 98 finished at 0:05:07.68 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00634 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.25 | Valid time: 0:00:00.40 | Valid loss: 0.01021 | Avg PSNR: 34.36 dB
+Estimated time remaining: 0:00:05
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 99 / 100
+Epoch 99 finished at 0:05:10.62 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00614 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.29 | Valid time: 0:00:00.42 | Valid loss: 0.01012 | Avg PSNR: 34.41 dB
+Estimated time remaining: 0:00:02
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+EPOCH 100 / 100
+Epoch 100 finished at 0:05:13.56 from n2n start.
+                                                                                Batch 120 / 120 | Avg loss: 0.00635 | Avg train time / batch: 12 ms
+Testing model on validation set...                                                                                 Train time: 0:00:02.26 | Valid time: 0:00:00.41 | Valid loss: 0.01016 | Avg PSNR: 34.39 dB
+Estimated time remaining: 
+Saving checkpoint to: ckpts/tgx-lower/tgx-lower0.4l1/tgx-lower0.4l1.pt
+
+Training done! Total elapsed time: 0:05:05.964
+Average training time per epoch:   0:00:02.794
+
+Training ended with exit code: 0
+
+----------------------------------------------------------------------------------------------
+
+
+Date:  Sun Nov 27 22:27:02 CST 2022
+
+N2N start time:     22:27:04.53
+n2n initialized in   0:00:02.18 from n2n start
+Loading checkpoint from: ckpts/tgx-lower/tgx-lower-0.4l1/tgx-lower-0.4l1.pt
+
+Testing/Eval parameters: 
+  Test dir = tgx_data/test
+  Target dir = tgx_data/test/targets
+  Redux = 0
+  Output = results/tgx-lower
+  Load ckpt = ckpts/tgx-lower/tgx-lower-0.4l1/tgx-lower-0.4l1.pt
+  Show output = 0
+  Montage only = True
+  Cuda = True
+  Noise type = lower
+  Noise param = 0.35
+  Seed = None
+  Crop size = 0
+  Channels = 3
+  Paired targets = True
+  Clean targets = True
+
+Saving images and montages to: results/tgx-lower/-207378
+
+Batch job runtime was 0h:6m:35s.
+ 
