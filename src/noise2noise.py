@@ -100,22 +100,26 @@ class Noise2Noise(object):
         if first:
             if self.p.load_ckpt and os.path.isfile(self.p.load_ckpt):  # indicate previous ckpt in ckpt_dir_name
                 if "retrain" in self.p.load_ckpt:
-                    ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-{}{}".format(self.p.noise_param, self.p.loss)
+                    # ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-{}{}".format(self.p.noise_param, self.p.loss)
+                    self.ckpt_dir = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-{}{}".format(self.p.noise_param, self.p.loss)
                 else:
-                    ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)  # ex: hs20mg-bernoulli-retrain-193174
+                    # ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)
+                    self.ckpt_dir = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)  # ex: hs20mg-bernoulli-retrain-0.4l1
             else:
-                ckpt_dir_name = f'{self.job_name.replace("-imgrec", "")}{self.p.noise_param}{self.p.loss}'  # ex: hs20mg-bernoulli0.4l1
-            self.ckpt_dir = os.path.normpath(os.path.join(self.p.ckpt_save_path, ckpt_dir_name))
+                # ckpt_dir_name = f'{self.job_name.replace("-imgrec", "")}{self.p.noise_param}{self.p.loss}'  # ex: hs20mg-bernoulli0.4l1
+                self.ckpt_dir = self.p.ckpt_save_path
+            # self.ckpt_dir = os.path.normpath(os.path.join(self.p.ckpt_save_path, ckpt_dir_name))
 
-            if not os.path.isdir(self.p.ckpt_save_path):
-                os.mkdir(self.p.ckpt_save_path)
+            # if not os.path.isdir(self.p.ckpt_save_path):
+            #     os.mkdir(self.p.ckpt_save_path)
             if not os.path.isdir(self.ckpt_dir):
                 os.mkdir(self.ckpt_dir)
 
         # Save checkpoint dictionary
         if self.p.ckpt_overwrite:
-            fname_unet = '{}/{}.pt'.format(self.ckpt_dir, os.path.basename(self.ckpt_dir))  # changed 7/5/2022
-            # fname_unet = '{}/n2n-{}.pt'.format(self.ckpt_dir, self.p.noise_type)  # ex: 'ckpts/01-n2npt-train-bernoulli/n2n-bernoulli.pt'
+            ckpt_filename = f'{self.job_name.replace("-imgrec", "")}{self.p.noise_param}{self.p.loss}'  # ex: hs20mg-bernoulli0.4l1
+            fname_unet = '{}/{}.pt'.format(self.ckpt_dir, ckpt_filename)  # changed 12/18/2022
+            # fname_unet = '{}/{}.pt'.format(self.ckpt_dir, os.path.basename(self.ckpt_dir))  # changed 7/5/2022
         else:
             valid_loss = stats['valid_loss'][epoch]
             fname_unet = '{}/n2n-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
@@ -216,7 +220,7 @@ class Noise2Noise(object):
         print('Saving images and montages to: {}'.format(save_path))
         if not os.path.isfile(os.path.join(save_path, 'psnr.txt')):
             f = open(os.path.join(save_path, 'psnr.txt'), 'w')  # create a text file to save psnr values to
-            f.write("input\tresult\n")
+            f.write("input,result\n")
             f.close()
         for i in range(len(source_imgs)):
             img_name = test_loader.dataset.imgs[i]

@@ -30,10 +30,11 @@ test_target_dir="hs20mg_data/test/targets"
 data_info="HS20MG holes & pillars, 960/240/7 (train/val/test)\n"
 channels=3
 
+train_ckpt=""    # for loading a specific checkpoint to be retrained
+
 redux=0
 noise="lower"
 train_param=0.4
-ckpt_save="ckpts/hs20mg-${noise}"
 report=264
 epochs=100
 loss_fun='l2'
@@ -56,8 +57,8 @@ else
     echo "Using jobname to find checkpoint:"
 fi
 
-ckpt="ckpts/${ckpt_string}/${ckpt_string}-${ckpt_spec}/${ckpt_string}-${ckpt_spec}.pt"
-echo -e "${ckpt}\n"
+ckpt_save="ckpts/${ckpt_string}/${ckpt_string}${ckpt_spec}"
+new_ckpt="${ckpt_save}/${ckpt_string}${ckpt_spec}.pt"       # this doesn't work if it's a retrained checkpoint
 
 results="results/${ckpt_string}"
 
@@ -108,7 +109,7 @@ python src/train.py \
     -r ${redux} \
     -n ${noise} \
     -p ${train_param} \
-    --ckpt-save-path ${ckpt_save} \
+    --ckpt-save-path "${ckpt_save}" \
     --ckpt-overwrite \
     --report-interval ${report} \
     -ch ${channels} \
@@ -116,8 +117,8 @@ python src/train.py \
     -l ${loss_fun} \
     --cuda \
     --paired-targets \
-    --verbose
-    # --load-ckpt "${ckpt}"
+    --verbose \
+    --load-ckpt "${train_ckpt}"
 
 
 exit_code="$?"
@@ -136,7 +137,7 @@ then
         -n ${noise} \
         -p ${test_param} \
         --output ${results} \
-        --load-ckpt "${ckpt}" \
+        --load-ckpt "${new_ckpt}" \
         --ch ${channels} \
         --cuda \
         --montage-only

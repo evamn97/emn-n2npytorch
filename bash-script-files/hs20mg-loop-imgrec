@@ -28,10 +28,12 @@ test_dir="hs20mg_clean_data/"
 data_info="B&W HS20MG holes & pillars (60 original imgs), 960/240/7 (train/val/test)\n"
 channels=3
 
+train_ckpt=""    # for loading a specific checkpoint
+
 redux=0
 noise="bernoulli"
 train_param=0.4
-ckpt_save="ckpts/hs20mg-${noise}"
+ckpt_parent="ckpts/hs20mg-${noise}"
 report=264
 epochs=100
 loss_fun='l2'
@@ -52,8 +54,8 @@ else
     echo "Using jobname to find checkpoint:"
 fi
 
-ckpt="ckpts/${ckpt_string}/${ckpt_string}-${ckpt_spec}/${ckpt_string}-${ckpt_spec}.pt"
-echo -e "${ckpt}\n"
+ckpt_save="ckpts/${ckpt_string}/${ckpt_string}${ckpt_spec}"
+new_ckpt="${ckpt_save}/${ckpt_string}${ckpt_spec}.pt"       # this doesn't work if it's a retrained checkpoint
 
 results="results/${ckpt_string}"
 
@@ -104,7 +106,7 @@ python src/train.py \
     -r ${redux} \
     -n ${noise} \
     -p ${train_param} \
-    --ckpt-save-path ${ckpt_save} \
+    --ckpt-save-path "${ckpt_save}" \
     --ckpt-overwrite \
     --report-interval ${report} \
     -ch ${channels} \
@@ -113,7 +115,7 @@ python src/train.py \
     --cuda \
     --clean-targets \
     --verbose \
-    # --load-ckpt "${ckpt}"
+    --load-ckpt "${train_ckpt}"
 
 # loop through 0.1-0.9 testing params
 # bash doesn't handle floats, so we use integers but the values are fixed in test.py
@@ -126,7 +128,7 @@ do
         -n ${noise} \
         -p ${test_param} \
         --output ${results} \
-        --load-ckpt "${ckpt}" \
+        --load-ckpt "${new_ckpt}" \
         --ch ${channels} \
         --cuda \
         --montage-only

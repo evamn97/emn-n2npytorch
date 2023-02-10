@@ -49,15 +49,16 @@ if __name__ == '__main__':
         mag = len(str(int(params.noise_param)))
         params.noise_param = params.noise_param / (10 ** mag)
 
-    # debugging only
-    # params.test_dir = '../planelevel_hs20mg_data/test'
-    # params.target_dir = '../hs20mg_xyz_data/test/targets'
-    # params.load_ckpt = '../ckpts/07-n2npt-train-lower/n2n-lower.pt'
+    # # debugging only
+    # params.test_dir = '../tgx_xyz_data/test'
+    # params.target_dir = '../tgx_xyz_data/test/targets'
+    # params.load_ckpt = '../ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/xyz-tgx-raw0.4l2.pt'
     # params.montage_only = True
-    # params.noise_type = 'lower'
-    # params.noise_param = 0.5
+    # params.noise_type = 'raw'
+    # params.noise_param = 0.4
     # params.paired_targets = True
     # params.channels = 1
+    # params.output = '../results'
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)

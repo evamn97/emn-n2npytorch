@@ -25,15 +25,16 @@ set +a    # only need to export job info vars
 train_dir="tgx_xyz_data/train"
 valid_dir="tgx_xyz_data/valid"
 target_dir="tgx_xyz_data/targets"
-test_dir="tgx_xyz_data/test/targets"
+test_dir="tgx_xyz_data/test/"
 test_target_dir="tgx_xyz_data/test/targets"
 data_info="TGX square pillars XYZ data (22 imgs), 480/120/6 (train/val/test)\n"
 channels=1
 
+train_ckpt=""    # for loading a specific checkpoint
+
 redux=0
 noise="raw"
 train_param=0.4
-ckpt_save="ckpts/xyz-tgx-${noise}"
 report=240
 epochs=100
 loss_fun='l2'
@@ -56,8 +57,10 @@ else
     echo "Using jobname to find checkpoint:"
 fi
 
-ckpt="ckpts/${ckpt_string}/${ckpt_string}-${ckpt_spec}/${ckpt_string}-${ckpt_spec}.pt"
-echo -e "${ckpt}\n"
+ckpt_save="ckpts/${ckpt_string}/${ckpt_string}${ckpt_spec}"
+# new_ckpt="${ckpt_save}/${ckpt_string}${ckpt_spec}.pt"       # this doesn't work if it's a retrained checkpoint
+
+new_ckpt="ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/xyz-tgx-raw0.4l2.pt"
 
 results="results/${ckpt_string}"
 
@@ -100,24 +103,24 @@ fi
 echo -e "Using python executable at: $(which python)\n\n"
 
 
-# Launch train code using virtual environment
-python src/train.py \
-    -t ${train_dir} \
-    -v ${valid_dir} \
-    --target-dir ${target_dir} \
-    -r ${redux} \
-    -n ${noise} \
-    -p ${train_param} \
-    --ckpt-save-path ${ckpt_save} \
-    --ckpt-overwrite \
-    --report-interval ${report} \
-    -ch ${channels} \
-    --nb-epochs ${epochs} \
-    -l ${loss_fun} \
-    --cuda \
-    --paired-targets \
-    --verbose
-    # --load-ckpt "${ckpt}"
+# # Launch train code using virtual environment
+# python src/train.py \
+#     -t ${train_dir} \
+#     -v ${valid_dir} \
+#     --target-dir ${target_dir} \
+#     -r ${redux} \
+#     -n ${noise} \
+#     -p ${train_param} \
+#     --ckpt-save-path "${ckpt_save}" \
+#     --ckpt-overwrite \
+#     --report-interval ${report} \
+#     -ch ${channels} \
+#     --nb-epochs ${epochs} \
+#     -l ${loss_fun} \
+#     --cuda \
+#     --paired-targets \
+#     --verbose \
+#     --load-ckpt "${train_ckpt}"
 
 
 exit_code="$?"
@@ -136,7 +139,7 @@ then
         -n ${noise} \
         -p ${test_param} \
         --output ${results} \
-        --load-ckpt "${ckpt}" \
+        --load-ckpt "${new_ckpt}" \
         --ch ${channels} \
         --cuda \
         --montage-only \

@@ -96,7 +96,7 @@ if __name__ == '__main__':
         print("\nLoading previous training model checkpoint...")
         n2n.load_model(params.load_ckpt)
     elif params.load_ckpt and not os.path.isfile(params.load_ckpt):
-        print("\nRequested model checkpoint ({}) is not a file. \nCreating a new training checkpoint.\n".format(params.load_ckpt))
+        # print("\nRequested model checkpoint ({}) is not a file. \nCreating a new training checkpoint.\n".format(params.load_ckpt))
         params.load_ckpt = None
 
     print(f'training begin:      {str(datetime.datetime.now() - python_start)[:-4]} from python start')

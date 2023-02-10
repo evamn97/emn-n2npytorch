@@ -123,13 +123,13 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     fig.tight_layout()
 
     # Open pop up window, if requested
-    if show > 0:
-        matplotlib.use('TkAgg')
-        plt.show()
+    # if show > 0:
+    #     matplotlib.use('TkAgg')
+    # plt.show()
 
     # Save to files
     f = open(os.path.join(save_path, 'psnr.txt'), 'a')
-    f.write("{:.2f}\t{:.2f}\n".format(psnr_vals[0], psnr_vals[1]))
+    f.write("{:.2f},{:.2f}\n".format(psnr_vals[0], psnr_vals[1]))
     f.close()
 
     fname = os.path.splitext(img_name)[0]
@@ -142,6 +142,7 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
         source.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-noisy.png'))
         denoised.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-denoised.png'))
     fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-montage.png'), bbox_inches='tight')
+    plt.close()
 
 
 class AvgMeter(object):

@@ -32,3 +32,5 @@
 /tgx_xyz_data/
 /xyz_dbtest_data/
 /db_trends.png
+/psnr-hs20mg-raw.txt
+/make_figs.py
