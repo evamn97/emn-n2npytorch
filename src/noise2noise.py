@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import torch
+import json
+import os
+import sys
+from datetime import datetime, timedelta
+
 import torch.nn as nn
 from torch.optim import Adam, lr_scheduler
 
 from unet import UNet
 from utils import *
-
-import os
-import json
-import sys
-from datetime import datetime, timedelta
 
 torch.set_default_dtype(torch.float64)
 
@@ -177,6 +176,7 @@ class Noise2Noise(object):
         loss_str = f'{self.p.loss.upper()} loss'
         plot_per_epoch(self.ckpt_dir, ('Valid ' + loss_str), stats['valid_loss'], loss_str)
         plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
+        plot_per_epoch(self.ckpt_dir, ('Valid PSNR over ' + loss_str), (stats['valid_psnr'] / stats['valid_loss']), '')
 
     def test(self, test_loader, show):
         """Evaluates denoiser on test set."""
@@ -192,7 +192,8 @@ class Noise2Noise(object):
         # Create directory for denoised images
         if not os.path.isdir(self.p.output):
             os.mkdir(self.p.output)
-        save_path = os.path.normpath(os.path.join(self.p.output, f'{self.job_name.replace("imgrec", "denoised")}{self.p.noise_param}-{self.job_id}'))  # ex: 'results/hs20mg-bernoulli0.4l2-193174/'
+        subfolder = f'{self.job_name.replace("imgrec", "denoised").replace("-test", "")}-{self.job_id}'
+        save_path = os.path.normpath(os.path.join(self.p.output, subfolder))  # ex: 'results/hs20mg-bernoulli0.4l2-193174/'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 
