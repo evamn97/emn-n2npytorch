@@ -22,11 +22,11 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-train_dir="hs20mg_xyz_planeleveled_data/train"
-valid_dir="hs20mg_xyz_planeleveled_data/valid"
-target_dir="hs20mg_xyz_planeleveled_data/targets"
-test_dir="hs20mg_xyz_planeleveled_data/test/targets"
-test_target_dir="hs20mg_xyz_planeleveled_data/test/targets"
+train_dir="hs20mg_xyz_data/train"
+valid_dir="hs20mg_xyz_data/valid"
+target_dir="hs20mg_xyz_data/targets"
+test_dir="hs20mg_xyz_data/test/"
+test_target_dir="hs20mg_xyz_data/test/targets"
 data_info="HS20MG holes & pillars (planeleveled), 960/240/7 (train/val/test)\n"
 channels=1
 
@@ -110,7 +110,6 @@ echo -e "Using python executable at: $(which python)\n\n"
     -n ${noise} \
     -p ${train_param} \
     --ckpt-save-path "${ckpt_save}" \
-    --ckpt-overwrite \
     --report-interval ${report} \
     -ch ${channels} \
     --nb-epochs ${epochs} \
@@ -124,25 +123,25 @@ echo -e "Using python executable at: $(which python)\n\n"
 exit_code="$?"
 echo -e "Training ended with exit code: ${exit_code}"
 
-# Launch testing code if training was successful
-if [[ $exit_code == 0 ]]
-then
-    echo -e "\n----------------------------------------------------------------------------------------------\n"
-    echo -e "\nDate:  $(date)\n"
+# # Launch testing code if training was successful
+# if [[ $exit_code == 0 ]]
+# then
+#     echo -e "\n----------------------------------------------------------------------------------------------\n"
+#     echo -e "\nDate:  $(date)\n"
 
-    # Launch test code using virtual environment
-    python src/test.py \
-        -t ${test_dir} \
-        --target-dir ${test_target_dir} \
-        -n ${noise} \
-        -p ${test_param} \
-        --output ${results} \
-        --load-ckpt "${new_ckpt}" \
-        --ch ${channels} \
-        --cuda \
-        --montage-only \
-        --paired-targets
-fi
+#     # Launch test code using virtual environment
+#     python src/test.py \
+#         -t ${test_dir} \
+#         --target-dir ${test_target_dir} \
+#         -n ${noise} \
+#         -p ${test_param} \
+#         --output ${results} \
+#         --load-ckpt "${new_ckpt}" \
+#         --ch ${channels} \
+#         --cuda \
+#         --montage-only \
+#         --paired-targets
+# fi
 
 
 end=$(date +%s)

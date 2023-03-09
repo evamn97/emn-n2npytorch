@@ -1,43 +1,39 @@
 #!/bin/bash
 # --------------------------------------------------------------------------------------------------
-# Last revised: 9 February 2023
+# Last revised: 2 March 2023
 # eva_mn
 # --------------------------------------------------------------------------------------------------
-
-#SBATCH -J xyz-tgx-raw                                  # SET THE JOB NAME!!!!!!!!!!!!
-#SBATCH -o ../results/%x-%j.out                         # Name of stdout output file
-#SBATCH -p v100                                         # Queue (partition) name
-#SBATCH -N 1                                            # Total # of nodes
-#SBATCH --ntasks-per-node 48                            # Total # of tasks per node (mpi tasks)
-#SBATCH -t 01:25:00                                     # Run time (hh:mm:ss)
-#SBATCH --mail-type=none                                # Send email at begin and end of job
-#SBATCH -A Modeling-of-Microsca                         # Allocation name (req'd if you have more than 1)
 
 start=$(date +%s)
 
 # get job number and name for file saving in python script, set some params
 set -a
-jobid=${SLURM_JOBID}
-jobname="${SLURM_JOB_NAME%".sh"}"
+jobid=$(date +%N)
 filename="$(basename -s .sh "$0")"
+jobname="xyz-tgx-test"                                               # SET JOB NAME!!!!!!!!!!!
 set +a    # only need to export job info vars
 
-# !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-test_dir="tgx_xyz_data/test/targets"
-test_target_dir="tgx_xyz_data/test/targets"
-data_info="TGX square pillars XYZ data , 41 varied speed images (taken 02.01.2023)\n"
+# !!!!!!!---------------------------------- SET INPUT VARS ----------------------------------!!!!!!!
+test_dir="tgx2_xyz_data/test/"
+test_target_dir="tgx2_xyz_data/test/targets"
+data_info="Fast scan test data (1.5-3.2 Hz TGX11 taken 02.02.2023)\n"
 channels=1
-
-train_ckpt=""    # for loading a specific checkpoint
 
 redux=0
 noise="raw"
-train_param=0.4
-report=240
-epochs=100
-loss_fun='l2'
-
 test_param=0.4
+
+test_ckpt="ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch100-0.00096.pt"            # SET TEST CKPT!!!!!!!!!!!
+
+# --------------------------------------------------------------------------------------------------
+
+# get ckpt name (set substring to remove from jobname if necessary)
+sub="-test"
+
+spec_string="${jobname%$sub}-${noise}"
+
+results="results/${spec_string}"
+echo "Results will be saved to: ${results}"
 
 # --------------------------------------------------------------------------------------------------
 
@@ -46,16 +42,14 @@ echo -e "\nDate:  $(date)\n"
 # get from SLURM env vars
 echo -e "Begin batch job... \n \
     File Name:       ${filename} \n \
-    Job Name:        ${SLURM_JOB_NAME} \n \
-    Job ID:          ${SLURM_JOB_ID} \n \
-    Output file:     ${SLURM_JOB_NAME}.out \n \
-    Partition:       ${SLURM_JOB_PARTITION} \n \
-    Nodes:           ${SLURM_JOB_NUM_NODES} \n \
-    Ntasks per node: ${SLURM_TASKS_PER_NODE} \n \
+    Job Name:        ${jobname} \n \
+    Job ID:          ${jobid} \n \
+    Output file:     ${jobname}.out \n \
     Dataset:         ${data_info}\n"
 
 cd ..
 echo -e "Working directory:  $(pwd)\n"
+
 
 echo -e "Using python executable at: $(which python)\n\n"
 
@@ -67,13 +61,13 @@ echo -e "\nDate:  $(date)\n"
 python src/test.py \
     -t ${test_dir} \
     --target-dir ${test_target_dir} \
+    -r ${redux} \
     -n ${noise} \
     -p ${test_param} \
-    --output ${results} \
-    --load-ckpt "${new_ckpt}" \
+    --output "${results}" \
+    --load-ckpt "${test_ckpt}" \
     --ch ${channels} \
     --cuda \
-    --montage-only \
     --paired-targets
 
 

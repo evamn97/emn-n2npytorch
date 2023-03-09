@@ -4,11 +4,12 @@
 # eva_mn
 # --------------------------------------------------------------------------------------------------
 
+#SBATCH -J xyz-tgx-test                                 # SET THE JOB NAME!!!!!!!!!!!!
 #SBATCH -o ../results/%x-%j.out                         # Name of stdout output file
 #SBATCH -p p100                                         # Queue (partition) name
 #SBATCH -N 1                                            # Total # of nodes
-#SBATCH --ntasks-per-node 48                            # Total # of tasks per node (mpi tasks)
-#SBATCH -t 01:25:00                                     # Run time (hh:mm:ss)
+#SBATCH --ntasks-per-node 1                             # Total # of tasks per node (mpi tasks)
+#SBATCH -t 00:05:00                                     # Run time (hh:mm:ss)
 #SBATCH --mail-type=none                                # Send email at begin and end of job
 #SBATCH -A Modeling-of-Microsca                         # Allocation name (req'd if you have more than 1)
 
@@ -21,48 +22,35 @@ jobname="${SLURM_JOB_NAME%".sh"}"
 filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
-# !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-train_dir="tgx2_xyz_data/train"
-valid_dir="tgx2_xyz_data/valid"
-target_dir="tgx2_xyz_data/targets"
-test_dir="tgx2_xyz_data/test/"
-test_target_dir="tgx2_xyz_data/test/targets"
-data_info="TGX square pillars XYZ data (44 imgs taken 02.02.2023)\n"
+# !!!!!!!---------------------------------- SET INPUT VARS ----------------------------------!!!!!!!
+test_dir="tgx_data/test/targets"
+test_target_dir="tgx_data/test/targets"
+data_info="TGX square pillars data, 41 varied speed images (taken 02.01.2023)\n"
 channels=1
-
-train_ckpt=""    # for loading a specific checkpoint
 
 redux=0
 noise="raw"
-train_param=0.4
-report=240
-epochs=100
-loss_fun='l2'
-
 test_param=0.4
 
+test_ckpt="ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/xyz-tgx-raw0.4l2.pt"            # SET TEST CKPT!!!!!!!
+
 # --------------------------------------------------------------------------------------------------
-ckpt_spec="${train_param}${loss_fun}"
 
 # get ckpt name (set substring to remove from jobname if necessary)
-sub="-imgrec"
+sub="-test"
 # because idev jobs don't follow the rules for some reason
 idev="idv"
 if [[ $jobname == *"$idev"* ]]  
 then
-    ckpt_string="${filename%$sub}-${noise}"
-    echo "This is an idev job, using filename in place of jobname to find checkpoint:"
+    spec_string="${filename%$sub}-${noise}"
+    echo "This is an idev job, using filename in place of jobname to get spec string:"
 else
-    ckpt_string="${jobname%$sub}-${noise}"
-    echo "Using jobname to find checkpoint:"
+    spec_string="${jobname%$sub}-${noise}"
+    echo "Using jobname to get spec string:"
 fi
 
-ckpt_save="ckpts/${ckpt_string}/${ckpt_string}${ckpt_spec}"
-
-new_ckpt="${ckpt_save}/${ckpt_string}${ckpt_spec}.pt"       # this doesn't work if it's a retrained checkpoint
-
-
-results="results/${ckpt_string}"
+results="results/${spec_string}"
+echo "Results will be saved to: ${results}"
 
 # --------------------------------------------------------------------------------------------------
 
@@ -71,9 +59,9 @@ echo -e "\nDate:  $(date)\n"
 # get from SLURM env vars
 echo -e "Begin batch job... \n \
     File Name:       ${filename} \n \
-    Job Name:        ${SLURM_JOB_NAME} \n \
-    Job ID:          ${SLURM_JOB_ID} \n \
-    Output file:     ${SLURM_JOB_NAME}.out \n \
+    Job Name:        ${jobname} \n \
+    Job ID:          ${jobid} \n \
+    Output file:     ${jobname}.out \n \
     Partition:       ${SLURM_JOB_PARTITION} \n \
     Nodes:           ${SLURM_JOB_NUM_NODES} \n \
     Ntasks per node: ${SLURM_TASKS_PER_NODE} \n \
@@ -81,7 +69,6 @@ echo -e "Begin batch job... \n \
 
 cd ..
 echo -e "Working directory:  $(pwd)\n"
-
 
 # for using conda environments in SLURM bash scripts
 if [ $(( ! CONDA_SHLVL)) ]
@@ -102,47 +89,23 @@ fi
 
 echo -e "Using python executable at: $(which python)\n\n"
 
+# Launch testing code if training was successful
+echo -e "\n----------------------------------------------------------------------------------------------\n"
+echo -e "\nDate:  $(date)\n"
 
-# Launch train code using virtual environment
-python src/train.py \
-    -t ${train_dir} \
-    -v ${valid_dir} \
-    --target-dir ${target_dir} \
+# Launch test code using virtual environment
+python src/test.py \
+    -t ${test_dir} \
+    --target-dir ${test_target_dir} \
     -r ${redux} \
     -n ${noise} \
-    -p ${train_param} \
-    --ckpt-save-path "${ckpt_save}" \
-    --report-interval ${report} \
-    -ch ${channels} \
-    --nb-epochs ${epochs} \
-    -l ${loss_fun} \
+    -p ${test_param} \
+    --output "${results}" \
+    --load-ckpt "${test_ckpt}" \
+    --ch ${channels} \
     --cuda \
-    --paired-targets \
-    --verbose \
-    --load-ckpt "${train_ckpt}"
-
-
-exit_code="$?"
-echo -e "Training ended with exit code: ${exit_code}"
-
-# # Launch testing code if training was successful
-# if [[ $exit_code == 0 ]]
-# then
-#     echo -e "\n----------------------------------------------------------------------------------------------\n"
-#     echo -e "\nDate:  $(date)\n"
-
-#     # Launch test code using virtual environment
-#     python src/test.py \
-#         -t ${test_dir} \
-#         --target-dir ${test_target_dir} \
-#         -n ${noise} \
-#         -p ${test_param} \
-#         --output ${results} \
-#         --load-ckpt "${new_ckpt}" \
-#         --ch ${channels} \
-#         --cuda \
-#         --paired-targets
-# fi
+    --montage-only \
+    --paired-targets
 
 
 end=$(date +%s)
