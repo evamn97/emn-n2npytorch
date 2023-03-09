@@ -14,16 +14,16 @@ jobname="xyz-tgx-test"                                               # SET JOB N
 set +a    # only need to export job info vars
 
 # !!!!!!!---------------------------------- SET INPUT VARS ----------------------------------!!!!!!!
-test_dir="tgx2_xyz_data/test/"
-test_target_dir="tgx2_xyz_data/test/targets"
-data_info="Fast scan test data (1.5-3.2 Hz TGX11 taken 02.02.2023)\n"
+test_dir="temp_hs20mg_test/"
+test_target_dir="temp_hs20mg_test/targets"
+data_info="Original HS20MG scans (same as training)\n"
 channels=1
 
 redux=0
 noise="raw"
 test_param=0.4
 
-test_ckpt="ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch100-0.00096.pt"            # SET TEST CKPT!!!!!!!!!!!
+test_ckpt="ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw0.4l2/n2n-epoch100-0.00327.pt"            # SET TEST CKPT!!!!!!!!!!!
 
 # --------------------------------------------------------------------------------------------------
 

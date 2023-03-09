@@ -1,471 +1,0 @@
-Using jobname to find checkpoint:
-
-Date:  Wed Mar  1 21:17:17 CST 2023
-
-Begin batch job... 
-     File Name:       slurm_script 
-     Job Name:        xyz-tgx-imgrec 
-     Job ID:          219449 
-     Output file:     xyz-tgx-imgrec.out 
-     Partition:       p100 
-     Nodes:           1 
-     Ntasks per node: 48 
-     Dataset:         TGX square pillars XYZ data (44 imgs taken 02.02.2023)
-
-
-Working directory:  /work/08261/evanat/maverick2/n2n-pytorch
-
-Using python executable at: /work/08261/evanat/maverick2/miniconda3/envs/imgrec/bin/python
-
-
-Python start time:  21:18:31.84 CST
-N2N start time:     21:18:31.86
-n2n initialized in   0:00:35.83 from n2n start
-training begin:      0:00:35.84 from python start
-Training parameters: 
-  Train dir = tgx2_xyz_data/train
-  Valid dir = tgx2_xyz_data/valid
-  Target dir = tgx2_xyz_data/targets
-  Redux = 0
-  Load ckpt = 
-  Ckpt save path = ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2
-  Ckpt overwrite = False
-  Report interval = 240
-  Learning rate = 0.001
-  Adam = [0.9, 0.99, 1e-08]
-  Channels = 1
-  Batch size = 4
-  Nb epochs = 100
-  Loss = l2
-  Cuda = True
-  Verbose = True
-  Show progress = False
-  Noise type = raw
-  Noise param = 0.4
-  Seed = None
-  Crop size = 0
-  Clean targets = False
-  Paired targets = True
-
-Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size). 
-nbatches = 800/4 = 200, report_interval = 240:   240 % 200 != 0 
-The report interval has been reset to equal nbatches (200).
-
-EPOCH 1 / 100
-Epoch 1 finished at 0:02:26.21 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.39134 | Avg train time / batch: 153 ms
-Testing model on validation set...                                                                                 Train time: 0:01:50.37 | Valid time: 0:00:23.15 | Valid loss: 0.01817 | Avg PSNR: 17.69 dB
-Estimated time remaining: 3:40:20
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch1-0.01817.pt
-
-EPOCH 2 / 100
-Epoch 2 finished at 0:03:17.95 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.01562 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.85 | Valid time: 0:00:06.79 | Valid loss: 0.01541 | Avg PSNR: 18.34 dB
-Estimated time remaining: 2:17:21
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch2-0.01541.pt
-
-EPOCH 3 / 100
-Epoch 3 finished at 0:03:52.46 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00948 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.47 | Valid time: 0:00:06.57 | Valid loss: 0.00691 | Avg PSNR: 22.11 dB
-Estimated time remaining: 1:48:58
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch3-0.00691.pt
-
-EPOCH 4 / 100
-Epoch 4 finished at 0:04:26.82 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00741 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.53 | Valid time: 0:00:06.67 | Valid loss: 0.00719 | Avg PSNR: 22.27 dB
-Estimated time remaining: 1:34:34
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch4-0.00719.pt
-
-EPOCH 5 / 100
-Epoch 5 finished at 0:05:01.73 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00513 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.98 | Valid time: 0:00:06.78 | Valid loss: 0.00377 | Avg PSNR: 24.79 dB
-Estimated time remaining: 1:25:53
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch5-0.00377.pt
-
-EPOCH 6 / 100
-Epoch 6 finished at 0:05:36.35 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00433 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.57 | Valid time: 0:00:06.67 | Valid loss: 0.00535 | Avg PSNR: 23.08 dB
-Estimated time remaining: 1:19:45
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch6-0.00535.pt
-
-EPOCH 7 / 100
-Epoch 7 finished at 0:06:11.23 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00394 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.86 | Valid time: 0:00:06.86 | Valid loss: 0.00410 | Avg PSNR: 24.33 dB
-Estimated time remaining: 1:15:19
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch7-0.00410.pt
-
-EPOCH 8 / 100
-Epoch 8 finished at 0:06:47.12 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00354 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.75 | Valid time: 0:00:06.81 | Valid loss: 0.00406 | Avg PSNR: 24.64 dB
-Estimated time remaining: 1:12:01
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch8-0.00406.pt
-
-EPOCH 9 / 100
-Epoch 9 finished at 0:07:22.41 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00313 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.20 | Valid time: 0:00:06.92 | Valid loss: 0.00297 | Avg PSNR: 26.02 dB
-Estimated time remaining: 1:09:14
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch9-0.00297.pt
-
-EPOCH 10 / 100
-Epoch 10 finished at 0:07:57.38 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00294 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.78 | Valid time: 0:00:06.77 | Valid loss: 0.00302 | Avg PSNR: 25.90 dB
-Estimated time remaining: 1:06:49
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch10-0.00302.pt
-
-EPOCH 11 / 100
-Epoch 11 finished at 0:08:32.20 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00268 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.76 | Valid time: 0:00:06.73 | Valid loss: 0.00229 | Avg PSNR: 27.73 dB
-Estimated time remaining: 1:04:43
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch11-0.00229.pt
-
-EPOCH 12 / 100
-Epoch 12 finished at 0:09:07.46 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00247 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.17 | Valid time: 0:00:06.84 | Valid loss: 0.00332 | Avg PSNR: 25.76 dB
-Estimated time remaining: 1:02:56
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch12-0.00332.pt
-
-EPOCH 13 / 100
-Epoch 13 finished at 0:09:42.76 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00210 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.19 | Valid time: 0:00:06.98 | Valid loss: 0.00218 | Avg PSNR: 27.58 dB
-Estimated time remaining: 1:01:21
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch13-0.00218.pt
-
-EPOCH 14 / 100
-Epoch 14 finished at 0:10:17.86 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00197 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.85 | Valid time: 0:00:06.71 | Valid loss: 0.00239 | Avg PSNR: 26.93 dB
-Estimated time remaining: 0:59:51
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch14-0.00239.pt
-
-EPOCH 15 / 100
-Epoch 15 finished at 0:10:53.16 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00169 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.30 | Valid time: 0:00:06.78 | Valid loss: 0.00196 | Avg PSNR: 28.31 dB
-Estimated time remaining: 0:58:32
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch15-0.00196.pt
-
-EPOCH 16 / 100
-Epoch 16 finished at 0:11:28.46 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00156 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.25 | Valid time: 0:00:06.78 | Valid loss: 0.00167 | Avg PSNR: 29.01 dB
-Estimated time remaining: 0:57:17
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch16-0.00167.pt
-
-EPOCH 17 / 100
-Epoch 17 finished at 0:12:03.36 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00169 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.85 | Valid time: 0:00:06.81 | Valid loss: 0.00185 | Avg PSNR: 28.32 dB
-Estimated time remaining: 0:56:06
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch17-0.00185.pt
-
-EPOCH 18 / 100
-Epoch 18 finished at 0:12:38.31 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00127 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.78 | Valid time: 0:00:06.83 | Valid loss: 0.00136 | Avg PSNR: 29.75 dB
-Estimated time remaining: 0:54:58
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch18-0.00136.pt
-
-EPOCH 19 / 100
-Epoch 19 finished at 0:13:13.54 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00122 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.12 | Valid time: 0:00:06.75 | Valid loss: 0.00186 | Avg PSNR: 28.31 dB
-Estimated time remaining: 0:53:55
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch19-0.00186.pt
-
-EPOCH 20 / 100
-Epoch 20 finished at 0:13:48.54 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00152 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.96 | Valid time: 0:00:06.95 | Valid loss: 0.00146 | Avg PSNR: 29.00 dB
-Estimated time remaining: 0:52:55
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch20-0.00146.pt
-
-EPOCH 21 / 100
-Epoch 21 finished at 0:14:23.89 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00100 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.13 | Valid time: 0:00:06.77 | Valid loss: 0.00116 | Avg PSNR: 30.79 dB
-Estimated time remaining: 0:51:58
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch21-0.00116.pt
-
-EPOCH 22 / 100
-Epoch 22 finished at 0:14:58.88 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00112 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.95 | Valid time: 0:00:06.76 | Valid loss: 0.00139 | Avg PSNR: 29.78 dB
-Estimated time remaining: 0:51:01
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch22-0.00139.pt
-
-EPOCH 23 / 100
-Epoch 23 finished at 0:15:34.10 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00103 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.11 | Valid time: 0:00:06.77 | Valid loss: 0.00116 | Avg PSNR: 31.02 dB
-Estimated time remaining: 0:50:07
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch23-0.00116.pt
-
-EPOCH 24 / 100
-Epoch 24 finished at 0:16:10.00 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00102 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.85 | Valid time: 0:00:06.93 | Valid loss: 0.00156 | Avg PSNR: 29.40 dB
-Estimated time remaining: 0:49:18
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch24-0.00156.pt
-
-EPOCH 25 / 100
-Epoch 25 finished at 0:16:44.86 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00091 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.66 | Valid time: 0:00:06.77 | Valid loss: 0.00144 | Avg PSNR: 29.91 dB
-Estimated time remaining: 0:48:26
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch25-0.00144.pt
-
-EPOCH 26 / 100
-Epoch 26 finished at 0:17:20.45 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00085 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.55 | Valid time: 0:00:06.80 | Valid loss: 0.00106 | Avg PSNR: 31.03 dB
-Estimated time remaining: 0:47:37
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch26-0.00106.pt
-
-EPOCH 27 / 100
-Epoch 27 finished at 0:17:55.30 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00101 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.76 | Valid time: 0:00:06.67 | Valid loss: 0.00129 | Avg PSNR: 30.53 dB
-Estimated time remaining: 0:46:47
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch27-0.00129.pt
-
-EPOCH 28 / 100
-Epoch 28 finished at 0:18:29.87 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00073 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.62 | Valid time: 0:00:06.75 | Valid loss: 0.00119 | Avg PSNR: 30.55 dB
-Estimated time remaining: 0:45:58
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch28-0.00119.pt
-
-EPOCH 29 / 100
-Epoch 29 finished at 0:19:05.74 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00082 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.78 | Valid time: 0:00:06.99 | Valid loss: 0.00145 | Avg PSNR: 30.02 dB
-Estimated time remaining: 0:45:14
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch29-0.00145.pt
-
-EPOCH 30 / 100
-Epoch 30 finished at 0:19:41.44 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00067 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.42 | Valid time: 0:00:06.78 | Valid loss: 0.00126 | Avg PSNR: 30.32 dB
-Estimated time remaining: 0:44:29
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch30-0.00126.pt
-
-EPOCH 31 / 100
-Epoch 31 finished at 0:20:16.42 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00072 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.93 | Valid time: 0:00:06.86 | Valid loss: 0.00110 | Avg PSNR: 31.24 dB
-Estimated time remaining: 0:43:43
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch31-0.00110.pt
-
-EPOCH 32 / 100
-Epoch 32 finished at 0:20:51.34 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00069 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.78 | Valid time: 0:00:06.63 | Valid loss: 0.00104 | Avg PSNR: 31.49 dB
-Estimated time remaining: 0:42:57
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch32-0.00104.pt
-
-EPOCH 33 / 100
-Epoch 33 finished at 0:21:25.88 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00083 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.63 | Valid time: 0:00:06.72 | Valid loss: 0.00142 | Avg PSNR: 29.49 dB
-Estimated time remaining: 0:42:12
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch33-0.00142.pt
-
-EPOCH 34 / 100
-Epoch 34 finished at 0:22:02.22 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00062 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:29.27 | Valid time: 0:00:07.03 | Valid loss: 0.00133 | Avg PSNR: 30.13 dB
-Estimated time remaining: 0:41:32
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch34-0.00133.pt
-
-EPOCH 35 / 100
-Epoch 35 finished at 0:22:38.24 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00052 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.71 | Valid time: 0:00:06.79 | Valid loss: 0.00140 | Avg PSNR: 30.32 dB
-Estimated time remaining: 0:40:50
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch35-0.00140.pt
-
-EPOCH 36 / 100
-Epoch 36 finished at 0:23:12.92 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00067 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.61 | Valid time: 0:00:06.83 | Valid loss: 0.00148 | Avg PSNR: 29.67 dB
-Estimated time remaining: 0:40:06
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch36-0.00148.pt
-
-EPOCH 37 / 100
-Epoch 37 finished at 0:23:47.99 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00048 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.96 | Valid time: 0:00:06.68 | Valid loss: 0.00133 | Avg PSNR: 30.67 dB
-Estimated time remaining: 0:39:23
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch37-0.00133.pt
-
-EPOCH 38 / 100
-Epoch 38 finished at 0:24:22.67 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00052 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.72 | Valid time: 0:00:06.65 | Valid loss: 0.00096 | Avg PSNR: 31.54 dB
-Estimated time remaining: 0:38:41
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch38-0.00096.pt
-
-EPOCH 39 / 100
-Epoch 39 finished at 0:24:57.21 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00052 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.61 | Valid time: 0:00:06.74 | Valid loss: 0.00108 | Avg PSNR: 30.97 dB
-Estimated time remaining: 0:37:59
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch39-0.00108.pt
-
-EPOCH 40 / 100
-Epoch 40 finished at 0:25:33.07 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00042 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.78 | Valid time: 0:00:07.06 | Valid loss: 0.00099 | Avg PSNR: 31.69 dB
-Estimated time remaining: 0:37:19
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch40-0.00099.pt
-
-EPOCH 41 / 100
-Epoch 41 finished at 0:26:08.58 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00044 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.16 | Valid time: 0:00:06.80 | Valid loss: 0.00106 | Avg PSNR: 31.44 dB
-Estimated time remaining: 0:36:38
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch41-0.00106.pt
-
-EPOCH 42 / 100
-Epoch 42 finished at 0:26:44.59 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00043 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.93 | Valid time: 0:00:06.84 | Valid loss: 0.00110 | Avg PSNR: 31.32 dB
-Estimated time remaining: 0:35:59
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch42-0.00110.pt
-
-EPOCH 43 / 100
-Epoch 43 finished at 0:27:19.57 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00067 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.86 | Valid time: 0:00:06.65 | Valid loss: 0.00116 | Avg PSNR: 30.67 dB
-Estimated time remaining: 0:35:18
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch43-0.00116.pt
-
-EPOCH 44 / 100
-Epoch 44 finished at 0:27:54.09 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00044 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.58 | Valid time: 0:00:06.67 | Valid loss: 0.00097 | Avg PSNR: 32.03 dB
-Estimated time remaining: 0:34:37
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch44-0.00097.pt
-
-EPOCH 45 / 100
-Epoch 45 finished at 0:28:30.25 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00034 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:29.14 | Valid time: 0:00:07.05 | Valid loss: 0.00239 | Avg PSNR: 28.47 dB
-Estimated time remaining: 0:33:59
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch45-0.00239.pt
-
-EPOCH 46 / 100
-Epoch 46 finished at 0:29:06.50 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00067 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.91 | Valid time: 0:00:06.92 | Valid loss: 0.00103 | Avg PSNR: 31.46 dB
-Estimated time remaining: 0:33:20
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch46-0.00103.pt
-
-EPOCH 47 / 100
-Epoch 47 finished at 0:29:41.80 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00036 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.10 | Valid time: 0:00:06.70 | Valid loss: 0.00107 | Avg PSNR: 31.33 dB
-Estimated time remaining: 0:32:41
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch47-0.00107.pt
-
-EPOCH 48 / 100
-Epoch 48 finished at 0:30:17.21 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00032 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.43 | Valid time: 0:00:06.81 | Valid loss: 0.00111 | Avg PSNR: 31.28 dB
-Estimated time remaining: 0:32:02
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch48-0.00111.pt
-
-EPOCH 49 / 100
-Epoch 49 finished at 0:30:51.96 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00032 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.66 | Valid time: 0:00:06.65 | Valid loss: 0.00101 | Avg PSNR: 31.70 dB
-Estimated time remaining: 0:31:22
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch49-0.00101.pt
-
-EPOCH 50 / 100
-Epoch 50 finished at 0:31:26.67 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00037 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.79 | Valid time: 0:00:06.75 | Valid loss: 0.00099 | Avg PSNR: 31.72 dB
-Estimated time remaining: 0:30:43
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch50-0.00099.pt
-
-EPOCH 51 / 100
-Epoch 51 finished at 0:32:02.63 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00038 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.84 | Valid time: 0:00:06.92 | Valid loss: 0.00116 | Avg PSNR: 30.92 dB
-Estimated time remaining: 0:30:05
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch51-0.00116.pt
-
-EPOCH 52 / 100
-Epoch 52 finished at 0:32:37.58 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00034 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.75 | Valid time: 0:00:06.73 | Valid loss: 0.00096 | Avg PSNR: 31.94 dB
-Estimated time remaining: 0:29:26
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch52-0.00096.pt
-
-EPOCH 53 / 100
-Epoch 53 finished at 0:33:12.92 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00031 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.32 | Valid time: 0:00:06.88 | Valid loss: 0.00149 | Avg PSNR: 29.34 dB
-Estimated time remaining: 0:28:48
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch53-0.00149.pt
-
-EPOCH 54 / 100
-Epoch 54 finished at 0:33:47.78 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00036 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.70 | Valid time: 0:00:06.68 | Valid loss: 0.00096 | Avg PSNR: 31.94 dB
-Estimated time remaining: 0:28:09
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch54-0.00096.pt
-
-EPOCH 55 / 100
-Epoch 55 finished at 0:34:22.40 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00029 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.65 | Valid time: 0:00:06.64 | Valid loss: 0.00098 | Avg PSNR: 31.95 dB
-Estimated time remaining: 0:27:30
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch55-0.00098.pt
-
-EPOCH 56 / 100
-Epoch 56 finished at 0:34:58.51 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00033 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:29.12 | Valid time: 0:00:06.95 | Valid loss: 0.00124 | Avg PSNR: 30.26 dB
-Estimated time remaining: 0:26:53
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch56-0.00124.pt
-
-EPOCH 57 / 100
-Epoch 57 finished at 0:35:34.45 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00037 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.72 | Valid time: 0:00:06.84 | Valid loss: 0.00110 | Avg PSNR: 31.31 dB
-Estimated time remaining: 0:26:16
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch57-0.00110.pt
-
-EPOCH 58 / 100
-Epoch 58 finished at 0:36:09.32 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00030 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.74 | Valid time: 0:00:06.72 | Valid loss: 0.00110 | Avg PSNR: 31.09 dB
-Estimated time remaining: 0:25:37
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch58-0.00110.pt
-
-EPOCH 59 / 100
-Epoch 59 finished at 0:36:44.87 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00027 | Avg train time / batch: 73 ms
-Testing model on validation set...                                                                                 Train time: 0:00:28.53 | Valid time: 0:00:06.81 | Valid loss: 0.00095 | Avg PSNR: 31.98 dB
-Estimated time remaining: 0:25:00
-Saving checkpoint to: ckpts/xyz-tgx-raw/xyz-tgx-raw0.4l2/n2n-epoch59-0.00095.pt
-
-EPOCH 60 / 100
-Epoch 60 finished at 0:37:19.68 from n2n start.
-                                                                                Batch 200 / 200 | Avg loss: 0.00028 | Avg train time / batch: 72 ms
-Testing model on validation set...                                                                                 Train time: 0:00:27.72 | Valid time: 0:00:06.69 | Valid loss: 0.00132 | Avg PSNR: 30.04 dB
-Estimated time remaining: 0:24:22
