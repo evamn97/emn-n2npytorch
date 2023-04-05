@@ -1,30 +1,31 @@
 from time import sleep
 
-import matplotlib.pyplot as plt
-import pandas as pd
-
 from src.data_prep import *
 
 if __name__ == '__main__':
     sleep(1)
 
     # ---------------------------------------------------------------- DATA AUGMENTING ----------------------------------------------------------------
-    # data_root = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/"
-    # n2npt_root = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/"
-    #
-    # source_in_dir = os.path.join(data_root, "TGX11_12um20um_02-02-23/xyz-conversions")
-    # target_in_dir = os.path.join(data_root, "TGX11_12um20um_02-02-23/xyz-processed")
-    # source_out_dir = os.path.join(n2npt_root, "tgx2_xyz_data")
-    #
-    # number = 1000
-    # px = 256
-    # m_angle = 300
-    #
-    # # augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=m_angle)
-    # augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=m_angle)
-    #
-    # split_ratio = 0.8
-    # split(source_out_dir, split_ratio)
+    data_root = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/SANDIA PHD RESEARCH/Ryan-AFM-Data/"
+    n2npt_root = "C:/Users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch/"
+
+    # ------------------------------- inputs -------------------------------
+    train_dirname = "TGX11_02-01-23-fastscan"
+    ext = "xyz"
+    source_out_dir = os.path.join(n2npt_root, "tgxfast_xyz_data")
+
+    number = 800
+    px = 256
+    m_angle = 300
+    # ----------------------------------------------------------------------
+
+    source_in_dir = os.path.join(data_root, train_dirname, f"{ext}-conversions")
+    target_in_dir = os.path.join(data_root, train_dirname, f"{ext}-processed")
+    # augment(source_in_dir, source_out_dir, number, min_px=px, max_angle=m_angle)
+    augment_pairs(source_in_dir, source_out_dir, target_in_dir, number, min_px=px, max_angle=m_angle)
+
+    split_ratio = 0.7
+    split(source_out_dir, split_ratio)
     #
     # nt = 44
     # test_out_dir = os.path.join(source_out_dir, "test")
@@ -32,20 +33,20 @@ if __name__ == '__main__':
     # .................................................................................................................................................
 
     # ------------------------------------------------------------- VALID STATS PLOTTING --------------------------------------------------------------
-    ckpt_dir = "ckpts/xyz-raw/xyz-raw0.4l2/"
-
-    f_name = os.path.join(ckpt_dir, "n2n-stats.json")
-    stats = pd.read_json(f_name)
-    stats['psnr_over_loss'] = stats['valid_psnr'] / stats['valid_loss']
-
-    plt.rcParams["font.family"] = "serif"
-    fig, ax = plt.subplots()
-    ax.plot(stats['psnr_over_loss'])
-    ax.set(title='Valid PSNR / Valid Loss', xlabel='Epoch')
-    fig.tight_layout()
-    plt.show()
-    save_name = os.path.join(ckpt_dir, 'psnr-over-loss.png')
-    plt.savefig(save_name, dpi=200)
+    # ckpt_dir = "ckpts/xyz-raw/xyz-raw0.4l2/"
+    #
+    # f_name = os.path.join(ckpt_dir, "n2n-stats.json")
+    # stats = pd.read_json(f_name)
+    # stats['psnr_over_loss'] = stats['valid_psnr'] / stats['valid_loss']
+    #
+    # plt.rcParams["font.family"] = "serif"
+    # fig, ax = plt.subplots()
+    # ax.plot(stats['psnr_over_loss'])
+    # ax.set(title='Valid PSNR / Valid Loss', xlabel='Epoch')
+    # fig.tight_layout()
+    # plt.show()
+    # save_name = os.path.join(ckpt_dir, 'psnr-over-loss.png')
+    # plt.savefig(save_name, dpi=200)
     # .................................................................................................................................................
 
     # ---------------------------------------------------------------- RENAMING FILES -----------------------------------------------------------------

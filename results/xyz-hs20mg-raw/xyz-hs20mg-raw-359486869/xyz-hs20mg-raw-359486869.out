@@ -1,0 +1,95 @@
+Results will be saved to: results/xyz-hs20mg-raw
+
+Date:  Wed Mar 29 20:25:51 CDT 2023
+
+Begin batch job... 
+     File Name:       imgrec-test 
+     Job Name:        xyz-hs20mg-test 
+     Job ID:          416703017 
+     Output file:     xyz-hs20mg-test.out 
+     Dataset:         XYZ HS20MG fast scans (taken 02.06.2023)
+
+
+Working directory:  /mnt/c/users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch
+
+Using python executable at: /home/eva_mn/miniconda3/envs/n2n/bin/python
+
+
+
+----------------------------------------------------------------------------------------------
+
+
+Date:  Wed Mar 29 20:25:51 CDT 2023
+
+N2N start time:     20:25:54.73
+n2n initialized in   0:00:00.03 from n2n start
+Loading checkpoint from: ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw0.15l2/n2n-epoch130-0.00353.pt
+
+Testing/Eval parameters: 
+  Test dir = hs20mg_xyz_data/test/
+  Target dir = hs20mg_xyz_data/test/targets
+  Redux = 0
+  Output = results/xyz-hs20mg-raw
+  Load ckpt = ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw0.15l2/n2n-epoch130-0.00353.pt
+  Show output = 0
+  Montage only = False
+  Cuda = False
+  Noise type = raw
+  Noise param = 0.12
+  Seed = None
+  Crop size = 0
+  Channels = 1
+  Paired targets = True
+  Clean targets = True
+
+
+Batch job runtime was 0h:0m:22s.
+ 
+Results will be saved to: results/xyz-hs20mg-raw
+
+Date:  Wed Mar 29 20:31:38 CDT 2023
+
+Begin batch job... 
+     File Name:       imgrec-test 
+     Job Name:        xyz-hs20mg-test 
+     Job ID:          359486869 
+     Output file:     xyz-hs20mg-test.out 
+     Dataset:         XYZ HS20MG fast scans (taken 02.06.2023)
+
+
+Working directory:  /mnt/c/users/eva_n/OneDrive - The University of Texas at Austin/PyCharm Projects/emn-n2n-pytorch
+
+Using python executable at: /home/eva_mn/miniconda3/envs/n2n/bin/python
+
+
+
+----------------------------------------------------------------------------------------------
+
+
+Date:  Wed Mar 29 20:31:38 CDT 2023
+
+N2N start time:     20:31:40.43
+n2n initialized in   0:00:00.02 from n2n start
+Loading checkpoint from: ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw0.15l2/n2n-epoch130-0.00353.pt
+
+Testing/Eval parameters: 
+  Test dir = hs20mg_xyz_data/test/
+  Target dir = hs20mg_xyz_data/test/targets
+  Redux = 0
+  Output = results/xyz-hs20mg-raw
+  Load ckpt = ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw0.15l2/n2n-epoch130-0.00353.pt
+  Show output = 0
+  Montage only = False
+  Cuda = False
+  Noise type = raw
+  Noise param = 0.12
+  Seed = None
+  Crop size = 0
+  Channels = 1
+  Paired targets = True
+  Clean targets = True
+
+Saving images and montages to: results/xyz-hs20mg-raw/xyz-hs20mg-raw-359486869
+
+Batch job runtime was 0h:1m:22s.
+ 

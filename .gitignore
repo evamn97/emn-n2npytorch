@@ -11,5 +11,8 @@
 /xyz_dbtest_data/
 /combo_xyz_data/
 /tgx2_xyz_data/
-/temp_hs20mg_test/
 
+make_figs.py
+scratch.py
+psnr-hs20mg-raw.txt
+psnr-tgx-raw.txt
