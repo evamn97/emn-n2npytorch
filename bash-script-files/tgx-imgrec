@@ -1,6 +1,6 @@
 #!/bin/bash
 # --------------------------------------------------------------------------------------------------
-# Last revised: 27 November 2022
+# Last revised: 29 March 2023
 # eva_mn
 # --------------------------------------------------------------------------------------------------
 
@@ -22,24 +22,22 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-train_dir="tgx_data/train"
-valid_dir="tgx_data/valid"
-target_dir="tgx_data/targets"
-test_dir="tgx_data/test"
-test_target_dir="tgx_data/test/targets"
-data_info="TGX square pillars (22 imgs), 480/120/6 (train/val/test)\n"
+data_name="tgx_data"
+train_dir="${data_name}/train"
+valid_dir="${data_name}/valid"
+target_dir="${data_name}/targets"
+data_info="TGX square pillars (22 PNG imgs), 480/120/6 (train/val/test)\n"
 channels=3
 
 train_ckpt=""    # for loading a specific checkpoint
 
 redux=0
-noise="lower"
+noise="bernoulli"
 train_param=0.35
 report=120
 epochs=100
+batch_size=6
 loss_fun='l1'
-
-test_param=0.4
 
 # --------------------------------------------------------------------------------------------------
 ckpt_spec="${train_param}${loss_fun}"
@@ -58,9 +56,6 @@ else
 fi
 
 ckpt_save="ckpts/${ckpt_string}/${ckpt_string}${ckpt_spec}"
-new_ckpt="${ckpt_save}/${ckpt_string}${ckpt_spec}.pt"       # this doesn't work if it's a retrained checkpoint
-
-results="results/${ckpt_string}"
 
 # --------------------------------------------------------------------------------------------------
 
@@ -114,6 +109,7 @@ python src/train.py \
     --report-interval ${report} \
     -ch ${channels} \
     --nb-epochs ${epochs} \
+    -b ${batch_size} \
     -l ${loss_fun} \
     --cuda \
     --clean-targets \
@@ -123,25 +119,6 @@ python src/train.py \
 exit_code="$?"
 echo -e "Training ended with exit code: ${exit_code}"
 
-
-if [[ $exit_code == 0 ]]
-then
-    echo -e "\n----------------------------------------------------------------------------------------------\n"
-    echo -e "\nDate:  $(date)\n"
-
-    # Launch test code using virtual environment
-    python src/test.py \
-        -t ${test_dir} \
-        --target-dir ${test_target_dir} \
-        -n ${noise} \
-        -p ${test_param} \
-        --output ${results} \
-        --load-ckpt "${new_ckpt}" \
-        --ch ${channels} \
-        --cuda \
-        --montage-only \
-        --paired-targets
-fi
 
 end=$(date +%s)
 runtime_hours=$(((end-start)/3600))

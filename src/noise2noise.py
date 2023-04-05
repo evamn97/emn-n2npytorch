@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import json
-import os
 import sys
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import torch.nn as nn
 from torch.optim import Adam, lr_scheduler
@@ -116,7 +115,7 @@ class Noise2Noise(object):
 
         # Save checkpoint dictionary
         if self.p.ckpt_overwrite:
-            ckpt_filename = f'{self.job_name.replace("-imgrec", "")}{self.p.noise_param}{self.p.loss}'  # ex: hs20mg-bernoulli0.4l1
+            ckpt_filename = f'{self.job_name.replace("-imgrec", "")}{self.p.noise_param}{self.p.loss}-e{self.p.nb_epochs}'  # ex: hs20mg-bernoulli0.4l1-e100
             fname_unet = '{}/{}.pt'.format(self.ckpt_dir, ckpt_filename)  # changed 12/18/2022
             # fname_unet = '{}/{}.pt'.format(self.ckpt_dir, os.path.basename(self.ckpt_dir))  # changed 7/5/2022
         else:
@@ -176,7 +175,9 @@ class Noise2Noise(object):
         loss_str = f'{self.p.loss.upper()} loss'
         plot_per_epoch(self.ckpt_dir, ('Valid ' + loss_str), stats['valid_loss'], loss_str)
         plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
-        plot_per_epoch(self.ckpt_dir, ('Valid PSNR over ' + loss_str), (stats['valid_psnr'] / stats['valid_loss']), '')
+
+        ratio = list(np.divide(stats['valid_psnr'], stats['valid_loss']))  # PSNR/Loss
+        plot_per_epoch(self.ckpt_dir, ('Valid PSNR over ' + loss_str), ratio, '')
 
     def test(self, test_loader, show):
         """Evaluates denoiser on test set."""

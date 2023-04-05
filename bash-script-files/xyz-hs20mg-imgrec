@@ -1,14 +1,14 @@
 #!/bin/bash
 # --------------------------------------------------------------------------------------------------
-# Last revised: 27 November 2022
+# Last revised: 29 March 2023
 # eva_mn
 # --------------------------------------------------------------------------------------------------
 
-#SBATCH -o ../results/%x-%j.out                         # Name of stdout output file
+#SBATCH -o ../ckpts/%x-%j.out                           # Name of stdout output file
 #SBATCH -p p100                                         # Queue (partition) name
 #SBATCH -N 1                                            # Total # of nodes
 #SBATCH --ntasks-per-node 48                            # Total # of tasks per node (mpi tasks)
-#SBATCH -t 01:25:00                                     # Run time (hh:mm:ss)
+#SBATCH -t 05:00:00                                     # Run time (hh:mm:ss)
 #SBATCH --mail-type=none                                # Send email at begin and end of job
 #SBATCH -A Modeling-of-Microsca                         # Allocation name (req'd if you have more than 1)
 
@@ -22,24 +22,22 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-train_dir="hs20mg_xyz_data/train"
-valid_dir="hs20mg_xyz_data/valid"
-target_dir="hs20mg_xyz_data/targets"
-test_dir="hs20mg_xyz_data/test/"
-test_target_dir="hs20mg_xyz_data/test/targets"
-data_info="HS20MG holes & pillars (planeleveled), 960/240/7 (train/val/test)\n"
+data_name="hs20mg_xyz_data"
+train_dir="${data_name}/train"
+valid_dir="${data_name}/valid"
+target_dir="${data_name}/targets"
+data_info="HS20MG XYZ holes & pillars\n"
 channels=1
 
-train_ckpt=""    # for loading a specific checkpoint
+train_ckpt=""    # for retraining a checkpoint (leave empty to create a new ckpt)
 
 redux=0
 noise="raw"
-train_param=0.4
-report=240
-epochs=100
+train_param=0.25
+report=80
+epochs=200
+batch_size=13
 loss_fun='l2'
-
-test_param=0.4
 
 # --------------------------------------------------------------------------------------------------
 ckpt_spec="${train_param}${loss_fun}"
@@ -58,9 +56,6 @@ else
 fi
 
 ckpt_save="ckpts/${ckpt_string}/${ckpt_string}${ckpt_spec}"
-new_ckpt="${ckpt_save}/${ckpt_string}${ckpt_spec}.pt"       # this doesn't work if it's a retrained checkpoint
-
-results="results/${ckpt_string}"
 
 # --------------------------------------------------------------------------------------------------
 
@@ -101,8 +96,8 @@ fi
 echo -e "Using python executable at: $(which python)\n\n"
 
 
- # Launch train code using virtual environment
- python src/train.py \
+# Launch train code using virtual environment
+python src/train.py \
     -t ${train_dir} \
     -v ${valid_dir} \
     --target-dir ${target_dir} \
@@ -113,6 +108,7 @@ echo -e "Using python executable at: $(which python)\n\n"
     --report-interval ${report} \
     -ch ${channels} \
     --nb-epochs ${epochs} \
+    -b ${batch_size} \
     -l ${loss_fun} \
     --cuda \
     --paired-targets \
@@ -122,26 +118,6 @@ echo -e "Using python executable at: $(which python)\n\n"
 
 exit_code="$?"
 echo -e "Training ended with exit code: ${exit_code}"
-
-# # Launch testing code if training was successful
-# if [[ $exit_code == 0 ]]
-# then
-#     echo -e "\n----------------------------------------------------------------------------------------------\n"
-#     echo -e "\nDate:  $(date)\n"
-
-#     # Launch test code using virtual environment
-#     python src/test.py \
-#         -t ${test_dir} \
-#         --target-dir ${test_target_dir} \
-#         -n ${noise} \
-#         -p ${test_param} \
-#         --output ${results} \
-#         --load-ckpt "${new_ckpt}" \
-#         --ch ${channels} \
-#         --cuda \
-#         --montage-only \
-#         --paired-targets
-# fi
 
 
 end=$(date +%s)

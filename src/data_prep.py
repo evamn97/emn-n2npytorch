@@ -1,19 +1,17 @@
+import os
+import random
+import shutil
 from typing import Union
 
+import PIL.Image as Image
 import numpy as np
 import pandas as pd
-import random
 import torch
 import torchvision.transforms as trf
-from torchvision.transforms import functional as tvF
-import PIL.Image as Image
-import os
-import sys
-from tqdm import tqdm
-from pathos.helpers import cpu_count, freeze_support
+from pathos.helpers import cpu_count
 from pathos.pools import ProcessPool as Pool
-import shutil
-from time import sleep
+from torchvision.transforms import functional as tvF
+from tqdm import tqdm
 
 
 def normalize(arr, as_image=False):

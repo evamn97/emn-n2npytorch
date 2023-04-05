@@ -1,6 +1,6 @@
 #!/bin/bash
 # --------------------------------------------------------------------------------------------------
-# Last revised: 2 March 2023
+# Last revised: 5 April 2023
 # eva_mn
 # --------------------------------------------------------------------------------------------------
 
@@ -10,20 +10,20 @@ start=$(date +%s)
 set -a
 jobid=$(date +%N)
 filename="$(basename -s .sh "$0")"
-jobname="xyz-tgx-test"                                               # SET JOB NAME!!!!!!!!!!!
+jobname="xyz-hs20mg-test"                                               # SET JOB NAME!!!!!!!!!!!
 set +a    # only need to export job info vars
 
 # !!!!!!!---------------------------------- SET INPUT VARS ----------------------------------!!!!!!!
-test_dir="temp_hs20mg_test/"
-test_target_dir="temp_hs20mg_test/targets"
-data_info="Original HS20MG scans (same as training)\n"
+data_name="hs20mg_data"
+test_dir="${data_name}/test/"
+test_target_dir="${test_dir}targets"
 channels=1
 
 redux=0
-noise="raw"
-test_param=0.4
+noise="bernoulli"
+test_param=0.35
 
-test_ckpt="ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw0.4l2/n2n-epoch100-0.00327.pt"            # SET TEST CKPT!!!!!!!!!!!
+test_ckpt="ckpts/hs20mg-bernoulli/hs20mg-bernoulli-0.4l2/hs20mg-bernoulli-0.4l2.pt"            # SET TEST CKPT!!!!!!!!!!!
 
 # --------------------------------------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ echo -e "Begin batch job... \n \
     Job Name:        ${jobname} \n \
     Job ID:          ${jobid} \n \
     Output file:     ${jobname}.out \n \
-    Dataset:         ${data_info}\n"
+    Dataset:         ${data_name}\n"
 
 cd ..
 echo -e "Working directory:  $(pwd)\n"
