@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
-import sys
-import torch
-import torch.nn as nn
-from typing import Union
 import datetime
+import os
+from argparse import ArgumentParser
 
 from datasets import load_dataset
 from noise2noise import Noise2Noise
-from argparse import ArgumentParser
 
 
 def parse_args():
@@ -22,9 +18,13 @@ def parse_args():
     # Data parameters
     parser.add_argument('-t', '--train-dir', help='directory path containing training images', default='../data/train', type=str)
     parser.add_argument('-v', '--valid-dir', help='directory path containing validation images', default='../data/valid', type=str)
-    parser.add_argument('--target-dir', help='directory path containing target images, if applicable.', default='../data/targets', type=str)
-    parser.add_argument('-r', '--redux', help='ratio (0.1 - 0.99) of dataset size to use for training (redux=0 means no reduction). useful for quick debugging.', default=0)
-    parser.add_argument('--load-ckpt', help='load ckpt from a previously trained model to use in training', default=None, type=str)
+    parser.add_argument('--target-dir', help='directory path containing target images, if applicable.',
+                        default='../data/targets', type=str)
+    parser.add_argument('-r', '--redux',
+                        help='reduction ratio (0.1 - 0.99) of dataset size (redux=0 means no reduction). useful for quick debugging.',
+                        default=0)
+    parser.add_argument('--load-ckpt', help='load ckpt from a previously trained model to use in training',
+                        default=None, type=str)
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts', type=str)
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
     parser.add_argument('--report-interval', help='batch report interval', default=100, type=int)
@@ -64,17 +64,18 @@ if __name__ == '__main__':
         params.noise_param = params.noise_param / (10 ** mag)
 
     # debugging only
-    # params.train_dir = "../hs20mg_data/train"
-    # params.valid_dir = "../hs20mg_data/valid"
-    # params.target_dir = "../hs20mg_data/targets"
+    # params.train_dir = "../combo_xyz_data/train"
+    # params.valid_dir = "../combo_xyz_data/valid"
+    # params.target_dir = "../combo_xyz_data/targets"
     # params.ckpt_overwrite = True
     # params.nb_epochs = 3
-    # params.channels = 3
+    # params.batch_size = 13
+    # params.channels = 1
     # params.noise_type = 'raw'
     # params.paired_targets = True
     # # params.clean_targets = True
     # params.cuda = True
-    # params.redux = 0.1
+    # params.redux = 0.9  # 90% reduction
     # params.show_progress = True
 
     python_start = datetime.datetime.now()

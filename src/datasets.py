@@ -1,22 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
-from datetime import datetime
-
 import matplotlib
-import numpy as np
-import pandas as pd
-import torch
-import torch.nn.functional as F
-import torchvision.transforms as trf
-import torchvision.transforms.functional as tvF
-from PIL import Image
 from matplotlib import rcParams
+from torch.utils.data import Dataset, DataLoader
 
 from data_prep import *
-
-from torch.utils.data import Dataset, DataLoader
 
 rcParams['font.family'] = 'serif'
 matplotlib.use('agg')
@@ -183,7 +172,7 @@ class NoisyDataset(AbstractDataset):
         if self.redux != 0:
             if not 0.0 < self.redux < 1.0:
                 raise ValueError("redux ratio must be a float between 0.0 and 1.0 (non-inclusive)")
-            new_size = int(self.redux * len(self.imgs))
+            new_size = int((1 - self.redux) * len(self.imgs))
             self.imgs = self.imgs[:new_size]  # reduce dataset size to given ratio
             # targets are found by source name anyway so no need to change self.targets list
 

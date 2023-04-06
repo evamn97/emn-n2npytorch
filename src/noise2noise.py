@@ -252,12 +252,18 @@ class Noise2Noise(object):
             loss = self.loss(source_denoised, target)
             loss_meter.update(loss.item())
 
-            # Compute PSRN
-            # TODO: Find a way to offload to GPU, and deal with uneven batch sizes
+            # Compute PSNR
+            # TODO: Find a way to offload to GPU
             for i in range(self.p.batch_size):
                 source_denoised = source_denoised.cpu()
                 target = target.cpu()
-                psnr_meter.update(psnr(source_denoised[i], target[i]).item())
+                try:
+                    psnr_meter.update(psnr(source_denoised[i], target[i]).item())
+                except IndexError:
+                    # this will trigger when batch size causes uneven division of data (with remainder)
+                    # so final batch is smaller than given batch size and the loop goes out of bounds
+
+                    break
 
         valid_loss = loss_meter.avg
         valid_time, _, valid_time_td = time_elapsed_since(valid_start)

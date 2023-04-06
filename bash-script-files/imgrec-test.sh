@@ -10,14 +10,14 @@ start=$(date +%s)
 set -a
 jobid=$(date +%N)
 filename="$(basename -s .sh "$0")"
-jobname="xyz-hs20mg-test"                                               # SET JOB NAME!!!!!!!!!!!
+jobname="hs20mg-test"                                               # SET JOB NAME!!!!!!!!!!!
 set +a    # only need to export job info vars
 
 # !!!!!!!---------------------------------- SET INPUT VARS ----------------------------------!!!!!!!
 data_name="hs20mg_data"
 test_dir="${data_name}/test/"
 test_target_dir="${test_dir}targets"
-channels=1
+channels=3
 
 redux=0
 noise="bernoulli"
