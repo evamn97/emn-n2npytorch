@@ -14,5 +14,6 @@
 
 make_figs.py
 scratch.py
-psnr-hs20mg-raw.txt
-psnr-tgx-raw.txt
+psnr-*
+niqe-*
+tgx2-niqe.txt
