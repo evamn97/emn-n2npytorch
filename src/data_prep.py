@@ -63,32 +63,23 @@ def arr3d_to_xyz(arr3d, out_path):
         z_df.to_csv(out_path, header=False, index=False, sep='\t')
 
 
-def partial_string_match(str1: str, str2: str):
-    i = len(str1) - 1
-    while i > 0:
-        if str1[:i] in str2:
-            return True
-        i -= 1
-    return False
-
-
 def find_target(targets_list: list, source_name: str):
     # first check if source_name is an exact substring of target:
-    res = [t for t in targets_list if source_name in t]
+    res = [t for t in targets_list if (source_name in t or t in source_name)]
     if len(res) == 1:
         target = res[0]
         return target
-
-    # if there's no direct match, try partial substring matching
-    else:   # len(res) == 0
-        res = [t for t in targets_list if partial_string_match(source_name, t)]
+    # if there's no direct match, try partial prefix matching
+    else:
+        sub = max([os.path.commonprefix([t, source_name]) for t in targets_list], key=len)
+        res = [t for t in targets_list if sub in t]
         if len(res) == 1:
             target = res[0]
             return target
         # if there's more than one direct match, raise error
         else:
             raise ValueError(
-                f'Expected single target, got {len(res)}. Check file naming: source and target are matched by partial name matching (from beginning of the string). See src.data_prep.find_target() for details.')
+                f'Expected single target, got {len(res)}. Check file naming: source and target are matched by prefix (assumes difference is a suffix, e.g., "_corrupted"). See src.data_prep.find_target() for details.')
 
 
 def conversions(f_in, new_type):
