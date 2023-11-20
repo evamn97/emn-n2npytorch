@@ -11,11 +11,11 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-data_root="test_dataset"
+data_root="../tiny-imagenet-imgrec/"
 train_dir="${data_root}/train"
 valid_dir="${data_root}/valid"
 target_dir="${data_root}/targets"
-data_info="HS20MG XYZ holes & pillars\n"
+data_info="Tiny Imagenet corrupted images\n"
 channels=3
 
 train_ckpt=""    # for fintuning a pretrained model (leave empty to create a new ckpt)

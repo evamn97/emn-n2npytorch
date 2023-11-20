@@ -4,6 +4,7 @@
 /pub_figures/
 /ckpts
 /results
+*__pycache__
 
 /*_data
 /tgx_data/
@@ -20,3 +21,5 @@ scratch.py
 psnr-*
 niqe-*
 tgx2-niqe.txt
+debugging.py
+*.DS_Store
