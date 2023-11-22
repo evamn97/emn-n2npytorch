@@ -10,7 +10,6 @@ import numpy as np
 from math import log10
 from datetime import datetime
 from PIL import Image
-import pyiqa
 
 from matplotlib import rcParams
 
@@ -95,7 +94,7 @@ def psnr(input, target):
     return 10 * torch.log10(1 / F.mse_loss(input, target))
 
 
-def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoised_t, clean_t, show, iqa, montage_only=False):
+def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoised_t, clean_t, show, montage_only=False):
     """Creates montage for easy comparison."""
 
     fig, ax = plt.subplots(1, 3, figsize=(29, 10), dpi=200)
@@ -133,29 +132,6 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     f = open(os.path.join(save_path, 'psnr.txt'), 'a')
     f.write("{:.2f},{:.2f}\n".format(psnr_vals[0], psnr_vals[1]))
     f.close()
-
-    # try:
-    #     niqe_vals = np.array(iqa(source).item(), iqa(denoised).item(), iqa(clean).item()).round(2)
-    # except:     # torch._C._LinAlgError     # this exception can't be used directly here, idk what type it is
-    #     # TODO: this comes up when there's a nonconvergence error, not sure how to fix it yet
-    #     niqe_vals = ['nan', 'nan', 'nan']
-    try:
-        niqe_vals = [round(iqa(source).item(), 2)]
-    except:
-        niqe_vals = ['nan']
-    try:
-        niqe_vals.append(round(iqa(denoised).item(), 2))
-    except:
-        niqe_vals.append('nan')
-    try:
-        niqe_vals.append(round(iqa(clean).item(), 2))
-    except:
-        niqe_vals.append('nan')
-
-
-    f2 = open(os.path.join(save_path, 'niqe.txt'), 'a')
-    f2.write(f"{niqe_vals[0]},{niqe_vals[1]},{niqe_vals[2]}\n")
-    f2.close()
 
     fname = os.path.splitext(img_name)[0]
     if not montage_only:

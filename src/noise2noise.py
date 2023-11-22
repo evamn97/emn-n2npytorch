@@ -111,7 +111,7 @@ class Noise2Noise(object):
             # if not os.path.isdir(self.p.ckpt_save_path):
             #     os.mkdir(self.p.ckpt_save_path)
             if not os.path.isdir(self.ckpt_dir):
-                os.mkdir(self.ckpt_dir)
+                os.makedirs(self.ckpt_dir)
 
         # Save checkpoint dictionary
         if self.p.ckpt_overwrite:
@@ -225,18 +225,11 @@ class Noise2Noise(object):
             f.write("input,result\n")
             f.close()
 
-        if not os.path.isfile(os.path.join(save_path, 'niqe.txt')):
-            f2 = open(os.path.join(save_path, 'niqe.txt'), 'w')  # create a text file to save niqe values to
-            f2.write("input,result,target\n")
-            f2.close()
-        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        niqe = pyiqa.create_metric('niqe', device=device)
-
         for i in range(len(source_imgs)):
             img_name = test_loader.dataset.imgs[i]
             create_montage(img_name, self.p.noise_type, self.p.noise_param, save_path,
                            source_imgs[i], denoised_imgs[i], clean_imgs[i],
-                           show, niqe, montage_only=self.p.montage_only)
+                           show, montage_only=self.p.montage_only)
 
     def eval(self, valid_loader):
         """Evaluates denoiser on validation set."""

@@ -11,7 +11,7 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-data_root="../tiny-imagenet-imgrec/"
+data_root="../tiny-imgrec/"
 train_dir="${data_root}/train"
 valid_dir="${data_root}/valid"
 target_dir="${data_root}/targets"
@@ -23,9 +23,9 @@ train_ckpt=""    # for fintuning a pretrained model (leave empty to create a new
 redux=0
 noise="raw"
 train_param=0.25
-report=80
-epochs=200
-batch_size=13
+report=5000
+epochs=100
+batch_size=10
 loss_fun='l1'
 
 # --------------------------------------------------------------------------------------------------
@@ -44,9 +44,7 @@ echo -e "Begin batch job... \n \
     File Name:       ${filename} \n \
     Dataset:         ${data_info}\n"
 
-cd ..
 echo -e "Working directory:  $(pwd)\n"
-
 
 echo -e "Using python executable at: $(which python)\n\n"
 
@@ -67,7 +65,7 @@ python src/train.py \
     -l ${loss_fun} \
     --cuda \
     --paired-targets \
-    --verbose \
+    --show-progress \
     --load-ckpt "${train_ckpt}"
 
 
