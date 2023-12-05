@@ -219,13 +219,9 @@ class NoisyDataset(AbstractDataset):
 
         if os.path.splitext(img_name)[-1] in ['.xyz', '.txt', '.csv']:  # load xyz
             img = normalize(xyz_to_zfield(img_path, return3d=False))
-            if self.channels != 1:
-                raise ValueError("The number of channels for xyz files must be 1, but got {}. Check channels input.".format(self.channels))
         else:  # load image
-            with Image.open(img_path).convert('RGB') as img:
+            with Image.open(img_path) as img:
                 img.load()
-                if self.channels != 3:
-                    raise ValueError("The number of channels for image files must be 3, but got {}. Check channels input.".format(self.channels))
         # Random square crop
         if not self.paired_targets and self.crop_size > 0:
             img = self._random_crop([img])[0]
@@ -239,7 +235,7 @@ class NoisyDataset(AbstractDataset):
             if os.path.splitext(trgt_name)[-1] in ['.xyz', '.txt', '.csv']:
                 trgt = normalize(xyz_to_zfield(trgt_path, return3d=False))
             else:
-                with Image.open(trgt_path).convert('RGB') as trgt:
+                with Image.open(trgt_path) as trgt:
                     trgt.load()
             target = tvF.to_tensor(trgt)
         elif self.clean_targets:

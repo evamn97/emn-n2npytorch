@@ -67,19 +67,27 @@ def find_target(targets_list: list, source_name: str):
     # first check if source_name is an exact substring of target:
     res = [t for t in targets_list if (source_name in t or t in source_name)]
     if len(res) == 1:
-        target = res[0]
-        return target
+        return res[0]
+
     # if there's no direct match, try partial prefix matching
     else:
         sub = max([os.path.commonprefix([t, source_name]) for t in targets_list], key=len)
         res = [t for t in targets_list if sub in t]
         if len(res) == 1:
-            target = res[0]
-            return target
-        # if there's more than one direct match, raise error
+            return res[0]
+
+        # if there's more than one direct match, try once more then raise error
         else:
-            raise ValueError(
-                f'Expected single target, got {len(res)}. Check file naming: source and target are matched by prefix (assumes difference is a suffix, e.g., "_corrupted"). See src.data_prep.find_target() for details.')
+            # try matching with substring one character longer bc commonprefix usually tries to return multiple results
+            #   (e,g,. "n03599486_220_corrupt" returns matches "n03599486_220_clean" *and* "n03599486_220_creepclean" because suffixes "corrupt" and "creepclean" both start with "c")
+            res2 = [t for t in targets_list if (source_name[:len(sub)+1] in t or source_name[:len(sub)+2] in t)]
+            if len(res2) == 1:
+                return res2[0]
+            # if that doesn't work, raise error with problematic substring and source name for reference
+            else:
+                raise ValueError(
+                    f'Expected single target for {source_name}, got {len(res)} from substrings {sub} and {source_name[:len(sub)+2]}. ',
+                    f'Check file naming: source and target are matched by prefix (assumes difference is a suffix, e.g., "_corrupted"). See src.data_prep.find_target() for details.')
 
 
 def conversions(f_in, new_type):
@@ -189,7 +197,7 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
         name, ext = os.path.splitext(filename)
         filepath = os.path.join(in_path, filename)
         if ext.lower() in ['.png', '.jpg', '.jpeg']:  # image extensions must be in this set, other items are skipped
-            with Image.open(filepath).convert('RGB') as im:
+            with Image.open(filepath) as im:
                 im.load()
         elif ext.lower() in ['.xyz']:
             im = xyz_to_zfield(filepath, return3d=True)
@@ -262,9 +270,9 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
         t_path = os.path.join(target_path_in, target_file)
 
         if ext.lower() in ['.png', '.jpg', '.jpeg']:  # image extensions must be in this set, other items are skipped
-            with Image.open(s_path).convert('RGB') as source:  # load source image
+            with Image.open(s_path) as source:  # load source image
                 source.load()
-            with Image.open(t_path).convert('RGB') as target:  # load target image
+            with Image.open(t_path) as target:  # load target image
                 target.load()
         elif ext.lower() in ['.xyz']:
             source = xyz_to_zfield(s_path, return3d=True)

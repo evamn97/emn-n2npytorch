@@ -11,7 +11,7 @@ from torch.optim import Adam, lr_scheduler
 from unet import UNet
 from utils import *
 
-torch.set_default_dtype(torch.float64)
+# torch.set_default_dtype(torch.float64)
 
 
 class Noise2Noise(object):
@@ -141,8 +141,7 @@ class Noise2Noise(object):
                 self.model.load_state_dict(torch.load(ckpt_fname, map_location='cpu'))
         except RuntimeError:
             raise ValueError("There is a mismatch between the UNet and the loaded checkpoint. " +
-                             "Try checking the requested number of channels and ensure it matches what the checkpoint was trained on. " +
-                             "\n(PNG or JPG => 3 channels, XYZ and Z only => 1)")
+                             "Try checking the requested number of channels and ensure it matches what the checkpoint was pretrained on. ")
 
     def _on_epoch_end(self, stats, train_loss, epoch, epoch_start, valid_loader):
         """Tracks and saves starts after each epoch."""
@@ -316,16 +315,16 @@ class Noise2Noise(object):
                     source = source.cuda()
                     target = target.cuda()
 
-                source = source.double()
-                target = target.double()
+                source = source  # .double()
+                target = target  # .double()
 
                 # Denoise image
                 try:
-                    source_denoised = self.model(source).double()
+                    source_denoised = self.model(source)  # .double()
                 except RuntimeError:
                     raise ValueError("There is a size mismatch between the number of UNet channels and the input data. " +
                                      "Check the requested number of channels. " +
-                                     "\n(PNG & JPG => 3 channels, XYZ => 1 or 3)")
+                                     "\n(e.g., RGB images = 3 channels, L (grayscale) = 4, XYZ file = 1, etc)")
 
                 loss = self.loss(source_denoised, target)
                 loss_meter.update(loss.item())
