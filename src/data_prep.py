@@ -249,7 +249,7 @@ def augment(in_path: str, out_path: str, total_imgs: int, min_px=None, max_angle
     pbar.close()
     pool.close()
     pool.join()
-    pool.clear()
+    pool.terminate()
     print("Done!")
 
 
@@ -337,7 +337,7 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
     pbar.close()
     pool.close()
     pool.join()
-    pool.clear()
+    pool.terminate()
     print("Done!")
 
 
