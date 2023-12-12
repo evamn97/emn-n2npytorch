@@ -24,5 +24,6 @@ tgx2-niqe.txt
 debugging.py
 *.DS_Store
 
-tinyimagenet-imgrec
-localtinyimagenet-imgrec
+tinyimagenet-imgrec.sh
+localtinyimagenet-imgrec.sh
+extratinyimagenet-imgrec.sh

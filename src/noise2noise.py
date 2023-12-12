@@ -199,8 +199,8 @@ class Noise2Noise(object):
 
         for batch_idx, (source, target) in enumerate(test_loader):
 
-            source = source.double()
-            target = target.double()
+            source = source # .double()
+            target = target # .double()
 
             source_imgs.append(source)
             clean_imgs.append(target)
@@ -209,7 +209,7 @@ class Noise2Noise(object):
                 source = source.cuda()
 
             # Denoise
-            denoised_img = self.model(source).detach().double()
+            denoised_img = self.model(source).detach() # .double()
             denoised_imgs.append(denoised_img)
 
         # Squeeze tensors
@@ -244,11 +244,11 @@ class Noise2Noise(object):
                 source = source.cuda()
                 target = target.cuda()
 
-            source = source.double()
-            target = target.double()
+            source = source # .double()
+            target = target # .double()
 
             # Denoise
-            source_denoised = self.model(source).double()
+            source_denoised = self.model(source) # .double()
 
             # Update loss
             loss = self.loss(source_denoised, target)
