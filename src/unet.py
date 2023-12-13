@@ -8,7 +8,7 @@ import torch.nn as nn
 class UNet(nn.Module):
     """Custom U-Net architecture for Noise2Noise (see Appendix, Table 2)."""
 
-    def __init__(self, in_channels=3, out_channels=3):  # is this what forces the 3-channel images?
+    def __init__(self, in_channels=3, out_channels=3):
         """Initializes U-Net."""
 
         super(UNet, self).__init__()

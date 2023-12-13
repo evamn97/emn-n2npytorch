@@ -22,7 +22,7 @@ def parse_args():
                         default='../data/targets', type=str)
     parser.add_argument('-r', '--redux',
                         help='reduction ratio (0.1 - 0.99) of dataset size (redux=0 means no reduction). useful for quick debugging.',
-                        default=0)
+                        default=0, type=float)
     parser.add_argument('--load-ckpt', help='load ckpt from a previously trained model to use in training',
                         default=None, type=str)
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts', type=str)
@@ -47,7 +47,7 @@ def parse_args():
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='random crop size', default=0, type=int)
     parser.add_argument('--clean-targets', help='use clean targets for training', action='store_true')
-    parser.add_argument('--paired-targets', help='uses targets from "targets" folder in data directory', action='store_true')
+    parser.add_argument('--paired-targets', help='uses targets from "targets" folder in data directory. overrides "--clean-targets"', action='store_true')
 
     return parser.parse_args()
 
@@ -58,25 +58,15 @@ if __name__ == '__main__':
     # Parse training parameters
     params = parse_args()
 
+    if (params.noise_type == 'raw' and not params.paired_targets):
+        params.paired_targets = True
+    if params.paired_targets:
+        params.clean_targets = False
+
     # error handling for noise param greater than 1
     if params.noise_param >= 1:
         mag = len(str(int(params.noise_param)))
         params.noise_param = params.noise_param / (10 ** mag)
-
-    # debugging only
-    # params.train_dir = "../combo_xyz_data/train"
-    # params.valid_dir = "../combo_xyz_data/valid"
-    # params.target_dir = "../combo_xyz_data/targets"
-    # params.ckpt_overwrite = True
-    # params.nb_epochs = 3
-    # params.batch_size = 13
-    # params.channels = 1
-    # params.noise_type = 'raw'
-    # params.paired_targets = True
-    # # params.clean_targets = True
-    # params.cuda = True
-    # params.redux = 0.9  # 90% reduction
-    # params.show_progress = True
 
     python_start = datetime.datetime.now()
     local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo

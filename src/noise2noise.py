@@ -33,16 +33,11 @@ class Noise2Noise(object):
         else:
             self.job_id = f'{datetime.now():%m%d%H%M}'  # ex: 05311336
         if "jobname" in os.environ and "idv" not in os.environ["jobname"]:
-            self.job_name = os.environ["jobname"] + "-" + self.p.noise_type  # ex: tgx-n2npt-train-bernoulli
+            self.job_name = os.environ["jobname"]  # ex: tgx-n2npt-train-bernoulli
         elif "filename" in os.environ:
-            self.job_name = os.environ["filename"] + "-" + self.p.noise_type  # ex: hs20mg-n2npt-train-lower (for non-slurm scripts)
+            self.job_name = f'{os.environ["filename"].replace("-imgrec", "")}{("redux" + self.p.redux) if self.p.redux > 0 else ""}-{self.p.noise_type}{"clean" if (trainable and self.p.clean_targets) else ""}{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss}'  # ex: tinyimagenetredux0.9-bernoulli0.5l1
         else:
-            self.job_name = self.p.noise_type  # ex: bernoulli
-            if trainable and self.p.clean_targets:
-                self.job_name += "-clean"  # ex: bernoulli-clean
-            if self.p.paired_targets:
-                self.job_name += "-paired"  # ex: bernoulli-paired
-            self.job_name += "-" + self.job_id  # ex: bernoulli-paired-05311336
+            self.job_name = f'{self.p.noise_type}{"-clean" if (trainable and self.p.clean_targets) else ""}{self.job_id}'
 
         # debugging
         print(f'n2n initialized in   {str(datetime.now() - self.n2n_start)[:-4]} from n2n start')
@@ -98,24 +93,21 @@ class Noise2Noise(object):
         if first:
             if self.p.load_ckpt and os.path.isfile(self.p.load_ckpt):  # indicate previous ckpt in ckpt_dir_name
                 if "retrain" in self.p.load_ckpt:
-                    # ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-{}{}".format(self.p.noise_param, self.p.loss)
-                    self.ckpt_dir = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-{}{}".format(self.p.noise_param, self.p.loss)
+                    # self.ckpt_dir = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-{}{}".format(self.p.noise_param, self.p.loss)
+                    self.ckpt_dir = f'{os.path.basename(os.path.dirname(self.p.load_ckpt))}{("redux" + self.p.redux) if self.p.redux > 0 else ""}-{self.p.noise_param}{self.p.loss}'
                 else:
-                    # ckpt_dir_name = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)
-                    self.ckpt_dir = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)  # ex: hs20mg-bernoulli-retrain-0.4l1
+                    # self.ckpt_dir = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)  # ex: hs20mg-bernoulli-retrain-0.4l1
+                    self.ckpt_dir = f'{os.path.basename(os.path.dirname(self.p.load_ckpt))}-retrain{("redux" + self.p.redux) if self.p.redux > 0 else ""}-{self.p.noise_param}{self.p.loss}'
             else:
-                # ckpt_dir_name = f'{self.job_name.replace("-imgrec", "")}{self.p.noise_param}{self.p.loss}'  # ex: hs20mg-bernoulli0.4l1
-                self.ckpt_dir = self.p.ckpt_save_path
-            # self.ckpt_dir = os.path.normpath(os.path.join(self.p.ckpt_save_path, ckpt_dir_name))
+                # self.ckpt_dir = self.p.ckpt_save_path
+                self.ckpt_dir = os.path.join(self.p.ckpt_save_path, f'{self.job_name}')
 
-            # if not os.path.isdir(self.p.ckpt_save_path):
-            #     os.mkdir(self.p.ckpt_save_path)
             if not os.path.isdir(self.ckpt_dir):
                 os.makedirs(self.ckpt_dir)
 
         # Save checkpoint dictionary
         if self.p.ckpt_overwrite:
-            ckpt_filename = f'{self.job_name.replace("-imgrec", "")}{self.p.noise_param}{self.p.loss}-e{self.p.nb_epochs}'  # ex: hs20mg-bernoulli0.4l1-e100
+            ckpt_filename = f'{self.job_name}{self.p.noise_param}{self.p.loss}-e{self.p.nb_epochs}'  # ex: hs20mg-bernoulli0.4l1-e100
             fname_unet = '{}/{}.pt'.format(self.ckpt_dir, ckpt_filename)  # changed 12/18/2022
             # fname_unet = '{}/{}.pt'.format(self.ckpt_dir, os.path.basename(self.ckpt_dir))  # changed 7/5/2022
         else:
@@ -298,6 +290,7 @@ class Noise2Noise(object):
         for epoch in range(self.p.nb_epochs):
             if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
                 print('EPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
+                sys.stdout.flush()
 
             # Some stats trackers
             epoch_start = datetime.now()
@@ -340,11 +333,14 @@ class Noise2Noise(object):
                     if self.p.verbose:
                         if self.p.show_progress:
                             print("")
-                        print('Epoch {} finished at {} from n2n start.'.format((epoch + 1), str((datetime.now() - self.n2n_start))[:-4]))
                         show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
+                        sys.stdout.flush()
                     train_loss_meter.update(loss_meter.avg)
                     loss_meter.reset()
                     time_meter.reset()
+            if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
+                print('Epoch {} finished at {} from n2n start.'.format((epoch + 1), str((datetime.now() - self.n2n_start))[:-4]))
+                sys.stdout.flush()
 
             # Epoch end, save and reset tracker
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)
