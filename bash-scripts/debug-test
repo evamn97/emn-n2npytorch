@@ -1,9 +1,7 @@
 #!/bin/bash
 # ----------------------------------------------------
-# Last revised: 06 July 2022
 # eva_mn
 # ----------------------------------------------------
-
 
 #SBATCH -o ../results/%x.out                  	        # Name of stdout output file
 #SBATCH -p gtx                                          # Queue (partition) name
@@ -23,9 +21,9 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
-test_dir="xyz_dbtest_data/"
-target_dir="xyz_dbtest_data/targets"
-data_info="B&W, HS20MG holes & pillars (XYZ files) (60 original imgs), 960/240/7 (train/val/test)\n"
+test_dir="hs20mg_xyz_data/test"
+target_dir="hs20mg_xyz_data/test/targets"
+data_info="B&W, HS20MG holes & pillars (XYZ files)\n"
 
 noise="raw"
 train_noise=$noise  # NOTE: assumes noise type is the same as training
@@ -33,7 +31,7 @@ test_param=1
 results="results"
 channels=1
 
-ckpt="ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw.pt"
+ckpt="ckpts/xyz-hs20mg-raw/xyz-hs20mg-raw0.4l2/n2n-epoch75-0.00293.pt"
 # -------------------------------------------------------------------------------
 
 echo -e "\nDate:  $(date)\n"
@@ -54,20 +52,20 @@ echo -e "Working directory:  $(pwd)\n"
 
 
 # for using conda environments in SLURM bash scripts
-if [ $(( ! CONDA_SHLVL)) ]
-then
-    source /work/08261/evanat/maverick2/miniconda3/etc/profile.d/conda.sh
-    conda activate imgrec
-    # echo -e "conda is now initialized for this script and imgrec has been activated.\n"
-else
-    # conda is already initialized
-    if [ "${CONDA_DEFAULT_ENV}" != imgrec ]
-    then
-        source /work/08261/evanat/maverick2/miniconda3/etc/profile.d/conda.sh
-        conda activate imgrec
-        # echo -e "the imgrec environment has been activated.\n"
-    fi
-fi
+#if [ $(( ! CONDA_SHLVL)) ]
+#then
+#    source /work/08261/evanat/maverick2/miniconda3/etc/profile.d/conda.sh
+#    conda activate imgrec
+#    # echo -e "conda is now initialized for this script and imgrec has been activated.\n"
+#else
+#    # conda is already initialized
+#    if [ "${CONDA_DEFAULT_ENV}" != imgrec ]
+#    then
+#        source /work/08261/evanat/maverick2/miniconda3/etc/profile.d/conda.sh
+#        conda activate imgrec
+#        # echo -e "the imgrec environment has been activated.\n"
+#    fi
+#fi
 
 echo -e "Using python executable at: $(which python)\n"
 
@@ -82,7 +80,6 @@ python src/test.py \
     --load-ckpt "${ckpt}" \
     --ch ${channels} \
     --cuda \
-    --montage-only \
     --paired-targets
 
 

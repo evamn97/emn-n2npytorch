@@ -95,7 +95,6 @@ def trainvalid_loss_plots(ckpt_dir, loss_str, train_loss, valid_loss):
     plt.close()
 
 
-
 def reinhard_tonemap(tensor):
     """Reinhard et al. (2002) tone mapping."""
 
