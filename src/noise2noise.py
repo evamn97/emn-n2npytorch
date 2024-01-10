@@ -308,8 +308,8 @@ class Noise2Noise(object):
                     source = source.cuda()
                     target = target.cuda()
 
-                source = source  # .double()
-                target = target  # .double()
+                # source = source.double()
+                # target = target.double()
 
                 # Denoise image
                 try:
@@ -317,14 +317,14 @@ class Noise2Noise(object):
                 except RuntimeError:
                     raise ValueError("There is a size mismatch between the number of UNet channels and the input data. " +
                                      "Check the requested number of channels. " +
-                                     "\n(e.g., RGB images = 3 channels, L (grayscale) = 4, XYZ file = 1, etc)")
+                                     "\n(e.g., RGB images = 3 channels, L (grayscale) = 1, XYZ file = 1, etc)")
 
                 loss = self.loss(source_denoised, target)
                 loss_meter.update(loss.item())
 
                 # Zero gradients, perform a backward pass, and update the weights
                 self.optim.zero_grad()
-                loss.backward()
+                loss.backward()     # takes a bit longer?
                 self.optim.step()
 
                 # Report/update statistics
@@ -339,6 +339,7 @@ class Noise2Noise(object):
                     train_loss_meter.update(loss_meter.avg)
                     loss_meter.reset()
                     time_meter.reset()
+            
             if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
                 print('Epoch {} finished at {} from n2n start.'.format((epoch + 1), str((datetime.now() - self.n2n_start))[:-4]))
                 sys.stdout.flush()
