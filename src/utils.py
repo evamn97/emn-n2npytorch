@@ -10,6 +10,7 @@ import numpy as np
 from math import log10
 from datetime import datetime
 from PIL import Image
+from skimage.metrics import structural_similarity as SSIM
 
 from matplotlib import rcParams
 
@@ -81,6 +82,20 @@ def plot_per_epoch(ckpt_dir, title, measurements, y_label):
     plt.close()
 
 
+def trainvalid_loss_plots(ckpt_dir, loss_str, train_loss, valid_loss):
+
+    fig, ax = plt.subplots(dpi=200)
+    ax.plot(range(1, len(train_loss) + 1), train_loss, label='Train Loss')
+    ax.plot(range(1, len(valid_loss) + 1), valid_loss, label='Valid Loss')
+    ax.set(xlabel='Epoch', ylabel=f'{loss_str}, Loss', title="Train and Valid Loss")
+    ax.legend('upper right')
+    fig.tight_layout()
+
+    plt.savefig(os.path.join(ckpt_dir, f'train-valid-loss.png'))
+    plt.close()
+
+
+
 def reinhard_tonemap(tensor):
     """Reinhard et al. (2002) tone mapping."""
 
@@ -113,6 +128,7 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
 
     # Build image montage
     psnr_vals = [psnr(source_t, clean_t), psnr(denoised_t, clean_t)]
+    ssim_vals = [SSIM(np.asarray(source), np.asarray(clean)), SSIM(np.asarray(denoised), np.asarray(clean))]
     titles = ['Input: {:.2f} dB'.format(psnr_vals[0]),
               'Denoised: {:.2f} dB'.format(psnr_vals[1]),
               'Ground truth']
@@ -129,8 +145,9 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     # plt.show()
 
     # Save to files
-    f = open(os.path.join(save_path, 'psnr.txt'), 'a')
-    f.write("{:.2f},{:.2f}\n".format(psnr_vals[0], psnr_vals[1]))
+    f = open(os.path.join(save_path, 'metrics.csv'), 'a')
+    # f.write("{:.2f},{:.2f}\n".format(psnr_vals[0], psnr_vals[1]))
+    f.write(f'{fname},{round(psnr_vals[0], 2)},{round(psnr_vals[1], 2)},{round(ssim_vals[0], 2)},{round(ssim_vals[1], 2)}')
     f.close()
 
     fname = os.path.splitext(img_name)[0]

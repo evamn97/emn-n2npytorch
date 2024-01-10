@@ -211,9 +211,9 @@ class Noise2Noise(object):
 
         # Create montage and save images
         print('Saving images and montages to: {}'.format(save_path))
-        if not os.path.isfile(os.path.join(save_path, 'psnr.txt')):
-            f = open(os.path.join(save_path, 'psnr.txt'), 'w')  # create a text file to save psnr values to
-            f.write("input,result\n")
+        if not os.path.isfile(os.path.join(save_path, 'metrics.csv')):
+            f = open(os.path.join(save_path, 'metrics.csv'), 'w')  # create a text file to save psnr values to
+            f.write("file,psnr_in,psnr_out,ssim_in,ssim_out\n")
             f.close()
 
         for i in range(len(source_imgs)):
@@ -328,6 +328,7 @@ class Noise2Noise(object):
                 self.optim.step()
 
                 # Report/update statistics
+                print(f'batch time: {datetime.now() - batch_start}')
                 time_meter.update(time_elapsed_since(batch_start)[1])
                 if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
                     if self.p.verbose:
@@ -347,5 +348,6 @@ class Noise2Noise(object):
             train_loss_meter.reset()
 
         train_elapsed = time_elapsed_since(train_start)[0]
+        trainvalid_loss_plots(self.ckpt_dir, self.p.loss.upper(), stats['train_loss'], stats['valid_loss'])
         print('Training done! Total elapsed time: {}'.format(str(train_elapsed)[:-3]))
         print('Average training time per epoch:   {}\n'.format(str(sum(self.epoch_times, timedelta(0)) / len(self.epoch_times))[:-3]))
