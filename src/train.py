@@ -58,6 +58,24 @@ if __name__ == '__main__':
     # Parse training parameters
     params = parse_args()
 
+    # debugging!! ------------------------------------------------------------------------------
+    # root = "/Users/emnatin/Library/CloudStorage/OneDrive-SandiaNationalLaboratories/GitHub/"
+    # root = "/mnt/data/emnatin"
+    # parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
+    # parent = os.path.join(root, "imgrec-tiny-ImageNet")
+    # params.train_dir = os.path.join(parent, "train")
+    # params.valid_dir = os.path.join(parent, "valid")
+    # params.target_dir = os.path.join(parent, "targets")
+    # params.batch_size = 4
+    # params.nb_epochs = 10
+    # params.channels = 1
+    # params.loss = 'l1'
+    # params.cuda = True
+    # params.verbose = True
+    # params.noise_type = 'raw'
+    # params.paired_targets = True
+    # ------------------------------------------------------------------------------------------
+
     if (params.noise_type == 'raw' and not params.paired_targets):
         params.paired_targets = True
     if params.paired_targets:
