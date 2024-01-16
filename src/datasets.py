@@ -4,85 +4,14 @@
 import matplotlib
 from matplotlib import rcParams
 from torch.utils.data import Dataset, DataLoader
+from torch.distributions.bernoulli import Bernoulli as BernoulliDist
+from torch.distributions.normal import Normal as NormalDist
 
 from data_prep import *
+from utils import rescale_tensor, import_spm
 
 rcParams['font.family'] = 'serif'
 matplotlib.use('agg')
-
-
-def create_image(img, p=0.5, style='r'):
-    """ Creates noisy image for source or target."""
-    ground_truth_array = np.array(img)
-    if len(ground_truth_array.shape) == 3:  # get  array dimensions for RGB and RGBA images
-        w = ground_truth_array.shape[0]
-        h = ground_truth_array.shape[1]
-        c = ground_truth_array.shape[2]
-    else:  # get dims for grayscale images/height fields
-        w = ground_truth_array.shape[0]
-        h = ground_truth_array.shape[1]
-        c = 1
-
-    rng = np.random.default_rng()
-
-    if style == 'l':  # lowers resolution of input image (should be used with clean targets)
-        temp_img = img
-        hN, wN = int(h * p), int(w * p)  # choose new dims based on p value
-        resized = tvF.resize(tvF.resize(temp_img, [hN, wN]), [h, w])
-        img_array_noised = np.array(resized)
-
-    # if style == 'l':  # lowers resolution of input image (editing for xyz images as well - doesn't work yet)
-    #     temp_img = tvF.to_tensor(img)
-    #     hN, wN = int(h * p), int(w * p)  # choose new dims based on p value
-    #     resized = tvF.resize(tvF.resize(temp_img, [hN, wN]), [h, w])
-    #     if c == 1:
-    #         img_array_noised = np.array(resized.numpy().squeeze())
-    #     else:
-    #         m_list = []
-    #         for dim in range(c):
-    #             m_list.append(resized[dim])
-    #         img_array_noised = np.dstack(m_list)
-
-    elif style == 'nu':  # random noise up to +/- 10 percent values (not binary)
-        ran = (np.max(ground_truth_array) - np.min(ground_truth_array)) * 0.1
-        rand_noise = rng.uniform(-1 * ran, ran, (h, w))
-        bin_mask = rng.binomial(1, p, (h, w))
-        mask = np.multiply(rand_noise, bin_mask)
-        if c > 1:
-            m_list = []
-            for dim in range(c):
-                m_list.append(mask)
-            mask = np.dstack(m_list)
-        img_array_noised = np.add(ground_truth_array, mask)
-
-    elif style == 'g':  # create a noise gradient from left to right
-        ran = (np.max(ground_truth_array) - np.min(ground_truth_array)) * p  # use 0.1 here for +/- 10% noise; this is arbitrary
-        rand_noise = rng.uniform(-1, 1, (h, w))
-        grad = np.tile(np.linspace(0, ran, num=w), (h, 1))
-        mask = np.multiply(rand_noise, grad)
-        if c > 1:
-            m_list = []
-            for dim in range(c):
-                m_list.append(mask)
-            mask = np.dstack(m_list)
-        img_array_noised = np.add(ground_truth_array, mask)
-
-    else:  # style == 'r':  # random trials
-        r_mask = rng.binomial(1, p, (h, w))
-        if c > 1:
-            m_list = []
-            for dim in range(c):
-                m_list.append(r_mask)
-            mask = np.dstack(m_list)
-        else:
-            mask = r_mask
-        img_array_noised = np.multiply(ground_truth_array, mask)
-
-    if c == 1:
-        final_noised = normalize(img_array_noised)
-    else:  # c == 3
-        final_noised = np.clip(img_array_noised, 0, 255).astype(np.uint8)
-    return final_noised
 
 
 def load_dataset(root_dir, params, shuffled=False, single=False):
@@ -101,80 +30,26 @@ def load_dataset(root_dir, params, shuffled=False, single=False):
         return DataLoader(dataset, batch_size=params.batch_size, shuffle=shuffled)
 
 
-class AbstractDataset(Dataset):
-    """Abstract dataset class for Noise2Noise."""
+class NoisyDataset(Dataset):
+    """Class for injecting random noise into dataset."""
 
-    def __init__(self, root_dir, target_dir, redux=0, crop_size=0, clean_targets=False, paired_targets=False, channels=3):
-        """Initializes abstract dataset."""
+    def __init__(self, root_dir, target_dir, redux=0, crop_size=0, clean_targets=False, paired_targets=False,
+                 channels=3, noise_dist=('bernoulli', 0.7), seed=None):
+        """Initializes noisy image dataset."""
 
-        super(AbstractDataset, self).__init__()
+        super(NoisyDataset, self).__init__()
 
-        self.imgs = []
-        self.targets = []
-        self.root_dir = root_dir
+        self.root_dir = os.path.normpath(root_dir)
+        self.target_dir = os.path.normpath(target_dir)
+        self.img_fnames = []
+        self.trgt_fnames = []
+        self.images = {}
+        self.targets = {}
         self.redux = float(redux)
         self.crop_size = crop_size
         self.clean_targets = clean_targets
         self.paired_targets = paired_targets
-        self.target_dir = target_dir
         self.channels = channels
-
-    def _random_crop(self, img_list):
-        """Performs random square crop of fixed size.
-        Works with list so that all items get the same cropped window (e.g. for buffers).
-        """
-        cropped_imgs = []
-
-        for img in img_list:
-            if type(img) != torch.Tensor:
-                im = tvF.to_tensor(img)
-            else:
-                im = img
-            c, h, w = im.size()
-            # Resize if dimensions are too small
-            if min(w, h) < self.crop_size:
-                im = tvF.resize(img, [self.crop_size, self.crop_size])
-            cropped_im = trf.RandomCrop(self.crop_size)(im).numpy().squeeze()
-            if c > 1:
-                cropped_im = np.rot90(np.rot90(cropped_im, axes=(0, 2)), k=3)
-            # Random crop
-            cropped_imgs.append(cropped_im)  # numpy arrays with shape (h, w, c)
-
-        return cropped_imgs
-
-    def __getitem__(self, index):
-        """Retrieves image from data folder path."""
-
-        raise NotImplementedError('Abstract method not implemented!')
-
-    def __len__(self):
-        """Returns length of dataset."""
-
-        return len(self.imgs)
-
-
-class NoisyDataset(AbstractDataset):
-    """Class for injecting random noise into dataset."""
-
-    def __init__(self, root_dir, target_dir, redux, crop_size, clean_targets=False, paired_targets=False, channels=3,
-                 noise_dist=('bernoulli', 0.7), seed=None):
-        """Initializes noisy image dataset."""
-
-        super(NoisyDataset, self).__init__(root_dir, target_dir, redux, crop_size, clean_targets, paired_targets, channels)
-
-        ext_list = ['.png', '.jpeg', '.jpg', '.xyz', '.txt', '.csv']  # acceptable extensions/filetypes
-        self.imgs = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in ext_list]
-        if os.path.isdir(target_dir):
-            self.targets = [t for t in os.listdir(target_dir) if os.path.splitext(t)[-1].lower() in ext_list]
-        if self.paired_targets and not os.path.isdir(target_dir):
-            raise NotADirectoryError("Paired targets are requested but the input target directory does not exist!")
-
-        if self.redux != 0:
-            if not 0.0 < self.redux < 1.0:
-                raise ValueError("redux ratio must be a float between 0.0 and 1.0 (non-inclusive)")
-            new_size = int((1 - self.redux) * len(self.imgs))
-            self.imgs = self.imgs[:new_size]  # reduce dataset size to given ratio
-            # targets are found by source name anyway so no need to change self.targets list
 
         # Noise parameters
         self.noise_type = noise_dist[0]
@@ -183,64 +58,105 @@ class NoisyDataset(AbstractDataset):
         if self.seed:
             np.random.seed(self.seed)
 
-    def _add_noise(self, img):
-        """Adds noise to image."""
+        # load filenames and redux, if applicable
+        ext_list = ['.png', '.jpeg', '.jpg', '.xyz', '.txt', '.csv']  # acceptable extensions/filetypes
+        self.img_fnames = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in ext_list]
 
-        # Manipulated noise options
-        if self.noise_type == 'gradient':
-            noise_img = create_image(img, p=self.noise_param, style='g')
-        elif self.noise_type == 'lower':
-            noise_img = create_image(img, p=self.noise_param, style='l')
-        elif self.noise_type == 'nonuniform':
-            noise_img = create_image(img, p=self.noise_param, style='nu')
-        elif self.noise_type == 'raw':  # just for redundancy & debugging
-            noise_img = np.array(img)
+        if self.paired_targets and not os.path.isdir(target_dir):
+            raise NotADirectoryError("Paired targets are requested but the input target directory does not exist!")
 
-        # Bernoulli distribution (default)
-        else:  # self.noise_type == 'bernoulli':
-            noise_img = create_image(img, p=self.noise_param, style='r')
+        if 0 < self.redux < 1:
+            new_size = int((1 - self.redux) * len(self.img_fnames))
+            self.img_fnames = self.img_fnames[:new_size]  # reduce dataset size to given ratio
+            # targets are found by source name anyway so no need to change targets list
+        elif self.redux > 1:
+            raise ValueError("redux ratio must be a float between 0.0 and 1.0 (non-inclusive)")
 
-        return noise_img  # returns numpy array in shape (h, w, c)
+        # get list of target names in matching order to source list
+        self.trgt_fnames = [find_target(os.listdir(target_dir), s) for s in self.img_fnames]
 
-    def _corrupt(self, img):
-        """Corrupts images."""
+        # load images on the frontend instead of in __getitem__
+        self.images = {name: obj for (name, obj) in [import_spm(os.path.join(self.root_dir, s)) for s in self.img_fnames]}
+        self.targets = {name: obj for (name, obj) in [import_spm(os.path.join(self.target_dir, t)) for t in self.trgt_fnames]}
 
-        if self.noise_type in ['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw']:
-            return self._add_noise(img)  # numpy array (h, w, c)
-        else:
-            raise ValueError('Invalid noise type: {}'.format(self.noise_type))
+        # TODO: debug using pathos multiprocessing for importing images (to try to reduce dataset init time)
+        # cpu_pool = Pool(cpu_count())
+        #
+        # # amap puts them out of order but the fnames lists are ordered the same, so we can use that to index in __getitem__
+        # try:    # for training loops where load_data is used for train and again for valid data, the pool must be restarted bc it has the same name
+        #     res0 = cpu_pool.amap(import_spm, [os.path.join(self.root_dir, s) for s in self.img_fnames])
+        # except ValueError:
+        #     cpu_pool.restart()
+        #     res0 = cpu_pool.amap(import_spm, [os.path.join(self.root_dir, s) for s in self.img_fnames])
+        # while not res0.ready():
+        #     sleep(1)
+        # self.images = {name: obj for (name, obj) in res0.get()}
+        #
+        # res1 = cpu_pool.amap(import_spm, [os.path.join(self.target_dir, t) for t in self.trgt_fnames])
+        # while not res1.ready():
+        #     sleep(1)
+        # self.targets = {name: obj for (name, obj) in res1.get()}
+        #
+        # cpu_pool.join()
+        # cpu_pool.close()
+        # # cpu_pool.terminate()
+        # cpu_pool.clear()
+
+    def _add_noise(self, img: torch.Tensor):
+        """ Adds noise to an image. """
+
+        rng = np.random.default_rng()
+        c, h, w = img.shape
+        valid_types = ['bernoulli', 'gradient', 'lower', 'gaussian']
+
+        if self.noise_type.lower() not in valid_types:
+            raise ValueError(f'Invalid noise type: {self.noise_type}. Added noise must be one of {valid_types}.')
+
+        if self.noise_type.lower() == 'gaussian':
+            std = rng.uniform(0, self.noise_param) * img.std()
+            noisy_img = img.to(torch.float64, copy=True) + NormalDist(0, std).sample(img.size())
+            if not img.is_floating_point():     # assumes int type means it's an image format (e.g., 0-255 range), so need rescale after summing
+                noisy_img = rescale_tensor(noisy_img, bounds=[img.min().item(), img.max().item()]).to(img.dtype)
+
+        elif self.noise_type.lower() == 'lower':
+            hN, wN = int(h * self.noise_param), int(w * self.noise_param)
+            noisy_img = tvF.resize(tvF.resize(img.to(torch.float64, copy=True), [hN, wN]), [h, w])
+
+        elif self.noise_type.lower() == 'gradient':
+            std = rng.uniform(0, self.noise_param) * img.std()
+            noise = torch.from_numpy(np.tile(np.linspace(0, 1, w), (h, 1))).unsqueeze(dim=0) * NormalDist(0, std).sample(img.size())
+            noisy_img = img.to(torch.float64, copy=True) + noise
+            if not img.is_floating_point():     # assumes int type means it's an image format (e.g., 0-255 range), so need rescale after summing
+                noisy_img = rescale_tensor(noisy_img, bounds=[img.min().item(), img.max().item()]).to(img.dtype)
+
+        else:   # self.noise_type.lower() == 'bernoulli':
+            noisy_img = img.to(torch.float64, copy=True) * BernoulliDist(self.noise_param).sample(img.size()[1:])
+
+        return noisy_img
 
     def __getitem__(self, index):
         """Retrieves image from folder_path and corrupts it."""
 
         # Load image
-        img_name = self.imgs[index]
-        img_path = os.path.normpath(os.path.join(self.root_dir, self.imgs[index]))
+        ground_truth = self.images[self.img_fnames[index]]
 
-        if os.path.splitext(img_name)[-1] in ['.xyz', '.txt', '.csv']:  # load xyz
-            img = normalize(xyz_to_zfield(img_path, return3d=False))
-        else:  # load image
-            with Image.open(img_path) as img:
-                img.load()
-        # Random square crop
-        if not self.paired_targets and self.crop_size > 0:
-            img = self._random_crop([img])[0]
         # Corrupt source image
-        source = tvF.to_tensor(self._corrupt(img))  # see '_corrupt' for returning raw image option
+        if self.noise_type != 'raw':
+            source = self._add_noise(ground_truth)
+        else:  # self.noise_type == 'raw':
+            source = ground_truth.clone()
 
         # Corrupt target image, but not when clean targets are requested or pairs exist
         if self.paired_targets:  # paired targets overrides clean targets
-            trgt_name = find_target(self.targets, self.imgs[index])
-            trgt_path = os.path.normpath(os.path.join(self.target_dir, trgt_name))
-            if os.path.splitext(trgt_name)[-1] in ['.xyz', '.txt', '.csv']:
-                trgt = normalize(xyz_to_zfield(trgt_path, return3d=False))
-            else:
-                with Image.open(trgt_path) as trgt:
-                    trgt.load()
-            target = tvF.to_tensor(trgt)
+            target = self.targets[self.trgt_fnames[index]]
         elif self.clean_targets:
-            target = tvF.to_tensor(img)
+            target = ground_truth.clone()
         else:
-            target = tvF.to_tensor(self._corrupt(img))
+            target = self._add_noise(ground_truth)
 
-        return source, target
+        return source.to(torch.float32), target.to(torch.float32)       # temporary fix for bug in pytorch... see https://github.com/pytorch/pytorch/issues/111671 (Jan 2024)
+
+    def __len__(self):
+        """Returns length of dataset."""
+
+        return len(self.img_fnames)

@@ -42,7 +42,7 @@ def parse_args():
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
-                        choices=['bernoulli', 'gradient', 'lower', 'nonuniform', 'raw'], default='bernoulli', type=str)
+                        choices=['bernoulli', 'gradient', 'lower', 'gaussian', 'raw'], default='bernoulli', type=str)
     parser.add_argument('-p', '--noise-param', help='noise parameter', default=0.7, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='random crop size', default=0, type=int)
@@ -55,6 +55,10 @@ def parse_args():
 if __name__ == '__main__':
     """Trains Noise2Noise."""
 
+    python_start = datetime.datetime.now()
+    local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+    print(f'Python start time:  {python_start.strftime("%H:%M:%S.%f")[:-4]} {local_tz}')
+
     # Parse training parameters
     params = parse_args()
 
@@ -63,17 +67,18 @@ if __name__ == '__main__':
     # root = "/mnt/data/emnatin"
     # parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
     # parent = os.path.join(root, "imgrec-tiny-ImageNet")
-    # params.train_dir = os.path.join(parent, "train")
-    # params.valid_dir = os.path.join(parent, "valid")
-    # params.target_dir = os.path.join(parent, "targets")
-    # params.batch_size = 4
-    # params.nb_epochs = 10
-    # params.channels = 1
-    # params.loss = 'l1'
-    # params.cuda = True
-    # params.verbose = True
-    # params.noise_type = 'raw'
-    # params.paired_targets = True
+    parent = "../hs20mg_xyz_data"
+    params.train_dir = os.path.join(parent, "train")
+    params.valid_dir = os.path.join(parent, "valid")
+    params.target_dir = os.path.join(parent, "targets")
+    params.batch_size = 4
+    params.nb_epochs = 10
+    params.channels = 1
+    params.loss = 'l1'
+    params.cuda = True
+    params.verbose = True
+    params.noise_type = 'raw'
+    params.paired_targets = True
     # ------------------------------------------------------------------------------------------
 
     if (params.noise_type == 'raw' and not params.paired_targets):
@@ -86,10 +91,6 @@ if __name__ == '__main__':
         mag = len(str(int(params.noise_param)))
         params.noise_param = params.noise_param / (10 ** mag)
 
-    python_start = datetime.datetime.now()
-    local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
-
-    print(f'Python start time:  {python_start.strftime("%H:%M:%S.%f")[:-4]} {local_tz}')
     if params.show_progress:
         params.verbose = True  # so '--show-progress' can be used instead of '--verbose'
 

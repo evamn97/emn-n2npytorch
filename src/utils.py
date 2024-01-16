@@ -7,19 +7,30 @@ import torchvision.transforms.functional as tvF
 
 import os
 import numpy as np
-from math import log10
+import pandas as pd
 from datetime import datetime
 from PIL import Image
 from skimage.metrics import structural_similarity as SSIM
+from pathos.helpers import cpu_count
+from pathos.pools import ProcessPool as Pool
 
-from matplotlib import rcParams
-
-rcParams['font.family'] = 'serif'
 import matplotlib
-
-matplotlib.use('agg')
+from matplotlib import rcParams
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+
+rcParams['font.family'] = 'serif'
+matplotlib.use('agg')
+
+
+def start_pool():
+    return Pool(cpu_count())
+
+
+def stop_pool(pool):
+    pool.close()
+    pool.join()
+    pool.terminate()
 
 
 def clear_line():
@@ -35,7 +46,9 @@ def progress_bar(batch_idx, num_batches, report_interval, train_loss):
     bar_size = 27 + dec
     progress = (batch_idx % report_interval) / report_interval
     fill = int(progress * bar_size) + 1
-    print('\rBatch {:>{dec}d} [{}{}] Train loss: {:>1.5f}'.format(batch_idx + 1, '=' * fill + '>', ' ' * (bar_size - fill), train_loss, dec=str(dec)), end='')
+    print('\rBatch {:>{dec}d} [{}{}] Train loss: {:>1.5f}'.format(batch_idx + 1, '=' * fill + '>',
+                                                                  ' ' * (bar_size - fill), train_loss,
+                                                                  dec=str(dec)), end='')
 
 
 def time_elapsed_since(start):
@@ -53,7 +66,9 @@ def show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr):
     """Formats validation error stats."""
 
     clear_line()
-    print('Train time: {} | Valid time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4], valid_time[:-4], valid_loss, valid_psnr))
+    print('Train time: {} | Valid time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4],
+                                                                                                valid_time[:-4],
+                                                                                                valid_loss, valid_psnr))
 
 
 def show_on_report(batch_idx, num_batches, loss, elapsed):
@@ -61,7 +76,10 @@ def show_on_report(batch_idx, num_batches, loss, elapsed):
 
     clear_line()
     dec = int(np.ceil(np.log10(num_batches)))
-    print('Batch {:>{dec}d} / {:d} | Avg loss: {:>1.5f} | Avg train time / batch: {:d} ms'.format(batch_idx + 1, num_batches, loss, int(elapsed), dec=dec))
+    print('Batch {:>{dec}d} / {:d} | Avg loss: {:>1.5f} | Avg train time / batch: {:d} ms'.format(batch_idx + 1,
+                                                                                                  num_batches, loss,
+                                                                                                  int(elapsed),
+                                                                                                  dec=dec))
 
 
 def plot_per_epoch(ckpt_dir, title, measurements, y_label):
@@ -83,7 +101,6 @@ def plot_per_epoch(ckpt_dir, title, measurements, y_label):
 
 
 def trainvalid_loss_plots(ckpt_dir, loss_str, train_loss, valid_loss):
-
     fig, ax = plt.subplots(dpi=200)
     ax.plot(range(1, len(train_loss) + 1), train_loss, label='Train Loss')
     ax.plot(range(1, len(valid_loss) + 1), valid_loss, label='Valid Loss')
@@ -108,7 +125,8 @@ def psnr(input, target):
     return 10 * torch.log10(1 / F.mse_loss(input, target))
 
 
-def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoised_t, clean_t, show, montage_only=False):
+def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoised_t, clean_t, show,
+                   montage_only=False):
     """Creates montage for easy comparison."""
 
     fig, ax = plt.subplots(1, 3, figsize=(29, 10), dpi=200)
@@ -144,12 +162,12 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     # plt.show()
 
     # Save to files
+    fname = os.path.splitext(img_name)[0]
     f = open(os.path.join(save_path, 'metrics.csv'), 'a')
     # f.write("{:.2f},{:.2f}\n".format(psnr_vals[0], psnr_vals[1]))
     f.write(f'{fname},{round(psnr_vals[0], 2)},{round(psnr_vals[1], 2)},{round(ssim_vals[0], 2)},{round(ssim_vals[1], 2)}')
     f.close()
 
-    fname = os.path.splitext(img_name)[0]
     if not montage_only:
         source.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-noisy.png'))
         denoised.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-denoised.png'))
@@ -157,6 +175,57 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
 
     fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-montage.png'), bbox_inches='tight')
     plt.close()
+
+
+def rescale_tensor(tensor, as_image=False, bounds=(0, 1), dtype=None):
+    """ Scales an input tensor to between 0 and 1 or given maximum.
+
+    :param tensor: torch tensor input
+    :param as_image: changes scaling range to 0-255 and converts to dtype=uint8
+    :param bounds: sets custom maximum value
+    :param dtype: tensor dtype to use for output
+    :return: rescaled tensor with desired dtype
+    """
+
+    numer = tensor - tensor.min().item()
+    denom = (tensor.max().item() - tensor.min().item())
+
+    if as_image:
+        rescaled = ((255 * numer) / denom).to(torch.uint8)
+    else:
+        if dtype is None:
+            dtype = tensor.dtype
+        rescaled = (bounds[0] + ((bounds[1] - bounds[0]) * numer) / denom).to(dtype)
+
+    return rescaled
+
+
+def import_spm(filepath):
+    picture = ['.png', '.jpeg', '.jpg']
+    xyz = ['.xyz', '.csv', '.txt']
+    ext = os.path.splitext(filepath)[-1].lower()
+
+    if ext not in (picture + xyz):
+        raise TypeError(f'File must be in the following supported formats: {picture + xyz}')
+
+    if ext.lower() in picture:
+        with Image.open(filepath).convert("L") as im_pil:
+            im_pil.load()
+        im_tensor = tvF.pil_to_tensor(im_pil)
+
+    else:  # ext.lower() in xyz:
+        df = pd.read_csv(filepath, header=None, delimiter='\t', index_col=False)
+        P = int(np.sqrt(len(df)))  # get img dimension
+        try:
+            im_tensor = torch.tensor(df[df.columns[-1]].values.reshape((P, -1))).unsqueeze(
+                dim=0)  # reshape using img dim
+        except ValueError:  # just in case above doesn't work, find highest power of 2 to reshape
+            P = int(pow(2, int(np.log2(P))))
+            im_tensor = torch.tensor(df[df.columns[-1]].values.reshape((P, -1))).unsqueeze(dim=0)
+
+        # im_pil = tvF.to_pil_image(rescale_tensor(im_tensor, as_image=True), mode="L")
+
+    return os.path.basename(filepath), im_tensor
 
 
 class AvgMeter(object):

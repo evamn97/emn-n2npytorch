@@ -11,8 +11,6 @@ from torch.optim import Adam, lr_scheduler
 from unet import UNet
 from utils import *
 
-# torch.set_default_dtype(torch.float64)
-
 
 class Noise2Noise(object):
     """Implementation of Noise2Noise from Lehtinen et al. (2018)."""
@@ -191,8 +189,8 @@ class Noise2Noise(object):
 
         for batch_idx, (source, target) in enumerate(test_loader):
 
-            source = source # .double()
-            target = target # .double()
+            # source = source.double()
+            # target = target.double()
 
             source_imgs.append(source)
             clean_imgs.append(target)
@@ -201,7 +199,7 @@ class Noise2Noise(object):
                 source = source.cuda()
 
             # Denoise
-            denoised_img = self.model(source).detach() # .double()
+            denoised_img = self.model(source).detach()  # .double()
             denoised_imgs.append(denoised_img)
 
         # Squeeze tensors
@@ -217,7 +215,7 @@ class Noise2Noise(object):
             f.close()
 
         for i in range(len(source_imgs)):
-            img_name = test_loader.dataset.imgs[i]
+            img_name = test_loader.dataset.img_fnames[i]
             create_montage(img_name, self.p.noise_type, self.p.noise_param, save_path,
                            source_imgs[i], denoised_imgs[i], clean_imgs[i],
                            show, montage_only=self.p.montage_only)
@@ -236,8 +234,8 @@ class Noise2Noise(object):
                 source = source.cuda()
                 target = target.cuda()
 
-            source = source # .double()
-            target = target # .double()
+            # source = source.double()
+            # target = target.double()
 
             # Denoise
             source_denoised = self.model(source) # .double()
@@ -299,7 +297,9 @@ class Noise2Noise(object):
             time_meter = AvgMeter()
 
             # Minibatch SGD
-            for batch_idx, (source, target) in enumerate(train_loader):
+            loop_start = datetime.now()
+            train_iter = enumerate(train_loader)
+            for batch_idx, (source, target) in train_iter:  # enumerate(train_loader):
                 batch_start = datetime.now()
                 if self.p.show_progress:
                     progress_bar(batch_idx, num_batches, self.p.report_interval, loss_meter.val)
@@ -311,24 +311,24 @@ class Noise2Noise(object):
                 # source = source.double()
                 # target = target.double()
 
+                self.optim.zero_grad()  # zero gradient before step
+
                 # Denoise image
                 try:
                     source_denoised = self.model(source)  # .double()
                 except RuntimeError:
-                    raise ValueError("There is a size mismatch between the number of UNet channels and the input data. " +
-                                     "Check the requested number of channels. " +
-                                     "\n(e.g., RGB images = 3 channels, L (grayscale) = 1, XYZ file = 1, etc)")
+                    raise ValueError(f"This error can be thrown if the input data dimensions don't match the defined input channels of the model"
+                                     f"\t source shape (where this error is thrown) should have len = 4 (e.g., [4, 1, 128, 128]), and dim 1 should match in_channels: source.shape = {source.shape}, in_channels = {self.p.channels}",
+                                     f"\nOr it can be caused by a dtype mismatch between the bias and input.",
+                                     f"\tBias type is usually float32, input dtype = {source.dtype}")
 
                 loss = self.loss(source_denoised, target)
                 loss_meter.update(loss.item())
 
-                # Zero gradients, perform a backward pass, and update the weights
-                self.optim.zero_grad()
                 loss.backward()     # takes a bit longer?
                 self.optim.step()
 
                 # Report/update statistics
-                print(f'batch time: {datetime.now() - batch_start}')
                 time_meter.update(time_elapsed_since(batch_start)[1])
                 if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
                     if self.p.verbose:
@@ -339,7 +339,10 @@ class Noise2Noise(object):
                     train_loss_meter.update(loss_meter.avg)
                     loss_meter.reset()
                     time_meter.reset()
-            
+
+                print(f'batch time: {datetime.now() - batch_start} | loop time: {datetime.now() - loop_start}')
+                loop_start = datetime.now()
+
             if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
                 print('Epoch {} finished at {} from n2n start.'.format((epoch + 1), str((datetime.now() - self.n2n_start))[:-4]))
                 sys.stdout.flush()
