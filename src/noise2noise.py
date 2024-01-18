@@ -198,7 +198,7 @@ class Noise2Noise(object):
         clean_imgs = [t.squeeze(0) for t in clean_imgs]
 
         # Create montage and save images
-        print('Saving images and montages to: {}'.format(save_path))
+        print('Saving images and montages to: {}\n'.format(save_path))
         if not os.path.isfile(os.path.join(save_path, 'metrics.csv')):
             with open(os.path.join(save_path, 'metrics.csv'), 'w') as f:  # create a text file to save psnr values to
                 f.write("file,psnr_in,psnr_out,ssim_in,ssim_out\n")

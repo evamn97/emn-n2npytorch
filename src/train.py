@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument('--target-dir', help='directory path containing target images, if applicable.',
                         default='../data/targets', type=str)
     parser.add_argument('-r', '--redux',
-                        help='reduction ratio (0.1 - 0.99) of dataset size (redux=0 means no reduction). useful for quick debugging.',
+                        help='reduction ratio [0, 1) of dataset size (redux=0 means no reduction). useful for quick debugging.',
                         default=0, type=float)
     parser.add_argument('--load-ckpt', help='load ckpt from a previously trained model to use in training',
                         default=None, type=str)
@@ -43,7 +43,7 @@ def parse_args():
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
                         choices=['bernoulli', 'gradient', 'lower', 'gaussian', 'raw'], default='bernoulli', type=str)
-    parser.add_argument('-p', '--noise-param', help='noise parameter', default=0.7, type=float)
+    parser.add_argument('-p', '--noise-param', help='noise parameter [0, 1). set to 0 for random', default=0.7, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='random crop size', default=0, type=int)
     parser.add_argument('--clean-targets', help='use clean targets for training', action='store_true')
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     if params.paired_targets:
         params.clean_targets = False
 
-    # error handling for noise param greater than 1
+    # error handling for noise param greater than 1 or random vs fixed
     if params.noise_param >= 1:
         mag = len(str(int(params.noise_param)))
         params.noise_param = params.noise_param / (10 ** mag)

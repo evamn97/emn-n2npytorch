@@ -22,6 +22,7 @@ def parse_args():
     parser.add_argument('--show-output', help='pop up window to display outputs', default=0, type=int)
     parser.add_argument('--montage-only', help='save montage figures only (not inputs and outputs)', action='store_true')
     parser.add_argument('--cuda', help='use cuda', action='store_true')
+    parser.add_argument('--verbose', help='prints additional progress', action='store_true')
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
