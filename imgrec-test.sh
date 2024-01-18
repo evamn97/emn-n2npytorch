@@ -11,16 +11,16 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
-data_root="train_tgx11_valid_hs20mg_data"
-test_dir="${data_root}/test"
-target_dir="${test_dir}/targets"
+data_root="combo_xyz_data"
+test_dir="${data_root}/test/targets"
+target_dir="${test_dir}" # /targets"
 
-noise="raw"
+noise="bernoulli"
 test_param=1
-results="new_ckpts_results/new_results_combo2_raw"
+results="new_ckpts_results/new_results_combo_bernoulli"
 channels=1
 
-ckpt="new_ckpts_results/new_ckpts_combo_raw/debuglocal-train-rawl2/train-epoch100-0.00532.pt"
+ckpt="new_ckpts_results/new_ckpts_combo_bernoulli/imgrec-train-bernoulliclean0.0l1/train-epoch100-0.01376.pt"
 # -------------------------------------------------------------------------------
 
 echo -e "\nDate:  $(date)\n"
@@ -34,20 +34,39 @@ echo -e "Working directory:  $(pwd)\n"
 
 echo -e "Using python executable at: $(which python)\n"
 
+# single test
+# python src/test.py \
+#     -t ${test_dir} \
+#     --target-dir ${target_dir} \
+#     -n ${noise} \
+#     -p ${test_param} \
+#     --output ${results} \
+#     --load-ckpt "${ckpt}" \
+#     --ch ${channels} \
+#     --cuda \
+#     --montage-only \
+#     --paired-targets
 
-# Launch code using virtual environment
-python src/test.py \
-    -t ${test_dir} \
-    --target-dir ${target_dir} \
-    -n ${noise} \
-    -p ${test_param} \
-    --output ${results} \
-    --load-ckpt "${ckpt}" \
-    --ch ${channels} \
-    --cuda \
-    --montage-only \
-    --paired-targets
 
+# loop through 0.1 - 0.9 noise params 
+# (bash doesn't handle floats so we use ints here but values >1 are fixed in train.py)
+test_param=1
+while [ $test_param -le 9 ]
+do
+    python src/test.py \
+        -t ${test_dir} \
+        --target-dir ${target_dir} \
+        -n ${noise} \
+        -p ${test_param} \
+        --output ${results} \
+        --load-ckpt "${ckpt}" \
+        --ch ${channels} \
+        --cuda \
+        --montage-only \
+        --verbose
+
+    test_param=$(( $test_param + 1 ))
+done
 
 end=$(date +%s)
 runtime_hours=$(((end-start)/3600))
