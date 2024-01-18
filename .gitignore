@@ -1,9 +1,10 @@
 /.idea/
-/bash-script-files/bsf.old/
+/bash-scripts/
 /.old_files_and_results/
 /pub_figures/
 /ckpts
 /results
+/new_ckpts_results/
 *__pycache__
 
 /*_data

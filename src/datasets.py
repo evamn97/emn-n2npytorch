@@ -3,9 +3,9 @@
 
 import matplotlib
 from matplotlib import rcParams
-from torch.utils.data import Dataset, DataLoader
 from torch.distributions.bernoulli import Bernoulli as BernoulliDist
 from torch.distributions.normal import Normal as NormalDist
+from torch.utils.data import Dataset, DataLoader
 
 from data_prep import *
 from utils import rescale_tensor, import_spm
@@ -75,32 +75,9 @@ class NoisyDataset(Dataset):
         # get list of target names in matching order to source list
         self.trgt_fnames = [find_target(os.listdir(target_dir), s) for s in self.img_fnames]
 
-        # load images on the frontend instead of in __getitem__
+        # load images into memory
         self.images = {name: obj for (name, obj) in [import_spm(os.path.join(self.root_dir, s)) for s in self.img_fnames]}
         self.targets = {name: obj for (name, obj) in [import_spm(os.path.join(self.target_dir, t)) for t in self.trgt_fnames]}
-
-        # TODO: debug using pathos multiprocessing for importing images (to try to reduce dataset init time)
-        # cpu_pool = Pool(cpu_count())
-        #
-        # # amap puts them out of order but the fnames lists are ordered the same, so we can use that to index in __getitem__
-        # try:    # for training loops where load_data is used for train and again for valid data, the pool must be restarted bc it has the same name
-        #     res0 = cpu_pool.amap(import_spm, [os.path.join(self.root_dir, s) for s in self.img_fnames])
-        # except ValueError:
-        #     cpu_pool.restart()
-        #     res0 = cpu_pool.amap(import_spm, [os.path.join(self.root_dir, s) for s in self.img_fnames])
-        # while not res0.ready():
-        #     sleep(1)
-        # self.images = {name: obj for (name, obj) in res0.get()}
-        #
-        # res1 = cpu_pool.amap(import_spm, [os.path.join(self.target_dir, t) for t in self.trgt_fnames])
-        # while not res1.ready():
-        #     sleep(1)
-        # self.targets = {name: obj for (name, obj) in res1.get()}
-        #
-        # cpu_pool.join()
-        # cpu_pool.close()
-        # # cpu_pool.terminate()
-        # cpu_pool.clear()
 
     def _add_noise(self, img: torch.Tensor):
         """ Adds noise to an image. """

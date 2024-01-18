@@ -18,7 +18,7 @@ class Noise2Noise(object):
     def __init__(self, params, trainable):
         """Initializes model."""
         self.n2n_start = datetime.now()
-        print(f'N2N start time:     {self.n2n_start.strftime("%H:%M:%S.%f")[:-4]}')
+        # print(f'N2N start time:     {self.n2n_start.strftime("%H:%M:%S.%f")[:-4]}')
         self.epoch_times = []  # added 6/24/22
         self.p = params
         self.trainable = trainable
@@ -33,19 +33,20 @@ class Noise2Noise(object):
         if "jobname" in os.environ and "idv" not in os.environ["jobname"]:
             self.job_name = os.environ["jobname"]  # ex: tgx-n2npt-train-bernoulli
         elif "filename" in os.environ:
-            self.job_name = f'{os.environ["filename"].replace("-imgrec", "")}{("redux" + self.p.redux) if self.p.redux > 0 else ""}-{self.p.noise_type}{"clean" if (trainable and self.p.clean_targets) else ""}{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss}'  # ex: tinyimagenetredux0.9-bernoulli0.5l1
+            self.job_name = f'{os.environ["filename"].replace("-imgrec", "")}{("redux" + self.p.redux) if self.p.redux > 0 else ""}-{self.p.noise_type}{"clean" if (trainable and self.p.clean_targets) else ""}{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss if trainable else ""}'  # ex: tinyimagenetredux0.9-bernoulli0.5l1
         else:
             self.job_name = f'{self.p.noise_type}{"-clean" if (trainable and self.p.clean_targets) else ""}{self.job_id}'
 
         # debugging
-        print(f'n2n initialized in   {str(datetime.now() - self.n2n_start)[:-4]} from n2n start')
+        print(f'n2n initialized in:  {str(datetime.now() - self.n2n_start)[:-4]}')
         sys.stdout.flush()
 
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
 
         # Model
-        self.model = UNet(in_channels=self.p.channels, out_channels=self.p.channels)  # .double()  # changed this from default in_channels=3 6/13/22 emn
+        self.model = UNet(in_channels=self.p.channels,
+                          out_channels=self.p.channels)  # .double()  # changed this from default in_channels=3 6/13/22 emn
 
         # Set optimizer and loss, if in training mode
         if self.trainable:
@@ -74,9 +75,9 @@ class Noise2Noise(object):
     def _print_params(self):
         """Formats parameters to print when training."""
         if self.trainable:
-            print('Training parameters: ')
+            print('\nTraining parameters: ')
         else:
-            print('Testing/Eval parameters: ')
+            print('\nTesting/Eval parameters: ')
         self.p.cuda = self.use_cuda
         param_dict = vars(self.p)
         pretty = lambda x: x.replace('_', ' ').capitalize()
@@ -110,15 +111,10 @@ class Noise2Noise(object):
             # fname_unet = '{}/{}.pt'.format(self.ckpt_dir, os.path.basename(self.ckpt_dir))  # changed 7/5/2022
         else:
             valid_loss = stats['valid_loss'][epoch]
-            fname_unet = '{}/n2n-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
+            fname_unet = '{}/train-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
         if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
             print('Saving checkpoint to: {}\n'.format(fname_unet))
         torch.save(self.model.state_dict(), fname_unet)
-
-        # Save stats to JSON
-        fname_dict = '{}/n2n-stats.json'.format(self.ckpt_dir)
-        with open(fname_dict, 'w') as fp:
-            json.dump(stats, fp, indent=2)
 
     def load_model(self, ckpt_fname):
         """Loads model from checkpoint file."""
@@ -131,42 +127,38 @@ class Noise2Noise(object):
                 self.model.load_state_dict(torch.load(ckpt_fname, map_location='cpu'))
         except RuntimeError:
             raise ValueError("There is a mismatch between the UNet and the loaded checkpoint. " +
-                             "Try checking the requested number of channels and ensure it matches what the checkpoint was pretrained on. ")
+                             "Try checking the requested number of channels and ensure it matches what the checkpoint was (pre-)trained on. ")
 
     def _on_epoch_end(self, stats, train_loss, epoch, epoch_start, valid_loader):
         """Tracks and saves starts after each epoch."""
 
         # Evaluate model on validation set
-        if self.p.verbose:
-            print('\rTesting model on validation set... ', end='')
-        epoch_time, _, epoch_time_td = time_elapsed_since(epoch_start)
-        valid_loss, valid_time, valid_time_td, valid_psnr = self.eval(valid_loader)
-
-        self.epoch_times.append(epoch_time_td + valid_time_td)
-
-        if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
-            show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr)
-            est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (self.p.nb_epochs - (epoch + 1))
-            print(f'Estimated time remaining: {str(est_remain)[:-7]}')
-            sys.stdout.flush()  # force print to out file
+        valid_loss, valid_time, valid_time_td, valid_psnr, valid_ssim = self.eval(valid_loader)
 
         # Decrease learning rate if plateau
         self.scheduler.step(valid_loss)
 
-        # Save checkpoint
+        # Save stats
         stats['train_loss'].append(train_loss)
         stats['valid_loss'].append(valid_loss)
         stats['valid_psnr'].append(valid_psnr)
+        stats['valid_ssim'].append(valid_ssim)
 
+        # Save checkpoint
         self.save_model(epoch, stats, first=(epoch == 0))
 
-        # Plot stats
-        loss_str = f'{self.p.loss.upper()} loss'
-        plot_per_epoch(self.ckpt_dir, ('Valid ' + loss_str), stats['valid_loss'], loss_str)
-        plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
+        epoch_time, _, epoch_time_td = time_elapsed_since(epoch_start)
+        self.epoch_times.append(epoch_time_td)
 
-        ratio = list(np.divide(stats['valid_psnr'], stats['valid_loss']))  # PSNR/Loss
-        plot_per_epoch(self.ckpt_dir, ('Valid PSNR over ' + loss_str), ratio, '')
+        if self.p.verbose:
+            print('Epoch time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4],
+                                                                                       valid_loss,
+                                                                                       valid_psnr))
+            est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (
+                        self.p.nb_epochs - (epoch + 1))
+            print(f'Estimated time remaining: {str(est_remain)[:-7]}')
+
+            sys.stdout.flush()  # force print to out file
 
     def test(self, test_loader, show):
         """Evaluates denoiser on test set."""
@@ -183,14 +175,12 @@ class Noise2Noise(object):
         if not os.path.isdir(self.p.output):
             os.mkdir(self.p.output)
         subfolder = f'{self.job_name.replace("imgrec", "denoised").replace("-test", "")}-{self.job_id}'
-        save_path = os.path.normpath(os.path.join(self.p.output, subfolder))  # ex: 'results/hs20mg-bernoulli0.4l2-193174/'
+        save_path = os.path.normpath(
+            os.path.join(self.p.output, subfolder))  # ex: 'results/hs20mg-bernoulli0.4l2-193174/'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
 
         for batch_idx, (source, target) in enumerate(test_loader):
-
-            # source = source.double()
-            # target = target.double()
 
             source_imgs.append(source)
             clean_imgs.append(target)
@@ -199,7 +189,7 @@ class Noise2Noise(object):
                 source = source.cuda()
 
             # Denoise
-            denoised_img = self.model(source).detach()  # .double()
+            denoised_img = self.model(source).detach()
             denoised_imgs.append(denoised_img)
 
         # Squeeze tensors
@@ -210,9 +200,8 @@ class Noise2Noise(object):
         # Create montage and save images
         print('Saving images and montages to: {}'.format(save_path))
         if not os.path.isfile(os.path.join(save_path, 'metrics.csv')):
-            f = open(os.path.join(save_path, 'metrics.csv'), 'w')  # create a text file to save psnr values to
-            f.write("file,psnr_in,psnr_out,ssim_in,ssim_out\n")
-            f.close()
+            with open(os.path.join(save_path, 'metrics.csv'), 'w') as f:  # create a text file to save psnr values to
+                f.write("file,psnr_in,psnr_out,ssim_in,ssim_out\n")
 
         for i in range(len(source_imgs)):
             img_name = test_loader.dataset.img_fnames[i]
@@ -228,17 +217,18 @@ class Noise2Noise(object):
         valid_start = datetime.now()
         loss_meter = AvgMeter()
         psnr_meter = AvgMeter()
+        ssim_meter = AvgMeter()
+
+        if self.p.verbose:
+            print('\rTesting model on validation set... ', end='')
 
         for batch_idx, (source, target) in enumerate(valid_loader):
             if self.use_cuda:
                 source = source.cuda()
                 target = target.cuda()
 
-            # source = source.double()
-            # target = target.double()
-
             # Denoise
-            source_denoised = self.model(source) # .double()
+            source_denoised = self.model(source)
 
             # Update loss
             loss = self.loss(source_denoised, target)
@@ -251,6 +241,9 @@ class Noise2Noise(object):
                 target = target.cpu()
                 try:
                     psnr_meter.update(psnr(source_denoised[i], target[i]).item())
+                    ssim_meter.update(
+                        SSIM(source_denoised[i].detach().squeeze().numpy(), target[i].detach().squeeze().numpy(),
+                             data_range=(source_denoised[i].max().item() - source_denoised[i].min().item())))
                 except IndexError:
                     # this will trigger when batch size causes uneven division of data (with remainder)
                     # so final batch is smaller than given batch size and the loop goes out of bounds
@@ -260,8 +253,11 @@ class Noise2Noise(object):
         valid_loss = loss_meter.avg
         valid_time, _, valid_time_td = time_elapsed_since(valid_start)
         psnr_avg = psnr_meter.avg
+        ssim_avg = ssim_meter.avg
 
-        return valid_loss, valid_time, valid_time_td, psnr_avg
+        clear_line()  # clears the "testing on validation.." line
+
+        return valid_loss, valid_time, valid_time_td, psnr_avg, ssim_avg
 
     def train(self, train_loader, valid_loader):
         """Trains denoiser on training set."""
@@ -272,7 +268,9 @@ class Noise2Noise(object):
         num_batches = len(train_loader)
         if num_batches % self.p.report_interval != 0:
             print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size).",
-                  "\nnbatches = {}/{} = {}, report_interval = {}:   {} % {} != 0".format((num_batches * self.p.batch_size), self.p.batch_size, num_batches, self.p.report_interval, self.p.report_interval, num_batches),
+                  "\nnbatches = {}/{} = {}, report_interval = {}:   {} % {} != 0".format(
+                      (num_batches * self.p.batch_size), self.p.batch_size, num_batches, self.p.report_interval,
+                      self.p.report_interval, num_batches),
                   "\nThe report interval has been reset to equal nbatches ({}).\n".format(num_batches))
             self.p.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset
 
@@ -281,7 +279,8 @@ class Noise2Noise(object):
                  'noise_param': self.p.noise_param,
                  'train_loss': [],
                  'valid_loss': [],
-                 'valid_psnr': []}
+                 'valid_psnr': [],
+                 'valid_ssim': []}
 
         # Main training loop
         train_start = datetime.now()
@@ -297,9 +296,8 @@ class Noise2Noise(object):
             time_meter = AvgMeter()
 
             # Minibatch SGD
-            loop_start = datetime.now()
-            train_iter = enumerate(train_loader)
-            for batch_idx, (source, target) in train_iter:  # enumerate(train_loader):
+            # loop_start = datetime.now()
+            for batch_idx, (source, target) in enumerate(train_loader):
                 batch_start = datetime.now()
                 if self.p.show_progress:
                     progress_bar(batch_idx, num_batches, self.p.report_interval, loss_meter.val)
@@ -308,24 +306,22 @@ class Noise2Noise(object):
                     source = source.cuda()
                     target = target.cuda()
 
-                # source = source.double()
-                # target = target.double()
-
                 self.optim.zero_grad()  # zero gradient before step
 
                 # Denoise image
                 try:
-                    source_denoised = self.model(source)  # .double()
+                    source_denoised = self.model(source)
                 except RuntimeError:
-                    raise ValueError(f"This error can be thrown if the input data dimensions don't match the defined input channels of the model"
-                                     f"\t source shape (where this error is thrown) should have len = 4 (e.g., [4, 1, 128, 128]), and dim 1 should match in_channels: source.shape = {source.shape}, in_channels = {self.p.channels}",
-                                     f"\nOr it can be caused by a dtype mismatch between the bias and input.",
-                                     f"\tBias type is usually float32, input dtype = {source.dtype}")
+                    raise ValueError(
+                        f"This error can be thrown if the input data dimensions don't match the defined input channels of the model"
+                        f"\t source shape (where this error is thrown) should have len = 4 (e.g., [4, 1, 128, 128]), and dim 1 should match in_channels: source.shape = {source.shape}, in_channels = {self.p.channels}",
+                        f"\nOr it can be caused by a dtype mismatch between the bias and input.",
+                        f"\tBias type is usually float32, input dtype = {source.dtype}")
 
                 loss = self.loss(source_denoised, target)
                 loss_meter.update(loss.item())
 
-                loss.backward()     # takes a bit longer?
+                loss.backward()
                 self.optim.step()
 
                 # Report/update statistics
@@ -340,18 +336,27 @@ class Noise2Noise(object):
                     loss_meter.reset()
                     time_meter.reset()
 
-                print(f'batch time: {datetime.now() - batch_start} | loop time: {datetime.now() - loop_start}')
-                loop_start = datetime.now()
-
-            if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
-                print('Epoch {} finished at {} from n2n start.'.format((epoch + 1), str((datetime.now() - self.n2n_start))[:-4]))
-                sys.stdout.flush()
+                # print(f'batch time: {datetime.now() - batch_start} | loop time: {datetime.now() - loop_start}')
+                # loop_start = datetime.now()
 
             # Epoch end, save and reset tracker
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)
             train_loss_meter.reset()
 
         train_elapsed = time_elapsed_since(train_start)[0]
-        trainvalid_loss_plots(self.ckpt_dir, self.p.loss.upper(), stats['train_loss'], stats['valid_loss'])
-        print('Training done! Total elapsed time: {}'.format(str(train_elapsed)[:-3]))
-        print('Average training time per epoch:   {}\n'.format(str(sum(self.epoch_times, timedelta(0)) / len(self.epoch_times))[:-3]))
+
+        # save stat plots
+        # plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
+        # plot_per_epoch(self.ckpt_dir, 'Valid SSIM', stats['valid_ssim'], 'SSIM')
+        trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_psnr'], 'PSNR (dB)')
+        trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_ssim'], 'SSIM')
+        trainvalid_metric_plots(self.ckpt_dir, stats['train_loss'], stats['valid_loss'], f'{self.p.loss.upper()} Loss')
+
+        # save stats to json file
+        fname_dict = '{}/n2n-stats.json'.format(self.ckpt_dir)
+        with open(fname_dict, 'w') as fp:
+            json.dump(stats, fp, indent=2)
+
+        print('\nTraining done! Total elapsed time: {}'.format(str(train_elapsed)[:-3]))
+        print('Average training time per epoch:   {}\n'.format(
+            str(sum(self.epoch_times, timedelta(0)) / len(self.epoch_times))[:-3]))

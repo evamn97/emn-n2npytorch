@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+from datetime import datetime
+
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import torch
 import torch.nn.functional as F
 import torchvision.transforms.functional as tvF
-
-import os
-import numpy as np
-import pandas as pd
-from datetime import datetime
 from PIL import Image
-from skimage.metrics import structural_similarity as SSIM
+from matplotlib import rcParams
+from matplotlib.ticker import MaxNLocator
 from pathos.helpers import cpu_count
 from pathos.pools import ProcessPool as Pool
-
-import matplotlib
-from matplotlib import rcParams
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from skimage.metrics import structural_similarity as SSIM
 
 rcParams['font.family'] = 'serif'
 matplotlib.use('agg')
@@ -62,15 +61,6 @@ def time_elapsed_since(start):
     return string, ms, timedelta
 
 
-def show_on_epoch_end(epoch_time, valid_time, valid_loss, valid_psnr):
-    """Formats validation error stats."""
-
-    clear_line()
-    print('Train time: {} | Valid time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4],
-                                                                                                valid_time[:-4],
-                                                                                                valid_loss, valid_psnr))
-
-
 def show_on_report(batch_idx, num_batches, loss, elapsed):
     """Formats training stats."""
 
@@ -100,15 +90,19 @@ def plot_per_epoch(ckpt_dir, title, measurements, y_label):
     plt.close()
 
 
-def trainvalid_loss_plots(ckpt_dir, loss_str, train_loss, valid_loss):
+def trainvalid_metric_plots(ckpt_dir, train_metric, valid_metric, metric_name):
     fig, ax = plt.subplots(dpi=200)
-    ax.plot(range(1, len(train_loss) + 1), train_loss, label='Train Loss')
-    ax.plot(range(1, len(valid_loss) + 1), valid_loss, label='Valid Loss')
-    ax.set(xlabel='Epoch', ylabel=f'{loss_str}, Loss', title="Train and Valid Loss")
-    ax.legend('upper right')
+    if train_metric is not None:
+        ax.plot(range(1, len(train_metric) + 1), train_metric, label=f'Train {metric_name}')
+    ax.plot(range(1, len(valid_metric) + 1), valid_metric, label=f'Valid {metric_name}')
+    ax.set(xlabel='Epoch',
+           ylabel=f'{metric_name}',
+           title=f"{'Train and Valid' if train_metric is not None else 'Valid'} {metric_name}")
+    ax.legend(loc='upper right')
     fig.tight_layout()
 
-    plt.savefig(os.path.join(ckpt_dir, f'train-valid-loss.png'))
+    plt.savefig(os.path.join(ckpt_dir,
+                             f"{'train-valid' if train_metric is not None else 'valid'}-{metric_name.replace(' ', '-').lower()}.png"))
     plt.close()
 
 
@@ -138,9 +132,14 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     denoised_t = denoised_t.cpu()
     clean_t = clean_t.cpu()
 
-    source = tvF.to_pil_image(source_t)
-    denoised = tvF.to_pil_image(torch.clamp(denoised_t, 0, 1))
-    clean = tvF.to_pil_image(clean_t)
+    if source_t.is_floating_point():
+        source = tvF.to_pil_image(rescale_tensor(source_t, as_image=True))
+        denoised = tvF.to_pil_image(rescale_tensor(denoised_t, as_image=True))
+        clean = tvF.to_pil_image(rescale_tensor(clean_t, as_image=True))
+    else:
+        source = tvF.to_pil_image(source_t)
+        denoised = tvF.to_pil_image(torch.clamp(denoised_t, 0, 1))
+        clean = tvF.to_pil_image(clean_t)
     # torch.clamp() is like clipping, why is it necessary? (like for RGB?)
 
     # Build image montage
@@ -163,10 +162,9 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
 
     # Save to files
     fname = os.path.splitext(img_name)[0]
-    f = open(os.path.join(save_path, 'metrics.csv'), 'a')
-    # f.write("{:.2f},{:.2f}\n".format(psnr_vals[0], psnr_vals[1]))
-    f.write(f'{fname},{round(psnr_vals[0], 2)},{round(psnr_vals[1], 2)},{round(ssim_vals[0], 2)},{round(ssim_vals[1], 2)}')
-    f.close()
+    with open(os.path.join(save_path, 'metrics.csv'), 'a') as f:
+        f.write(
+            f'{fname},{round(psnr_vals[0].item(), 2)},{round(psnr_vals[1].item(), 2)},{round(ssim_vals[0], 2)},{round(ssim_vals[1], 2)}\n')
 
     if not montage_only:
         source.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-noisy.png'))
@@ -223,6 +221,7 @@ def import_spm(filepath):
             P = int(pow(2, int(np.log2(P))))
             im_tensor = torch.tensor(df[df.columns[-1]].values.reshape((P, -1))).unsqueeze(dim=0)
 
+        im_tensor = rescale_tensor(im_tensor)  # rescales to [0, 1]
         # im_pil = tvF.to_pil_image(rescale_tensor(im_tensor, as_image=True), mode="L")
 
     return os.path.basename(filepath), im_tensor

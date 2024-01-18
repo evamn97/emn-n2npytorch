@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     python_start = datetime.datetime.now()
     local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
-    print(f'Python start time:  {python_start.strftime("%H:%M:%S.%f")[:-4]} {local_tz}')
+    print(f'python start time:  {python_start.strftime("%H:%M:%S.%f")[:-4]} {local_tz}')
 
     # Parse training parameters
     params = parse_args()
@@ -67,18 +67,18 @@ if __name__ == '__main__':
     # root = "/mnt/data/emnatin"
     # parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
     # parent = os.path.join(root, "imgrec-tiny-ImageNet")
-    parent = "../hs20mg_xyz_data"
-    params.train_dir = os.path.join(parent, "train")
-    params.valid_dir = os.path.join(parent, "valid")
-    params.target_dir = os.path.join(parent, "targets")
-    params.batch_size = 4
-    params.nb_epochs = 10
-    params.channels = 1
-    params.loss = 'l1'
-    params.cuda = True
-    params.verbose = True
-    params.noise_type = 'raw'
-    params.paired_targets = True
+    # parent = "../hs20mg_xyz_data"
+    # params.train_dir = os.path.join(parent, "train")
+    # params.valid_dir = os.path.join(parent, "valid")
+    # params.target_dir = os.path.join(parent, "targets")
+    # params.batch_size = 4
+    # params.nb_epochs = 10
+    # params.channels = 1
+    # params.loss = 'l1'
+    # params.cuda = True
+    # params.verbose = True
+    # params.noise_type = 'raw'
+    # params.paired_targets = True
     # ------------------------------------------------------------------------------------------
 
     if (params.noise_type == 'raw' and not params.paired_targets):
@@ -109,5 +109,7 @@ if __name__ == '__main__':
         # print("\nRequested model checkpoint ({}) is not a file. \nCreating a new training checkpoint.\n".format(params.load_ckpt))
         params.load_ckpt = None
 
-    print(f'training begin:      {str(datetime.datetime.now() - python_start)[:-4]} from python start')
+    # print(f'training begin:      {str(datetime.datetime.now() - python_start)[:-4]} from python start')
+    print(f'training begin:      {datetime.datetime.now().strftime("%H:%M:%S.%f")[:-4]}')
+
     n2n.train(train_loader, valid_loader)

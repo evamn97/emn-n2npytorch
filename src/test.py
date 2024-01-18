@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import torch
-import torch.nn as nn
+from argparse import ArgumentParser
 
 from datasets import load_dataset
 from noise2noise import Noise2Noise
-
-from argparse import ArgumentParser
 
 
 def parse_args():
@@ -50,15 +47,16 @@ if __name__ == '__main__':
         params.noise_param = params.noise_param / (10 ** mag)
 
     # debugging only
-    # params.test_dir = '../tgx2_xyz_data/test'
-    # params.target_dir = '../tgx2_xyz_data/test/targets'
-    # params.load_ckpt = '../ckpts/xyz-tgx-raw/xyz-tgx-raw0.24l2/n2n-epoch100-0.00443.pt'
+    # parent = '../hs20mg_xyz_data'
+    # params.test_dir = os.path.join(parent, 'test')
+    # params.target_dir = os.path.join(params.test_dir, 'targets')
+    # params.load_ckpt = '../ckpts_new/hs20mg-xyz-raw/n2n-epoch100-0.00000.pt'
     # params.montage_only = True
     # params.noise_type = 'raw'
-    # params.noise_param = 0.4
+    # # params.noise_param = 0.4
     # params.paired_targets = True
     # params.channels = 1
-    # params.output = '../results/debug/'
+    # params.output = '../new_results/'
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)
