@@ -8,9 +8,9 @@ import numpy as np
 import pandas as pd
 import torch
 import torchvision.transforms as trf
+from torchvision.transforms import functional as tvF
 from pathos.helpers import cpu_count
 from pathos.pools import ProcessPool as Pool
-from torchvision.transforms import functional as tvF
 from tqdm import tqdm
 
 
@@ -96,19 +96,21 @@ def conversions(f_in, new_type):
         raise TypeError("Unsupported input type.")
     if new_type not in supported:
         raise TypeError("Unsupported conversion type.")
-    assert type(f_in) != new_type, "Input type matches conversion type."
+    if type(f_in) is new_type:
+        return f_in
+    # assert type(f_in) is not new_type, "Input type matches conversion type."
 
     if new_type == Image.Image:
-        if type(f_in) == torch.Tensor:
+        if type(f_in) is torch.Tensor:
             return tvF.to_pil_image(f_in)
-        elif type(f_in) == np.ndarray:
+        elif type(f_in) is np.ndarray:
             return Image.fromarray(f_in)
     elif new_type == torch.Tensor:
         return tvF.to_tensor(f_in)
     else:  # new_type == np.ndarray
-        if type(f_in) == Image.Image:
+        if type(f_in) is Image.Image:
             return np.array(f_in)
-        elif type(f_in) == torch.Tensor:
+        elif type(f_in) is torch.Tensor:
             return np.rot90(np.rot90(f_in.numpy(), axes=(0, 2)), k=3).squeeze()
 
 
@@ -120,7 +122,7 @@ def random_trf(image: Union[Image.Image, torch.Tensor, np.ndarray], min_dim=None
     :param corner_priority: if True, sets rotation angle to zero and forces cropping bbox on images to enclose corners of the original image.
     :param max_angle: maximum angle range within which to rotate the image.
     """
-    if type(image) != torch.Tensor:
+    if type(image) is not torch.Tensor:
         img = tvF.to_tensor(image)
     else:
         img = image
@@ -157,7 +159,7 @@ def random_trf(image: Union[Image.Image, torch.Tensor, np.ndarray], min_dim=None
         return new_source
 
     else:  # for augmenting image pairs with the same transformations
-        if type(target) != torch.Tensor:
+        if type(target) is not torch.Tensor:
             tgt = tvF.to_tensor(target)
         else:
             tgt = target
@@ -282,6 +284,8 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
             target = xyz_to_zfield(t_path)
         else:
             return None
+        # _, source = import_spm(s_path)
+        # _, target = import_spm(t_path)
 
         corner_priority = False
         if corners:
@@ -338,6 +342,7 @@ def augment_pairs(source_path_in: str, source_path_out: str, target_path_in: str
     pool.close()
     pool.join()
     pool.clear()
+    pool.terminate()
     print("Done!")
 
 

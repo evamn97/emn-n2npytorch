@@ -11,7 +11,7 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-data_name="combo_xyz_data"
+data_name="train_tgx11_valid_hs20mg_data"
 train_dir="${data_name}/train"
 valid_dir="${data_name}/valid"
 target_dir="${data_name}/targets"
@@ -22,13 +22,13 @@ train_ckpt=""    # for finetuning a pretrained model (leave empty to create a ne
 redux=0
 noise="raw"
 train_param=0.25
-report=100
+report=50
 epochs=100
-batch_size=39
+batch_size=47
 loss_fun='l2'
 
 # --------------------------------------------------------------------------------------------------
-ckpt_save="new_ckpts_results/new_ckpts_combo_raw"
+ckpt_save="new_ckpts_results/new_ckpts_combo2_raw"
 # --------------------------------------------------------------------------------------------------
 
 echo -e "\nDate:  $(date)\n"

@@ -11,13 +11,13 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
-data_root="combo_xyz_data"
+data_root="train_tgx11_valid_hs20mg_data"
 test_dir="${data_root}/test"
 target_dir="${test_dir}/targets"
 
 noise="raw"
 test_param=1
-results="new_ckpts_results/new_results_combo_raw"
+results="new_ckpts_results/new_results_combo2_raw"
 channels=1
 
 ckpt="new_ckpts_results/new_ckpts_combo_raw/debuglocal-train-rawl2/train-epoch100-0.00532.pt"
