@@ -113,7 +113,7 @@ class Noise2Noise(object):
             valid_loss = stats['valid_loss'][epoch]
             fname_unet = '{}/train-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
         if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
-            print('Saving checkpoint to: {}\n'.format(fname_unet))
+            print('Saving checkpoint to: {}'.format(fname_unet))
         torch.save(self.model.state_dict(), fname_unet)
 
     def load_model(self, ckpt_fname):
@@ -286,7 +286,7 @@ class Noise2Noise(object):
         train_start = datetime.now()
         for epoch in range(self.p.nb_epochs):
             if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
-                print('EPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
+                print('\nEPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
                 sys.stdout.flush()
 
             # Some stats trackers
