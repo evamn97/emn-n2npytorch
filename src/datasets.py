@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import os.path
 
 import matplotlib
 from matplotlib import rcParams
@@ -72,19 +73,21 @@ class NoisyDataset(Dataset):
         elif self.redux > 1:
             raise ValueError("redux ratio must be a float between 0.0 and 1.0 (non-inclusive)")
 
-        # get list of target names in matching order to source list
-        self.trgt_fnames = [find_target(os.listdir(self.target_dir), s) for s in self.img_fnames]
-
         # load images into memory
         if verbose:
-            source_iter = tqdm(self.img_fnames, desc='Loading source images', leave=False, unit='img')
-            target_iter = tqdm(self.trgt_fnames, desc='Loading target images', leave=False, unit='img')
+            source_iter = tqdm(self.img_fnames, desc=f'Loading {os.path.basename(self.root_dir)} images', leave=False, unit='img')
         else:
             source_iter = self.img_fnames
-            target_iter = self.trgt_fnames
-
         self.images = {name: obj for (name, obj) in [import_spm(os.path.join(self.root_dir, s)) for s in source_iter]}
-        self.targets = {name: obj for (name, obj) in [import_spm(os.path.join(self.target_dir, t)) for t in target_iter]}
+
+        # get targets in matching order to source list (if paired targets is true)
+        if self.paired_targets:
+            self.trgt_fnames = [find_target(os.listdir(self.target_dir), s) for s in self.img_fnames]
+            if verbose:
+                target_iter = tqdm(self.trgt_fnames, desc=f'Loading {os.path.basename(self.root_dir)} targets', leave=False, unit='img')
+            else:
+                target_iter = self.trgt_fnames
+            self.targets = {name: obj for (name, obj) in [import_spm(os.path.join(self.target_dir, t)) for t in target_iter]}
 
     def _add_noise(self, img: torch.Tensor, param: float) -> torch.Tensor:
         """ Adds noise to an image. """
