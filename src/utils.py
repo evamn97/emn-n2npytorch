@@ -147,7 +147,7 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     ssim_vals = [SSIM(np.asarray(source), np.asarray(clean)), SSIM(np.asarray(denoised), np.asarray(clean))]
     titles = ['Input: {:.2f} dB'.format(psnr_vals[0]),
               'Denoised: {:.2f} dB'.format(psnr_vals[1]),
-              'Ground truth']
+              'Clean target']
     zipped = zip(titles, [source, denoised, clean])
     for j, (title, img) in enumerate(zipped):
         ax[j].imshow(img, cmap='gray')  # cmap for height fields (not normalized)
@@ -164,7 +164,7 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     fname = os.path.splitext(img_name)[0]
     with open(os.path.join(save_path, 'metrics.csv'), 'a') as f:
         f.write(
-            f'{fname},{round(psnr_vals[0].item(), 2)},{round(psnr_vals[1].item(), 2)},{round(ssim_vals[0], 2)},{round(ssim_vals[1], 2)}\n')
+            f'{fname},{round(psnr_vals[0].item(), 2)},{round(psnr_vals[1].item(), 2)},{round(ssim_vals[0], 4)},{round(ssim_vals[1], 4)}\n')
 
     if not montage_only:
         source.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-noisy.png'))

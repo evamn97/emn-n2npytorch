@@ -110,7 +110,7 @@ class NoisyDataset(Dataset):
             noisy_img = tvF.resize(tvF.resize(img.to(torch.float64, copy=True), [hN, wN]), [h, w])
 
         elif self.noise_type.lower() == 'gradient':
-            std = rng.uniform(0, param) * img.std()
+            std = param * img.std()
             noise = torch.from_numpy(np.tile(np.linspace(0, 1, w), (h, 1))).unsqueeze(dim=0) * NormalDist(0, std).sample(img.size())
             noisy_img = img.to(torch.float64, copy=True) + noise
             if not img.is_floating_point():     # assumes int type means it's an image format (e.g., 0-255 range), so need rescale after summing
