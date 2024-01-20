@@ -11,24 +11,24 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-data_name="combo_xyz_data"
-train_dir="${data_name}/targets"
-valid_dir="${data_name}/targets"
+data_name="combo_xyz_clean_data"
+train_dir="${data_name}/train"
+valid_dir="${data_name}/valid"
 target_dir="${data_name}/targets"
 channels=1
 
 train_ckpt=""    # for finetuning a pretrained model (leave empty to create a new ckpt)
 
 redux=0
-noise="bernoulli"
+noise="lower"
 train_param=0
-report=50
+report=24
 epochs=100
-batch_size=47
+batch_size=94
 loss_fun='l1'
 
 # --------------------------------------------------------------------------------------------------
-ckpt_save="new_ckpts_results/new_ckpts_combo_bernoulli"
+ckpt_save="new_ckpts_results/clean_combo_lower"
 # --------------------------------------------------------------------------------------------------
 
 echo -e "\nDate:  $(date)\n"
