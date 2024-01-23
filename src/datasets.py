@@ -75,7 +75,7 @@ class NoisyDataset(Dataset):
 
         # load images into memory
         if verbose:
-            source_iter = tqdm(self.img_fnames, desc=f'Loading {os.path.basename(self.root_dir)} images', leave=False, unit='img')
+            source_iter = tqdm(self.img_fnames, desc=f'Loading {os.path.basename(self.root_dir)} images', unit='img')
         else:
             source_iter = self.img_fnames
         self.images = {name: obj for (name, obj) in [import_spm(os.path.join(self.root_dir, s)) for s in source_iter]}
@@ -84,7 +84,7 @@ class NoisyDataset(Dataset):
         if self.paired_targets:
             self.trgt_fnames = [find_target(os.listdir(self.target_dir), s) for s in self.img_fnames]
             if verbose:
-                target_iter = tqdm(self.trgt_fnames, desc=f'Loading {os.path.basename(self.root_dir)} targets', leave=False, unit='img')
+                target_iter = tqdm(self.trgt_fnames, desc=f'Loading {os.path.basename(self.root_dir)} targets', unit='img')
             else:
                 target_iter = self.trgt_fnames
             self.targets = {name: obj for (name, obj) in [import_spm(os.path.join(self.target_dir, t)) for t in target_iter]}
