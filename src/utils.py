@@ -20,7 +20,7 @@ from pathos.pools import ProcessPool as Pool
 from skimage.metrics import structural_similarity as SSIM
 
 rcParams['font.family'] = 'serif'
-mpl.use('QtAgg')
+# mpl.use('QtAgg')
 
 
 def start_pool():
@@ -168,11 +168,11 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
             f'{fname},{round(psnr_vals[0].item(), 2)},{round(psnr_vals[1].item(), 2)},{round(ssim_vals[0], 4)},{round(ssim_vals[1], 4)}\n')
 
     if not montage_only:
-        source.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-noisy.png'))
-        denoised.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-denoised.png'))
-        clean.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-target.png'))
+        source.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param if noise_type != "raw" else ""}-noisy.png'))
+        denoised.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param if noise_type != "raw" else ""}-denoised.png'))
+        clean.save(os.path.join(save_path, f'{fname}-{noise_type}{noise_param if noise_type != "raw" else ""}-target.png'))
 
-    fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-montage.png'), bbox_inches='tight')
+    fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}{noise_param if noise_type != "raw" else ""}-montage.png'), bbox_inches='tight')
     plt.close()
 
 
