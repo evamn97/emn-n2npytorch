@@ -82,7 +82,8 @@ class NoisyDataset(Dataset):
 
         # get targets in matching order to source list (if paired targets is true)
         if self.paired_targets:
-            self.trgt_fnames = [find_target(os.listdir(self.target_dir), s) for s in self.img_fnames]
+            # self.trgt_fnames = [find_target(os.listdir(self.target_dir), s) for s in self.img_fnames]
+            self.trgt_fnames = [s.replace('corrupt', 'clean') for s in self.img_fnames]     # find_target is taking wayyy too long
             if verbose:
                 target_iter = tqdm(self.trgt_fnames, desc=f'Loading {os.path.basename(self.root_dir)} targets', unit='img')
             else:

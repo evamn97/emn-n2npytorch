@@ -220,9 +220,9 @@ def import_spm(filepath):
         except ValueError:  # just in case above doesn't work, find highest power of 2 to reshape
             P = int(pow(2, int(np.log2(P))))
             im_tensor = torch.tensor(df[df.columns[-1]].values.reshape((P, -1))).unsqueeze(dim=0)
-
-        im_tensor = rescale_tensor(im_tensor)  # rescales to [0, 1]
         # im_pil = tvF.to_pil_image(rescale_tensor(im_tensor, as_image=True), mode="L")
+    
+    im_tensor = rescale_tensor(im_tensor)  # rescales to [0, 1]
 
     return os.path.basename(filepath), im_tensor
 

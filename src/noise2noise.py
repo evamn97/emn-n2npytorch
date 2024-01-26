@@ -33,7 +33,7 @@ class Noise2Noise(object):
         if "jobname" in os.environ and "idv" not in os.environ["jobname"]:
             self.job_name = os.environ["jobname"]  # ex: tgx-n2npt-train-bernoulli
         elif "filename" in os.environ:
-            self.job_name = f'{os.environ["filename"].replace("-imgrec", "")}{("redux" + self.p.redux) if self.p.redux > 0 else ""}-{self.p.noise_type}{"clean" if (trainable and self.p.clean_targets) else ""}{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss if trainable else ""}'  # ex: tinyimagenetredux0.9-bernoulli0.5l1
+            self.job_name = f'{os.environ["filename"].replace("-imgrec", "")}{("redux" + str(self.p.redux)) if self.p.redux > 0 else ""}-{self.p.noise_type}{"clean" if (trainable and self.p.clean_targets) else ""}{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss if trainable else ""}'  # ex: tinyimagenetredux0.9-bernoulli0.5l1
         else:
             self.job_name = f'{self.p.noise_type}{"-clean" if (trainable and self.p.clean_targets) else ""}{self.job_id}'
 
@@ -92,17 +92,18 @@ class Noise2Noise(object):
         if first:
             if self.p.load_ckpt and os.path.isfile(self.p.load_ckpt):  # indicate previous ckpt in ckpt_dir_name
                 if "retrain" in self.p.load_ckpt:
-                    # self.ckpt_dir = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-{}{}".format(self.p.noise_param, self.p.loss)
-                    self.ckpt_dir = f'{os.path.basename(os.path.dirname(self.p.load_ckpt))}{("redux" + self.p.redux) if self.p.redux > 0 else ""}-{self.p.noise_param}{self.p.loss}'
+                    ckpt_subdir = f'{os.path.basename(os.path.dirname(self.p.load_ckpt))}_{("redux" + str(self.p.redux)) if self.p.redux > 0 else ""}-{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss}'
                 else:
-                    # self.ckpt_dir = os.path.basename(os.path.dirname(self.p.load_ckpt)) + "-retrain-{}{}".format(self.p.noise_param, self.p.loss)  # ex: hs20mg-bernoulli-retrain-0.4l1
-                    self.ckpt_dir = f'{os.path.basename(os.path.dirname(self.p.load_ckpt))}-retrain{("redux" + self.p.redux) if self.p.redux > 0 else ""}-{self.p.noise_param}{self.p.loss}'
+                    ckpt_subdir = f'{os.path.basename(os.path.dirname(self.p.load_ckpt))}_retrain{("redux" + str(self.p.redux)) if self.p.redux > 0 else ""}-{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss}'
             else:
-                # self.ckpt_dir = self.p.ckpt_save_path
-                self.ckpt_dir = os.path.join(self.p.ckpt_save_path, f'{self.job_name}')
+                ckpt_subdir = f'{self.job_name}'
+            self.ckpt_dir = os.path.join(self.p.ckpt_save_path, ckpt_subdir)
 
-            if not os.path.isdir(self.ckpt_dir):
-                os.makedirs(self.ckpt_dir)
+            if os.path.isdir(self.ckpt_dir):
+                idx = sum(ckpt_subdir in dirname for dirname in os.listdir(self.p.ckpt_save_path) if os.path.isdir(os.path.join(self.p.ckpt_save_path, dirname)))
+                self.ckpt_dir += f'-{idx}'
+
+            os.makedirs(self.ckpt_dir)
 
         # Save checkpoint dictionary
         if self.p.ckpt_overwrite:
@@ -150,13 +151,23 @@ class Noise2Noise(object):
         epoch_time, _, epoch_time_td = time_elapsed_since(epoch_start)
         self.epoch_times.append(epoch_time_td)
 
+        # save stat plots
+        trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_psnr'], 'PSNR')
+        trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_ssim'], 'SSIM')
+        trainvalid_metric_plots(self.ckpt_dir, stats['train_loss'], stats['valid_loss'], f'{self.p.loss.upper()} Loss')
+
+        # save stats to json file
+        fname_dict = '{}/n2n-stats.json'.format(self.ckpt_dir)
+        with open(fname_dict, 'w') as fp:
+            json.dump(stats, fp, indent=2)
+
         if self.p.verbose:
             print('Epoch time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4],
                                                                                        valid_loss,
                                                                                        valid_psnr))
             est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (
                         self.p.nb_epochs - (epoch + 1))
-            print(f'Estimated time remaining: {str(est_remain)[:-7]}')
+            print(f'Estimated time remaining: {str(est_remain)[:-4]}')
 
             sys.stdout.flush()  # force print to out file
 
@@ -268,11 +279,9 @@ class Noise2Noise(object):
         num_batches = len(train_loader)
         if num_batches % self.p.report_interval != 0:
             print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size).",
-                  "\nnbatches = {}/{} = {}, report_interval = {}:   {} % {} != 0".format(
-                      (num_batches * self.p.batch_size), self.p.batch_size, num_batches, self.p.report_interval,
-                      self.p.report_interval, num_batches),
+                  f"\nnbatches = {len(train_loader.dataset)}/{self.p.batch_size} = {num_batches}, report_interval = {self.p.report_interval}:   {self.p.report_interval} % {num_batches} != 0",
                   "\nThe report interval has been reset to equal nbatches ({}).\n".format(num_batches))
-            self.p.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset
+            self.p.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset to print once per epoch
 
         # Dictionaries of tracked stats
         stats = {'noise_type': self.p.noise_type,
@@ -344,18 +353,6 @@ class Noise2Noise(object):
             train_loss_meter.reset()
 
         train_elapsed = time_elapsed_since(train_start)[0]
-
-        # save stat plots
-        # plot_per_epoch(self.ckpt_dir, 'Valid PSNR', stats['valid_psnr'], 'PSNR (dB)')
-        # plot_per_epoch(self.ckpt_dir, 'Valid SSIM', stats['valid_ssim'], 'SSIM')
-        trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_psnr'], 'PSNR (dB)')
-        trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_ssim'], 'SSIM')
-        trainvalid_metric_plots(self.ckpt_dir, stats['train_loss'], stats['valid_loss'], f'{self.p.loss.upper()} Loss')
-
-        # save stats to json file
-        fname_dict = '{}/n2n-stats.json'.format(self.ckpt_dir)
-        with open(fname_dict, 'w') as fp:
-            json.dump(stats, fp, indent=2)
 
         print('\nTraining done! Total elapsed time: {}'.format(str(train_elapsed)[:-3]))
         print('Average training time per epoch:   {}\n'.format(

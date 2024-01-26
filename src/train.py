@@ -63,7 +63,7 @@ if __name__ == '__main__':
     params = parse_args()
 
     # debugging!! ------------------------------------------------------------------------------
-    # root = "/Users/emnatin/Library/CloudStorage/OneDrive-SandiaNationalLaboratories/GitHub/"
+    # root = "/Users/emnatin/Documents/"
     # root = "/mnt/data/emnatin"
     # parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
     # parent = os.path.join(root, "imgrec-tiny-ImageNet")
@@ -71,10 +71,12 @@ if __name__ == '__main__':
     # params.train_dir = os.path.join(parent, "train")
     # params.valid_dir = os.path.join(parent, "valid")
     # params.target_dir = os.path.join(parent, "targets")
-    # params.batch_size = 4
+    # params.ckpt_save_path = "ckpts"
+    # params.batch_size = 100
     # params.nb_epochs = 10
+    # params.redux = 0.9999
     # params.channels = 1
-    # params.loss = 'l1'
+    # params.loss = 'l2'
     # params.cuda = True
     # params.verbose = True
     # params.noise_type = 'raw'
@@ -94,11 +96,7 @@ if __name__ == '__main__':
     if params.show_progress:
         params.verbose = True  # so '--show-progress' can be used instead of '--verbose'
 
-    # Train/valid datasets
-    train_loader = load_dataset(params.train_dir, params, shuffled=True)
-    valid_loader = load_dataset(params.valid_dir, params, shuffled=False)
-
-    # Initialize model and train
+    # Initialize model
     n2n = Noise2Noise(params, trainable=True)
 
     # try using previously trained model to build on - 06/17/22
@@ -107,9 +105,13 @@ if __name__ == '__main__':
         n2n.load_model(params.load_ckpt)
     elif params.load_ckpt and not os.path.isfile(params.load_ckpt):
         # print("\nRequested model checkpoint ({}) is not a file. \nCreating a new training checkpoint.\n".format(params.load_ckpt))
-        params.load_ckpt = None
+        # params.load_ckpt = None
+        raise FileNotFoundError(f'\nRequested model checkpoint ({params.load_ckpt}) is not a file or does not exist!')    # Train/valid datasets
 
-    # print(f'training begin:      {str(datetime.datetime.now() - python_start)[:-4]} from python start')
+    # create data loaders and load datasets
+    train_loader = load_dataset(params.train_dir, params, shuffled=True)
+    valid_loader = load_dataset(params.valid_dir, params, shuffled=False)
+
+    # start training
     print(f'training begin:      {datetime.datetime.now().strftime("%H:%M:%S.%f")[:-4]}')
-
     n2n.train(train_loader, valid_loader)
