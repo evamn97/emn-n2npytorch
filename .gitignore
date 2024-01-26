@@ -1,27 +1,14 @@
 /.idea/
 /bash-scripts/
-/.old_files_and_results/
-/pub_figures/
+/MEAS_PUB/
 /ckpts
 /results
-/new_ckpts_results/
 *__pycache__
 
 /*_data
-/tgx_data/
-/tgx_xyz_data/
-/hs20mg_data/
-/hs20mg_xyz_data/
-/xyz_dbtest_data/
-/combo_xyz_data/
-/tgx2_xyz_data/
-/combo_test_set/
 
 make_figs.py
 scratch.py
-psnr-*
-niqe-*
-tgx2-niqe.txt
 debugging.py
 *.DS_Store
 
