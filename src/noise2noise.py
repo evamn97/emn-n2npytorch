@@ -17,7 +17,7 @@ class Noise2Noise(object):
 
     def __init__(self, params, trainable):
         """Initializes model."""
-        self.n2n_start = datetime.now()
+        self.n2n_start = dt.now()
         # print(f'N2N start time:     {self.n2n_start.strftime("%H:%M:%S.%f")[:-4]}')
         self.epoch_times = []  # added 6/24/22
         self.p = params
@@ -29,7 +29,7 @@ class Noise2Noise(object):
         if "jobid" in os.environ:
             self.job_id = os.environ["jobid"]  # ex: 193174
         else:
-            self.job_id = f'{datetime.now():%m%d%H%M}'  # ex: 05311336
+            self.job_id = f'{dt.now():%m%d%H%M}'  # ex: 05311336
         if "jobname" in os.environ and "idv" not in os.environ["jobname"]:
             self.job_name = os.environ["jobname"]  # ex: tgx-n2npt-train-bernoulli
         elif "filename" in os.environ:
@@ -38,7 +38,7 @@ class Noise2Noise(object):
             self.job_name = f'{self.p.noise_type}{"-clean" if (trainable and self.p.clean_targets) else ""}{self.job_id}'
 
         # debugging
-        print(f'n2n initialized in:  {str(datetime.now() - self.n2n_start)[:-4]}')
+        print(f'n2n initialized in:  {str(dt.now() - self.n2n_start)[:-4]}')
         sys.stdout.flush()
 
     def _compile(self):
@@ -97,7 +97,8 @@ class Noise2Noise(object):
                     ckpt_subdir = f'{os.path.basename(os.path.dirname(self.p.load_ckpt))}_retrain{("redux" + str(self.p.redux)) if self.p.redux > 0 else ""}-{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss}'
             else:
                 ckpt_subdir = f'{self.job_name}'
-            self.ckpt_dir = os.path.join(self.p.ckpt_save_path, ckpt_subdir)
+
+            self.ckpt_dir = os.path.normpath(os.path.join(self.p.ckpt_save_path, ckpt_subdir))
 
             if os.path.isdir(self.ckpt_dir):
                 idx = sum(ckpt_subdir in dirname for dirname in os.listdir(self.p.ckpt_save_path) if os.path.isdir(os.path.join(self.p.ckpt_save_path, dirname)))
@@ -225,7 +226,7 @@ class Noise2Noise(object):
 
         self.model.train(False)
 
-        valid_start = datetime.now()
+        valid_start = dt.now()
         loss_meter = AvgMeter()
         psnr_meter = AvgMeter()
         ssim_meter = AvgMeter()
@@ -292,22 +293,22 @@ class Noise2Noise(object):
                  'valid_ssim': []}
 
         # Main training loop
-        train_start = datetime.now()
+        train_start = dt.now()
         for epoch in range(self.p.nb_epochs):
             if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
                 print('\nEPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
                 sys.stdout.flush()
 
             # Some stats trackers
-            epoch_start = datetime.now()
+            epoch_start = dt.now()
             train_loss_meter = AvgMeter()
             loss_meter = AvgMeter()
             time_meter = AvgMeter()
 
             # Minibatch SGD
-            # loop_start = datetime.now()
+            # loop_start = dt.now()
             for batch_idx, (source, target) in enumerate(train_loader):
-                batch_start = datetime.now()
+                batch_start = dt.now()
                 if self.p.show_progress:
                     progress_bar(batch_idx, num_batches, self.p.report_interval, loss_meter.val)
 
@@ -345,8 +346,8 @@ class Noise2Noise(object):
                     loss_meter.reset()
                     time_meter.reset()
 
-                # print(f'batch time: {datetime.now() - batch_start} | loop time: {datetime.now() - loop_start}')
-                # loop_start = datetime.now()
+                # print(f'batch time: {dt.now() - batch_start} | loop time: {dt.now() - loop_start}')
+                # loop_start = dt.now()
 
             # Epoch end, save and reset tracker
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)

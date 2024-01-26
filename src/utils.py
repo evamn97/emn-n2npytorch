@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import os
-from datetime import datetime
-
-import matplotlib
+from datetime import datetime as dt
+from typing import Union
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import pandas as pd
 import torch
@@ -19,7 +20,7 @@ from pathos.pools import ProcessPool as Pool
 from skimage.metrics import structural_similarity as SSIM
 
 rcParams['font.family'] = 'serif'
-matplotlib.use('agg')
+mpl.use('QtAgg')
 
 
 def start_pool():
@@ -53,7 +54,7 @@ def progress_bar(batch_idx, num_batches, report_interval, train_loss):
 def time_elapsed_since(start):
     """Computes elapsed time since start."""
 
-    timedelta = datetime.now() - start
+    timedelta = dt.now() - start
     # string = str(timedelta)[:-7]
     string = str(timedelta)
     ms = int(timedelta.total_seconds() * 1000)
@@ -157,7 +158,7 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
 
     # Open pop up window, if requested
     # if show > 0:
-    #     matplotlib.use('TkAgg')
+    #     mpl.use('TkAgg')
     # plt.show()
 
     # Save to files
@@ -173,6 +174,99 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
 
     fig.savefig(os.path.join(save_path, f'{fname}-{noise_type}{noise_param}-montage.png'), bbox_inches='tight')
     plt.close()
+
+
+def plot_tensors(corr_im_tensor: torch.Tensor,
+                 source: Union[str, torch.Tensor] = None,
+                 titles: list = None,
+                 save_path: str = '',
+                 f_name: str = '',
+                 small_fig: bool = False,
+                 cmap=mpl.colormaps['gray']):
+    if corr_im_tensor.is_floating_point():  # if tensor isn't already in image scale
+        im_pil = tvF.to_pil_image(rescale_tensor(corr_im_tensor, as_image=True))
+    else:
+        im_pil = tvF.to_pil_image(corr_im_tensor.to(torch.uint8))
+
+    fig_height = 4 if small_fig else 8
+    plt.rc('axes', titlesize=28, labelsize=18)  # fontsize of the axes title
+    plt.rc('ytick', labelsize=16)
+    mpl.rcParams['font.family'] = 'serif'
+
+    if source is not None:  # if fpath is given, assume source is different from im_tensor and plot both
+        if titles is None:
+            titles = ['Corrupted Image', 'Source Image']
+        else:
+            assert len(titles) == 2, "The number of titles doesn't match the number of images (2)! Check titles input."
+
+        if type(source) is str:
+            source_pil, source_tensor = import_spm(source)
+            fignum = os.path.basename(source)
+        else:
+            source_tensor = source
+            if f_name != '':
+                fignum = os.path.splitext(f_name)[0]
+            else:
+                fignum = None
+            if source.is_floating_point():
+                source_pil = tvF.to_pil_image(rescale_tensor(source, as_image=True))
+            else:
+                source_pil = tvF.to_pil_image(source.to(torch.uint8))
+
+        im_ratio = max(corr_im_tensor.size()[2], source_tensor.size()[2]) / max(corr_im_tensor.size()[1],
+                                                                                corr_im_tensor.size()[1])
+        fig, ax = plt.subplots(1, 2, figsize=(im_ratio * 2 * fig_height + 1, fig_height), num=fignum)
+
+        norm_i = mpl.colors.Normalize(vmin=torch.amin(corr_im_tensor).item(), vmax=torch.amax(corr_im_tensor).item())
+        sm_i = plt.cm.ScalarMappable(cmap=cmap, norm=norm_i)
+        ax[0].imshow(im_pil, cmap=cmap)
+        ax[0].set(title=titles[0], xticks=[], yticks=[])
+        divider = make_axes_locatable(ax[0])
+        cax0 = divider.append_axes("right", size="5%", pad=0.1)
+        fig.colorbar(sm_i, cax=cax0)
+
+        norm_s = mpl.colors.Normalize(vmin=torch.amin(source_tensor).item(), vmax=torch.amax(source_tensor).item())
+        sm_s = plt.cm.ScalarMappable(cmap=cmap, norm=norm_s)
+        ax[1].imshow(source_pil, cmap=cmap)
+        ax[1].set(title=titles[1], xticks=[], yticks=[])
+        divider = make_axes_locatable(ax[1])
+        cax1 = divider.append_axes("right", size="5%", pad=0.1)
+        fig.colorbar(sm_s, cax=cax1, label='Z Height or Pixel value')
+
+        plt.subplots_adjust(left=0.01,
+                            bottom=0.01,
+                            right=0.94,
+                            top=0.96,
+                            wspace=0.1,
+                            hspace=0.0)
+
+        if save_path != '':
+            if type(source) is str:
+                save_name = os.path.splitext(os.path.basename(source))[
+                                0] + f'_montage_{dt.today().strftime("%H%M")}.png'
+            elif f_name != '':
+                save_name = os.path.splitext(f_name)[0] + f'_montage_{dt.today().strftime("%H%M")}.png'
+            else:
+                save_name = f'corr_montage_{dt.today().strftime("%H%M%s")}.png'
+            # save_path = f'./corrupted_{dt.today().strftime("%Y%m%d")}'
+            fig.savefig(os.path.join(save_path, save_name), bbox_inches='tight')
+            # plt.close()
+
+    else:
+        im_ratio = im_pil.width / im_pil.height
+        fig, ax = plt.subplots(figsize=(im_ratio * fig_height + 1, fig_height))
+        if titles is not None:
+            assert len(titles) == 1, "Need one title for one image! Check titles input."
+            ax.set_title(titles[0])
+        norm = mpl.colors.Normalize(vmin=torch.amin(corr_im_tensor).item(), vmax=torch.amax(corr_im_tensor).item())
+        ax.imshow(im_pil, cmap=cmap)
+        ax.set(xticks=[], yticks=[])
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+        fig.colorbar(sm, ax=ax, label='Z Height or Pixel value')
+
+        fig.tight_layout()
+    plt.ion()
+    plt.show()
 
 
 def rescale_tensor(tensor, as_image=False, bounds=(0, 1), dtype=None):
@@ -222,7 +316,7 @@ def import_spm(filepath):
             im_tensor = torch.tensor(df[df.columns[-1]].values.reshape((P, -1))).unsqueeze(dim=0)
         # im_pil = tvF.to_pil_image(rescale_tensor(im_tensor, as_image=True), mode="L")
     
-    im_tensor = rescale_tensor(im_tensor)  # rescales to [0, 1]
+    im_tensor = rescale_tensor(im_tensor, dtype=torch.float64)  # rescales to [0, 1]
 
     return os.path.basename(filepath), im_tensor
 
