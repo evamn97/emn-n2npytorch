@@ -20,7 +20,7 @@ channels=1
 
 train_ckpt=""    # for finetuning a pretrained model (leave empty to create a new ckpt)
 
-redux=0.995
+redux=0
 noise="raw"
 train_param=0.5
 report=2000
