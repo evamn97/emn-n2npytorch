@@ -65,16 +65,18 @@ if __name__ == '__main__':
     # debugging!! ------------------------------------------------------------------------------
     # root = "/Users/emnatin/Documents/"
     # root = "/mnt/data/emnatin"
+    # root = "D:/imgrec_data/"
+    # root = "/mnt/d/imgrec_data"
     # parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
     # parent = os.path.join(root, "imgrec-tiny-ImageNet")
-    # parent = "../hs20mg_xyz_data"
+    # # parent = "../hs20mg_xyz_data"
     # params.train_dir = os.path.join(parent, "train")
     # params.valid_dir = os.path.join(parent, "valid")
     # params.target_dir = os.path.join(parent, "targets")
-    # params.ckpt_save_path = "ckpts"
+    # # params.ckpt_save_path = "ckpts"
     # params.batch_size = 100
     # params.nb_epochs = 10
-    # params.redux = 0.9999
+    # params.redux = 0.995
     # params.channels = 1
     # params.loss = 'l2'
     # params.cuda = True

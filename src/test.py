@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 
 from datasets import load_dataset
 from noise2noise import Noise2Noise
+import os
 
 
 def parse_args():
@@ -48,16 +49,17 @@ if __name__ == '__main__':
         params.noise_param = params.noise_param / (10 ** mag)
 
     # debugging only
-    # parent = '../hs20mg_xyz_data'
+    # parent = '../combo_xyz_data'
     # params.test_dir = os.path.join(parent, 'test')
     # params.target_dir = os.path.join(params.test_dir, 'targets')
-    # params.load_ckpt = '../ckpts_new/hs20mg-xyz-raw/n2n-epoch100-0.00000.pt'
+    # params.load_ckpt = '../ckpts/raw01261137/train-epoch10-0.01532.pt'
     # params.montage_only = True
     # params.noise_type = 'raw'
     # # params.noise_param = 0.4
     # params.paired_targets = True
     # params.channels = 1
-    # params.output = '../new_results/'
+    # params.output = '../test_results/'
+    # params.verbose = True
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)

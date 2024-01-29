@@ -11,7 +11,8 @@ filename="$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
-data_name="combo_xyz_clean_data"
+root="/mnt/d/imgrec_data"
+data_name="${root}/imgrec-tiny-ImageNet"
 train_dir="${data_name}/train"
 valid_dir="${data_name}/valid"
 target_dir="${data_name}/targets"
@@ -19,16 +20,18 @@ channels=1
 
 train_ckpt=""    # for finetuning a pretrained model (leave empty to create a new ckpt)
 
-redux=0
-noise="lower"
-train_param=0
-report=24
-epochs=100
-batch_size=94
-loss_fun='l1'
+redux=0.995
+noise="raw"
+train_param=0.5
+report=2000
+epochs=10
+batch_size=100
+loss_fun='l2'
 
 # --------------------------------------------------------------------------------------------------
-ckpt_save="new_ckpts_results/clean_combo_lower"
+sub="-imgrec"
+ckpt_string="${filename%$sub}-${noise}"
+ckpt_save="ckpts/${ckpt_string}"
 # --------------------------------------------------------------------------------------------------
 
 echo -e "\nDate:  $(date)\n"
@@ -59,8 +62,7 @@ python src/train.py \
     -l ${loss_fun} \
     --cuda \
     --clean-targets \
-    --verbose \
-    --load-ckpt "${train_ckpt}"
+    --verbose
 
 
 exit_code="$?"
