@@ -24,6 +24,7 @@ class Noise2Noise(object):
         self.trainable = trainable
         self._compile()  # creates unet
         self.ckpt_dir = ''
+        self.report_interval = 1    # placeholder so it doesn't throw a warning for adding a property later
 
         # try to sync montage output with SLURM output filenames by getting job ID and name - emn 05/19/22
         if "jobid" in os.environ:
@@ -168,7 +169,8 @@ class Noise2Noise(object):
                                                                                        valid_psnr))
             est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (
                         self.p.nb_epochs - (epoch + 1))
-            print(f'Estimated time remaining: {str(est_remain)[:-4]}')
+            print(f'Current model runtime: {str(dt.now() - self.n2n_start)[:-4]}\n', 
+                f'Estimated time remaining: {str(est_remain)[:-4]}')
 
             sys.stdout.flush()  # force print to out file
 
@@ -278,11 +280,13 @@ class Noise2Noise(object):
 
         self._print_params()
         num_batches = len(train_loader)
-        if num_batches % self.p.report_interval != 0:
-            print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size).",
-                  f"\nnbatches = {len(train_loader.dataset)}/{self.p.batch_size} = {num_batches}, report_interval = {self.p.report_interval}:   {self.p.report_interval} % {num_batches} != 0",
-                  "\nThe report interval has been reset to equal nbatches ({}).\n".format(num_batches))
-            self.p.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset to print once per epoch
+        self.report_interval = int(num_batches / self.p.report_per_epoch)
+
+        # if num_batches % self.report_interval != 0:
+        #     print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size).",
+        #           f"\nnbatches = {len(train_loader.dataset)}/{self.p.batch_size} = {num_batches}, report_interval = {self.p.report_interval}:   {self.p.report_interval} % {num_batches} != 0",
+        #           "\nThe report interval has been reset to equal nbatches ({}).\n".format(num_batches))
+        #     self.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset to print once per epoch
 
         # Dictionaries of tracked stats
         stats = {'noise_type': self.p.noise_type,
@@ -310,7 +314,7 @@ class Noise2Noise(object):
             for batch_idx, (source, target) in enumerate(train_loader):
                 batch_start = dt.now()
                 if self.p.show_progress:
-                    progress_bar(batch_idx, num_batches, self.p.report_interval, loss_meter.val)
+                    progress_bar(batch_idx, num_batches, self.report_interval, loss_meter.val)
 
                 if self.use_cuda:
                     source = source.cuda()
@@ -336,7 +340,7 @@ class Noise2Noise(object):
 
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
-                if (batch_idx + 1) % self.p.report_interval == 0 and batch_idx:
+                if (batch_idx + 1) % self.report_interval == 0 and batch_idx:
                     if self.p.verbose:
                         if self.p.show_progress:
                             print("")

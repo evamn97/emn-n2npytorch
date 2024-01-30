@@ -27,7 +27,8 @@ def parse_args():
                         default=None, type=str)
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts', type=str)
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
-    parser.add_argument('--report-interval', help='batch report interval', default=100, type=int)
+    # parser.add_argument('--report-interval', help='batch report interval', default=100, type=int)
+    parser.add_argument('--report-per-epoch', help='number of times to report on batch loss per epoch', default=1, type=int)
 
     # Training hyperparameters
     parser.add_argument('-lr', '--learning-rate', help='learning rate', default=0.001, type=float)
@@ -63,26 +64,27 @@ if __name__ == '__main__':
     params = parse_args()
 
     # debugging!! ------------------------------------------------------------------------------
-    # root = "/Users/emnatin/Documents/"
+    root = "/Users/emnatin/Documents/"
     # root = "/mnt/data/emnatin"
     # root = "D:/imgrec_data/"
     # root = "/mnt/d/imgrec_data"
-    # parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
+    parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
     # parent = os.path.join(root, "imgrec-tiny-ImageNet")
     # # parent = "../hs20mg_xyz_data"
-    # params.train_dir = os.path.join(parent, "train")
-    # params.valid_dir = os.path.join(parent, "valid")
-    # params.target_dir = os.path.join(parent, "targets")
+    params.train_dir = os.path.join(parent, "train")
+    params.valid_dir = os.path.join(parent, "valid")
+    params.target_dir = os.path.join(parent, "targets")
     # # params.ckpt_save_path = "ckpts"
-    # params.batch_size = 100
-    # params.nb_epochs = 10
-    # params.redux = 0.995
-    # params.channels = 1
-    # params.loss = 'l2'
-    # params.cuda = True
-    # params.verbose = True
-    # params.noise_type = 'raw'
-    # params.paired_targets = True
+    params.batch_size = 100
+    params.report_per_epoch = 5
+    params.nb_epochs = 10
+    params.redux = 0.8
+    params.channels = 1
+    params.loss = 'l2'
+    params.cuda = True
+    params.verbose = True
+    params.noise_type = 'raw'
+    params.paired_targets = True
     # ------------------------------------------------------------------------------------------
 
     if (params.noise_type == 'raw' and not params.paired_targets):

@@ -56,7 +56,7 @@ python src/train.py \
     -n ${noise} \
     -p ${train_param} \
     --ckpt-save-path "${ckpt_save}" \
-    --report-interval ${report} \
+    --report-per-epoch ${report} \
     -ch ${channels} \
     --nb-epochs ${epochs} \
     -b ${batch_size} \
