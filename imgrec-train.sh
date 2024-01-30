@@ -13,10 +13,10 @@ set +a    # only need to export job info vars
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
 # root="/mnt/d/imgrec_data"
 root="/mnt/data/emnatin"
-data_name="${root}/imgrec-tiny-ImageNet"
-train_dir="${data_name}/train"
-valid_dir="${data_name}/valid"
-target_dir="${data_name}/targets"
+data_dir="${root}/imgrec-tiny-ImageNet"
+train_dir="${data_dir}/train"
+valid_dir="${data_dir}/valid"
+target_dir="${data_dir}/targets"
 channels=1
 
 train_ckpt=""    # for finetuning a pretrained model (leave empty to create a new ckpt)
@@ -40,7 +40,7 @@ echo -e "\nDate:  $(date)\n"
 # get from SLURM env vars
 echo -e "Begin batch job... \n \
     File Name:       ${filename} \n \
-    Dataset:         ${data_name}\n"
+    Dataset:         ${data_dir}\n"
 
 echo -e "Working directory:  $(pwd)"
 

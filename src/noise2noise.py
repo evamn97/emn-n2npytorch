@@ -8,6 +8,8 @@ from datetime import timedelta
 import torch.nn as nn
 from torch.optim import Adam, lr_scheduler
 
+from tqdm import tqdm
+
 from unet import UNet
 from utils import *
 
@@ -24,7 +26,6 @@ class Noise2Noise(object):
         self.trainable = trainable
         self._compile()  # creates unet
         self.ckpt_dir = ''
-        self.report_interval = 1    # placeholder so it doesn't throw a warning for adding a property later
 
         # try to sync montage output with SLURM output filenames by getting job ID and name - emn 05/19/22
         if "jobid" in os.environ:
@@ -163,6 +164,8 @@ class Noise2Noise(object):
         with open(fname_dict, 'w') as fp:
             json.dump(stats, fp, indent=2)
 
+        # self.optim = adjust_lr(self.optim, epoch, lr_Mvalue, self.p.learning_rate)    # sinusoidal learning rate adjustment
+
         if self.p.verbose:
             print('Epoch time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4],
                                                                                        valid_loss,
@@ -212,12 +215,17 @@ class Noise2Noise(object):
         clean_imgs = [t.squeeze(0) for t in clean_imgs]
 
         # Create montage and save images
-        print('Saving images and montages to: {}\n'.format(save_path))
+        print('Saving results to: {}\n'.format(save_path))
+
         if not os.path.isfile(os.path.join(save_path, 'metrics.csv')):
             with open(os.path.join(save_path, 'metrics.csv'), 'w') as f:  # create a text file to save psnr values to
                 f.write("file,psnr_in,psnr_out,ssim_in,ssim_out\n")
-
-        for i in range(len(source_imgs)):
+        
+        if self.p.verbose:
+            test_iter = tqdm(range(len(source_imgs)), desc='Saving results images', unit='img')
+        else:
+            test_iter = range(len(source_imgs))
+        for i in test_iter:
             img_name = test_loader.dataset.img_fnames[i]
             create_montage(img_name, self.p.noise_type, self.p.noise_param, save_path,
                            source_imgs[i], denoised_imgs[i], clean_imgs[i],
@@ -280,13 +288,8 @@ class Noise2Noise(object):
 
         self._print_params()
         num_batches = len(train_loader)
-        self.report_interval = int(num_batches / self.p.report_per_epoch)
-
-        # if num_batches % self.report_interval != 0:
-        #     print("Report interval must be a factor of the total number of batches (nbatches = ntrain / batch_size).",
-        #           f"\nnbatches = {len(train_loader.dataset)}/{self.p.batch_size} = {num_batches}, report_interval = {self.p.report_interval}:   {self.p.report_interval} % {num_batches} != 0",
-        #           "\nThe report interval has been reset to equal nbatches ({}).\n".format(num_batches))
-        #     self.report_interval = num_batches  # if the report interval doesn't evenly divide num_batches, reset to print once per epoch
+        report_interval = int(num_batches / self.p.report_per_epoch)
+        lr_Mvalue = self.p.nb_epochs / (2 * self.p.lr_periods)    # half-period dim for sinusoidal learning rate
 
         # Dictionaries of tracked stats
         stats = {'noise_type': self.p.noise_type,
@@ -314,7 +317,7 @@ class Noise2Noise(object):
             for batch_idx, (source, target) in enumerate(train_loader):
                 batch_start = dt.now()
                 if self.p.show_progress:
-                    progress_bar(batch_idx, num_batches, self.report_interval, loss_meter.val)
+                    progress_bar(batch_idx, num_batches, report_interval, loss_meter.val)
 
                 if self.use_cuda:
                     source = source.cuda()
@@ -340,7 +343,7 @@ class Noise2Noise(object):
 
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
-                if (batch_idx + 1) % self.report_interval == 0 and batch_idx:
+                if (batch_idx + 1) % report_interval == 0 and batch_idx:
                     if self.p.verbose:
                         if self.p.show_progress:
                             print("")

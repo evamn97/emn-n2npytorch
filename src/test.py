@@ -17,7 +17,7 @@ def parse_args():
     # Data parameters
     parser.add_argument('-t', '--test-dir', help='directory path containing testing images', default='../data/test')
     parser.add_argument('--target-dir', help='directory path containing target images, if applicable.', default='../data/targets')
-    parser.add_argument('-r', '--redux', help='ratio (0.1 - 0.99) of dataset size to use for training (redux=0 means no reduction). useful for quick debugging.', default=0)
+    parser.add_argument('-r', '--redux', help='ratio (0.1 - 0.99) of dataset size to use for training (redux=0 means no reduction). useful for quick debugging.', default=0, type=float)
     parser.add_argument('--output', help='directory to save the results images', default='../results')
     parser.add_argument('--load-ckpt', help='load model checkpoint')
     parser.add_argument('--show-output', help='pop up window to display outputs', default=0, type=int)

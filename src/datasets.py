@@ -64,7 +64,7 @@ class NoisyDataset(Dataset):
         self.img_fnames = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in ext_list]
 
         if self.paired_targets and not os.path.isdir(target_dir):
-            raise NotADirectoryError("Paired targets are requested but the input target directory does not exist!")
+            raise NotADirectoryError(f"Paired targets are requested but the target directory ({target_dir}) does not exist!")
 
         if 0 < self.redux < 1:
             new_size = int((1 - self.redux) * len(self.img_fnames))
