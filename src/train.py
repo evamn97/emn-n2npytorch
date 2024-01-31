@@ -27,11 +27,12 @@ def parse_args():
                         default=None, type=str)
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts', type=str)
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
-    # parser.add_argument('--report-interval', help='batch report interval', default=100, type=int)
-    parser.add_argument('--report-per-epoch', help='number of times to report on batch loss per epoch', default=1, type=int)
+    parser.add_argument('--ckpt-save-every', help='save ckpts only every X epochs. helpful for long trainings when ckpts-overwrite is false', default=1, type=int)
+    parser.add_argument('--report-per-epoch', help='num of reports on batch loss per epoch (may not be exact if batch division is uneven)', default=1, type=int)
 
     # Training hyperparameters
-    parser.add_argument('-lr', '--learning-rate', help='learning rate', default=0.001, type=float)
+    parser.add_argument('-lr', '--learning-rate', help='sinusoidal learning rate [min, max] for adam optimizer. set min=max for constant learning rate.', default=[0.0, 0.001], type=list)
+    parser.add_argument('--lr-periods', help='num of sine periods per epoch for sinusoidal learning rate', default=5)
     parser.add_argument('-a', '--adam', help='adam parameters', nargs='+', default=[0.9, 0.99, 1e-8], type=list)
     parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)', default=3, type=int)
     parser.add_argument('-b', '--batch-size', help='minibatch size', default=4, type=int)
@@ -74,11 +75,13 @@ if __name__ == '__main__':
     params.train_dir = os.path.join(parent, "train")
     params.valid_dir = os.path.join(parent, "valid")
     params.target_dir = os.path.join(parent, "targets")
-    # # params.ckpt_save_path = "ckpts"
-    params.batch_size = 100
-    params.report_per_epoch = 5
-    params.nb_epochs = 10
-    params.redux = 0.8
+    params.ckpt_save_path = "ckpts"
+    params.ckpt_save_every = 5
+    params.batch_size = 20
+    params.report_per_epoch = 4
+    # params.nb_epochs = 10
+    params.learning_rate = [0.0, 0.01]
+    params.redux = 0.95
     params.channels = 1
     params.loss = 'l2'
     params.cuda = True

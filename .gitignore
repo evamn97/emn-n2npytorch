@@ -17,3 +17,4 @@ localtinyimagenet-imgrec.sh
 extratinyimagenet-imgrec.sh
 
 train-valid-l2-loss.png
+scratch.ipynb

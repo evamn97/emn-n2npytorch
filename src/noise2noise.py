@@ -53,7 +53,7 @@ class Noise2Noise(object):
         # Set optimizer and loss, if in training mode
         if self.trainable:
             self.optim = Adam(self.model.parameters(),
-                              lr=self.p.learning_rate,
+                              lr=self.p.learning_rate[1],
                               betas=self.p.adam[:2],
                               eps=self.p.adam[2])
 
@@ -111,8 +111,7 @@ class Noise2Noise(object):
         # Save checkpoint dictionary
         if self.p.ckpt_overwrite:
             ckpt_filename = f'{self.job_name}{self.p.noise_param}{self.p.loss}-e{self.p.nb_epochs}'  # ex: hs20mg-bernoulli0.4l1-e100
-            fname_unet = '{}/{}.pt'.format(self.ckpt_dir, ckpt_filename)  # changed 12/18/2022
-            # fname_unet = '{}/{}.pt'.format(self.ckpt_dir, os.path.basename(self.ckpt_dir))  # changed 7/5/2022
+            fname_unet = '{}/{}.pt'.format(self.ckpt_dir, ckpt_filename)
         else:
             valid_loss = stats['valid_loss'][epoch]
             fname_unet = '{}/train-epoch{}-{:>1.5f}.pt'.format(self.ckpt_dir, epoch + 1, valid_loss)
@@ -149,10 +148,9 @@ class Noise2Noise(object):
         stats['valid_ssim'].append(valid_ssim)
 
         # Save checkpoint
-        self.save_model(epoch, stats, first=(epoch == 0))
+        if epoch == 0 or (epoch + 1) % self.p.ckpt_save_every == 0 or (epoch + 1) == self.p.nb_epochs:
+            self.save_model(epoch, stats, first=(epoch == 0))
 
-        epoch_time, _, epoch_time_td = time_elapsed_since(epoch_start)
-        self.epoch_times.append(epoch_time_td)
 
         # save stat plots
         trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_psnr'], 'PSNR')
@@ -164,7 +162,8 @@ class Noise2Noise(object):
         with open(fname_dict, 'w') as fp:
             json.dump(stats, fp, indent=2)
 
-        # self.optim = adjust_lr(self.optim, epoch, lr_Mvalue, self.p.learning_rate)    # sinusoidal learning rate adjustment
+        epoch_time, _, epoch_time_td = time_elapsed_since(epoch_start)
+        self.epoch_times.append(epoch_time_td)        
 
         if self.p.verbose:
             print('Epoch time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4],
@@ -172,8 +171,7 @@ class Noise2Noise(object):
                                                                                        valid_psnr))
             est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (
                         self.p.nb_epochs - (epoch + 1))
-            print(f'Current model runtime: {str(dt.now() - self.n2n_start)[:-4]}\n', 
-                f'Estimated time remaining: {str(est_remain)[:-4]}')
+            print(f'Current model runtime:    {str(dt.now() - self.n2n_start)[:-4]} (from N2N init)\nEstimated time remaining: {str(est_remain)[:-4]}')
 
             sys.stdout.flush()  # force print to out file
 
@@ -311,6 +309,12 @@ class Noise2Noise(object):
             train_loss_meter = AvgMeter()
             loss_meter = AvgMeter()
             time_meter = AvgMeter()
+        
+            # adjust learning rate for this epoch (if not constant)
+            if self.p.learning_rate[0] != self.p.learning_rate[1]:      
+                self.optim = adjust_lr(self.optim, epoch, lr_Mvalue, self.p.learning_rate)
+                if self.p.verbose:
+                    print(f'Learning rate = {round(self.optim.param_groups[0]["lr"], 7)}')
 
             # Minibatch SGD
             # loop_start = dt.now()

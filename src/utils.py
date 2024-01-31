@@ -321,6 +321,22 @@ def import_spm(filepath):
     return os.path.basename(filepath), im_tensor
 
 
+def adjust_lr(optimizer, epoch, M, learning_rate=(0.0, 0.001)):
+    """ Adjusts optimizer learning rate to a sine wave.
+    :param optimizer: optimizer object
+    :param epoch: current epoch
+    :param M: half-period width of the sinusoid
+    :param learning_rate: [min, max] learning rate values
+    """
+    lr_min = learning_rate[0]
+    lr_max = learning_rate[1]
+    
+    lr_new = lr_min + 0.5 * (lr_max - lr_min) * (1 + np.cos(np.pi * epoch / M))
+    for group in optimizer.param_groups:
+        group['lr'] = lr_new
+    return optimizer
+
+
 class AvgMeter(object):
     """Computes and stores the average and current value.
     Useful for tracking averages such as elapsed times, minibatch losses, etc.
