@@ -53,7 +53,7 @@ class Noise2Noise(object):
         # Set optimizer and loss, if in training mode
         if self.trainable:
             self.optim = Adam(self.model.parameters(),
-                              lr=self.p.learning_rate[1],
+                              lr=self.p.learning_params[1],
                               betas=self.p.adam[:2],
                               eps=self.p.adam[2])
 
@@ -166,9 +166,10 @@ class Noise2Noise(object):
         self.epoch_times.append(epoch_time_td)        
 
         if self.p.verbose:
-            print('Epoch time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB'.format(epoch_time[:-4],
+            print('Epoch time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB | Avg SSIM: {:.2f}'.format(epoch_time[:-4],
                                                                                        valid_loss,
-                                                                                       valid_psnr))
+                                                                                       valid_psnr, 
+                                                                                       valid_ssim))
             est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (
                         self.p.nb_epochs - (epoch + 1))
             print(f'Current model runtime:    {str(dt.now() - self.n2n_start)[:-4]} (from N2N init)\nEstimated time remaining: {str(est_remain)[:-4]}')
@@ -187,13 +188,10 @@ class Noise2Noise(object):
         clean_imgs = []
 
         # Create directory for denoised images
-        if not os.path.isdir(self.p.output):
-            os.mkdir(self.p.output)
         subfolder = f'{self.job_name.replace("imgrec", "denoised").replace("-test", "")}-{self.job_id}'
-        save_path = os.path.normpath(
-            os.path.join(self.p.output, subfolder))  # ex: 'results/hs20mg-bernoulli0.4l2-193174/'
+        save_path = os.path.normpath(os.path.join(self.p.output, subfolder))  # ex: 'results/hs20mg-bernoulli0.4l2-193174/'
         if not os.path.isdir(save_path):
-            os.mkdir(save_path)
+            os.makedirs(save_path)
 
         for batch_idx, (source, target) in enumerate(test_loader):
 
@@ -215,9 +213,8 @@ class Noise2Noise(object):
         # Create montage and save images
         print('Saving results to: {}\n'.format(save_path))
 
-        if not os.path.isfile(os.path.join(save_path, 'metrics.csv')):
-            with open(os.path.join(save_path, 'metrics.csv'), 'w') as f:  # create a text file to save psnr values to
-                f.write("file,psnr_in,psnr_out,ssim_in,ssim_out\n")
+        with open(os.path.join(save_path, 'metrics.csv'), 'w') as f:  # create a text file to save psnr values to
+            f.write("file,psnr_in,psnr_out,ssim_in,ssim_out\n")
         
         if self.p.verbose:
             test_iter = tqdm(range(len(source_imgs)), desc='Saving results images', unit='img')
@@ -250,25 +247,19 @@ class Noise2Noise(object):
             # Denoise
             source_denoised = self.model(source)
 
-            # Update loss
-            loss = self.loss(source_denoised, target)
-            loss_meter.update(loss.item())
-
-            # Compute PSNR
+            # Calculate PSNR and SSIM for each image
             # TODO: Find a way to offload to GPU
-            for i in range(self.p.batch_size):
-                source_denoised = source_denoised.cpu()
-                target = target.cpu()
-                try:
-                    psnr_meter.update(psnr(source_denoised[i], target[i]).item())
-                    ssim_meter.update(
-                        SSIM(source_denoised[i].detach().squeeze().numpy(), target[i].detach().squeeze().numpy(),
-                             data_range=(source_denoised[i].max().item() - source_denoised[i].min().item())))
-                except IndexError:
-                    # this will trigger when batch size causes uneven division of data (with remainder)
-                    # so final batch is smaller than given batch size and the loop goes out of bounds
+            ssims = [SSIM(d.squeeze().numpy(), t.squeeze().numpy(), data_range=(t.max() - t.min()).item()) for d in source_denoised.detach().cpu() for t in target.detach().cpu()]
+            psnrs = [PSNR(d, t).item() for d in source_denoised.detach().cpu() for t in target.detach().cpu()]
 
-                    break
+            # Update average meters
+            for S, P in zip(ssims, psnrs):
+                psnr_meter.update(P)
+                ssim_meter.update(S)
+
+            # Update loss
+            loss = self.loss(source_denoised, target) + (1 - np.average(ssims))
+            loss_meter.update(loss.item())
 
         valid_loss = loss_meter.avg
         valid_time, _, valid_time_td = time_elapsed_since(valid_start)
@@ -286,8 +277,7 @@ class Noise2Noise(object):
 
         self._print_params()
         num_batches = len(train_loader)
-        report_interval = int(num_batches / self.p.report_per_epoch)
-        lr_Mvalue = self.p.nb_epochs / (2 * self.p.lr_periods)    # half-period dim for sinusoidal learning rate
+        report_interval = int(num_batches / self.p.report_per_epoch) if self.p.report_per_epoch < num_batches else 1
 
         # Dictionaries of tracked stats
         stats = {'noise_type': self.p.noise_type,
@@ -311,8 +301,8 @@ class Noise2Noise(object):
             time_meter = AvgMeter()
         
             # adjust learning rate for this epoch (if not constant)
-            if self.p.learning_rate[0] != self.p.learning_rate[1]:      
-                self.optim = adjust_lr(self.optim, epoch, lr_Mvalue, self.p.learning_rate)
+            if self.p.learning_params[0] != self.p.learning_params[1]:      
+                self.optim = adjust_lr(self.optim, epoch, self.p.nb_epochs, self.p.learning_params)
                 if self.p.verbose:
                     print(f'Learning rate = {round(self.optim.param_groups[0]["lr"], 7)}')
 
@@ -339,7 +329,10 @@ class Noise2Noise(object):
                         f"\nOr it can be caused by a dtype mismatch between the bias and input.",
                         f"\tBias type is usually float32, input dtype = {source.dtype}")
 
-                loss = self.loss(source_denoised, target)
+                # Calculate ssims and update loss
+                ssims = np.average([SSIM(d.squeeze().numpy(), t.squeeze().numpy(), data_range=(t.max() - t.min()).item()) for d in source_denoised.detach().cpu() for t in target.detach().cpu()])
+
+                loss = self.loss(source_denoised, target) + (1 - ssims)
                 loss_meter.update(loss.item())
 
                 loss.backward()

@@ -23,16 +23,6 @@ rcParams['font.family'] = 'serif'
 # mpl.use('QtAgg')
 
 
-def start_pool():
-    return Pool(cpu_count())
-
-
-def stop_pool(pool):
-    pool.close()
-    pool.join()
-    pool.terminate()
-
-
 def clear_line():
     """Clears line from any characters."""
 
@@ -114,7 +104,7 @@ def reinhard_tonemap(tensor):
     return torch.pow(tensor / (1 + tensor), 1 / 2.2)
 
 
-def psnr(input, target):
+def PSNR(input, target):
     """Computes peak signal-to-noise ratio."""
 
     return 10 * torch.log10(1 / F.mse_loss(input, target))
@@ -124,7 +114,7 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
                    montage_only=False):
     """Creates montage for easy comparison."""
 
-    fig, ax = plt.subplots(1, 3, figsize=(29, 10), dpi=200)
+    fig, ax = plt.subplots(1, 3, figsize=(29, 12.5), dpi=200)
     fig.canvas.manager.set_window_title(img_name.capitalize()[:-4])
 
     # Bring tensors to CPU
@@ -144,16 +134,26 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     # torch.clamp() is like clipping, why is it necessary? (like for RGB?)
 
     # Build image montage
-    psnr_vals = [psnr(source_t, clean_t), psnr(denoised_t, clean_t)]
+    psnr_vals = [PSNR(source_t, clean_t), PSNR(denoised_t, clean_t)]
     ssim_vals = [SSIM(np.asarray(source), np.asarray(clean)), SSIM(np.asarray(denoised), np.asarray(clean))]
-    titles = ['Input: {:.2f} dB'.format(psnr_vals[0]),
-              'Denoised: {:.2f} dB'.format(psnr_vals[1]),
-              'Clean target']
+    titles = ['Input', 
+              'Output', 
+              'Clean Target']
+    specs = [f'PSNR={round(psnr_vals[0].item(), 2)} dB | SSIM={round(ssim_vals[0].item(), 2)}', 
+             f'PSNR={round(psnr_vals[1].item(), 2)} dB | SSIM={round(ssim_vals[1].item(), 2)}', 
+             '']
+    # titles = ['Input: {:.2f} dB'.format(psnr_vals[0]),
+    #           'Denoised: {:.2f} dB'.format(psnr_vals[1]),
+    #           'Clean target']
     zipped = zip(titles, [source, denoised, clean])
     for j, (title, img) in enumerate(zipped):
         ax[j].imshow(img, cmap='gray')  # cmap for height fields (not normalized)
-        ax[j].set_title(title, fontsize=44)
-        ax[j].axis('off')
+        ax[j].set_title(title, fontsize=44, pad=15)
+        ax[j].set_xlabel(specs[j], fontsize=32, labelpad=10)    
+        ax[j].xaxis.set_label_position('top')
+        # ax[j].axis('off')
+        ax[j].set(xticks=[], yticks=[])
+
     fig.tight_layout()
 
     # Open pop up window, if requested
@@ -321,17 +321,24 @@ def import_spm(filepath):
     return os.path.basename(filepath), im_tensor
 
 
-def adjust_lr(optimizer, epoch, M, learning_rate=(0.0, 0.001)):
+def adjust_lr(optimizer, epoch, nb_epochs, learning_params=(0.0, 0.001, 6.5, 10.0), decay=True):
     """ Adjusts optimizer learning rate to a sine wave.
     :param optimizer: optimizer object
     :param epoch: current epoch
-    :param M: half-period width of the sinusoid
-    :param learning_rate: [min, max] learning rate values
+    :param learning_params: [min, max, alpha, beta] learning rate parameters
     """
-    lr_min = learning_rate[0]
-    lr_max = learning_rate[1]
+    lr_min = learning_params[0]
+    A = learning_params[1] - learning_params[0]
+    alpha = learning_params[2]
+    beta = learning_params[3]
+    sine_term = 0.5 * A * (np.cos(beta * epoch * 2 * np.pi / nb_epochs) + 1)
+    exp_term = np.exp(-alpha * epoch / nb_epochs)
+
+    if decay:
+        lr_new = lr_min + sine_term * exp_term
+    else:
+        lr_new = lr_min + sine_term
     
-    lr_new = lr_min + 0.5 * (lr_max - lr_min) * (1 + np.cos(np.pi * epoch / M))
     for group in optimizer.param_groups:
         group['lr'] = lr_new
     return optimizer

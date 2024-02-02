@@ -12,8 +12,10 @@ set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
 # root="/mnt/d/imgrec_data"
-root="/mnt/data/emnatin"
-data_dir="${root}/imgrec-tiny-ImageNet"
+# root="/mnt/data/emnatin"
+root="/Users/emnatin/Documents"
+# data_dir="${root}/imgrec-tiny-ImageNet"
+data_dir="${root}/timgrec-extra-tiny-ImageNet"
 train_dir="${data_dir}/train"
 valid_dir="${data_dir}/valid"
 target_dir="${data_dir}/targets"
@@ -28,6 +30,7 @@ report=4
 epochs=10
 batch_size=100
 loss_fun='l2'
+learning_params="0.001 0.001 6.0 10.0"
 
 # --------------------------------------------------------------------------------------------------
 sub="-imgrec"

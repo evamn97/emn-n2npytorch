@@ -31,9 +31,9 @@ def parse_args():
     parser.add_argument('--report-per-epoch', help='num of reports on batch loss per epoch (may not be exact if batch division is uneven)', default=1, type=int)
 
     # Training hyperparameters
-    parser.add_argument('-lr', '--learning-rate', help='sinusoidal learning rate [min, max] for adam optimizer. set min=max for constant learning rate.', default=[0.0, 0.001], type=list)
-    parser.add_argument('--lr-periods', help='num of sine periods per epoch for sinusoidal learning rate', default=5)
-    parser.add_argument('-a', '--adam', help='adam parameters', nargs='+', default=[0.9, 0.99, 1e-8], type=list)
+    parser.add_argument('-lr', '--learning-params', help='learning rate params [min, max, alpha, beta] for adam optimizer. set min=max for constant learning rate; set alpha=0 for no exp decay; set beta=0 for no sinusoid.', nargs='+', default=[0.0, 0.001, 6.5, 10.0], type=float)
+    # parser.add_argument('--lr-periods', help='num of sine periods per epoch for sinusoidal learning rate', default=5)
+    parser.add_argument('-a', '--adam', help='adam parameters', nargs='+', default=[0.9, 0.99, 1e-8], type=float)
     parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)', default=3, type=int)
     parser.add_argument('-b', '--batch-size', help='minibatch size', default=4, type=int)
     parser.add_argument('-e', '--nb-epochs', help='number of epochs', default=100, type=int)
@@ -65,29 +65,33 @@ if __name__ == '__main__':
     params = parse_args()
 
     # debugging!! ------------------------------------------------------------------------------
-    root = "/Users/emnatin/Documents/"
-    # root = "/mnt/data/emnatin"
-    # root = "D:/imgrec_data/"
-    # root = "/mnt/d/imgrec_data"
-    parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
-    # parent = os.path.join(root, "imgrec-tiny-ImageNet")
-    # # parent = "../hs20mg_xyz_data"
-    params.train_dir = os.path.join(parent, "train")
-    params.valid_dir = os.path.join(parent, "valid")
-    params.target_dir = os.path.join(parent, "targets")
-    params.ckpt_save_path = "ckpts"
-    params.ckpt_save_every = 5
-    params.batch_size = 20
-    params.report_per_epoch = 4
+
+    # print(f'lr = {params.learning_params} \ntype = {type(params.learning_params)} \nitem type = {type(params.learning_params[0])}\n')
+    # input('waiting...')
+
+    # root = "/Users/emnatin/Documents/"
+    # # root = "/mnt/data/emnatin"
+    # # root = "D:/imgrec_data/"
+    # # root = "/mnt/d/imgrec_data"
+    # parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
+    # # parent = os.path.join(root, "imgrec-tiny-ImageNet")
+    # # # parent = "../hs20mg_xyz_data"
+    # params.train_dir = os.path.join(parent, "train")
+    # params.valid_dir = os.path.join(parent, "valid")
+    # params.target_dir = os.path.join(parent, "targets")
+    # params.ckpt_save_path = "ckpts"
+    # # params.ckpt_save_every = 5
+    # params.batch_size = 20
+    # params.report_per_epoch = 8
     # params.nb_epochs = 10
-    params.learning_rate = [0.0, 0.01]
-    params.redux = 0.95
-    params.channels = 1
-    params.loss = 'l2'
-    params.cuda = True
-    params.verbose = True
-    params.noise_type = 'raw'
-    params.paired_targets = True
+    # # params.learning_params = [0.0, 0.01, 6.0, 10.0]
+    # params.redux = 0.95
+    # params.channels = 1
+    # params.loss = 'l2'
+    # params.cuda = True
+    # params.verbose = True
+    # params.noise_type = 'raw'
+    # params.paired_targets = True
     # ------------------------------------------------------------------------------------------
 
     if (params.noise_type == 'raw' and not params.paired_targets):
