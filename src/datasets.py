@@ -7,6 +7,7 @@ from matplotlib import rcParams
 from torch.distributions.bernoulli import Bernoulli as BernoulliDist
 from torch.distributions.normal import Normal as NormalDist
 from torch.utils.data import Dataset, DataLoader
+from random import shuffle
 
 from data_prep import *
 from utils import rescale_tensor, import_spm
@@ -68,6 +69,7 @@ class NoisyDataset(Dataset):
 
         if 0 < self.redux < 1:
             new_size = int((1 - self.redux) * len(self.img_fnames))
+            shuffle(self.img_fnames)    # in-place shuffle of filenames so redux doesn't take the same files every time
             self.img_fnames = self.img_fnames[:new_size]  # reduce dataset size to given ratio
             # targets are found by source name anyway so no need to change targets list
         elif self.redux > 1:
