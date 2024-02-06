@@ -190,8 +190,10 @@ class Noise2Noise(object):
         # Create directory for denoised images
         subfolder = f'{self.job_name.replace("imgrec", "denoised").replace("-test", "")}-{self.job_id}'
         save_path = os.path.normpath(os.path.join(self.p.output, subfolder))  # ex: 'results/hs20mg-bernoulli0.4l2-193174/'
-        if not os.path.isdir(save_path):
-            os.makedirs(save_path)
+        if os.path.isdir(save_path):
+            idx = sum(subfolder in dirname for dirname in os.listdir(self.p.output) if os.path.isdir(os.path.join(self.p.output, dirname)))
+            save_path += f'-{idx}'
+        os.makedirs(save_path)
 
         for batch_idx, (source, target) in enumerate(test_loader):
 

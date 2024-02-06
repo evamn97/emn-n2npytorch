@@ -101,10 +101,14 @@ class NoisyDataset(Dataset):
 
         if self.noise_type.lower() not in valid_types:
             raise ValueError(f'Invalid noise type: {self.noise_type}. Added noise must be one of {valid_types}.')
+        
+        gen = torch.Generator()
+        if self.seed:
+            gen.manual_seed(self.seed)
 
         if self.noise_type.lower() == 'gaussian':
             std = rng.uniform(0, param) * img.std()
-            noisy_img = img.to(torch.float64, copy=True) + NormalDist(0, std).sample(img.size())
+            noisy_img = img.to(torch.float64, copy=True) + NormalDist(0, std, generator=gen).sample(img.size())
             if not img.is_floating_point():     # assumes int type means it's an image format (e.g., 0-255 range), so need rescale after summing
                 noisy_img = rescale_tensor(noisy_img, bounds=[img.min().item(), img.max().item()]).to(img.dtype)
 
@@ -114,13 +118,13 @@ class NoisyDataset(Dataset):
 
         elif self.noise_type.lower() == 'gradient':
             std = param * img.std()
-            noise = torch.from_numpy(np.tile(np.linspace(0, 1, w), (h, 1))).unsqueeze(dim=0) * NormalDist(0, std).sample(img.size())
+            noise = torch.from_numpy(np.tile(np.linspace(0, 1, w), (h, 1))).unsqueeze(dim=0) * NormalDist(0, std, generator=gen).sample(img.size())
             noisy_img = img.to(torch.float64, copy=True) + noise
             if not img.is_floating_point():     # assumes int type means it's an image format (e.g., 0-255 range), so need rescale after summing
                 noisy_img = rescale_tensor(noisy_img, bounds=[img.min().item(), img.max().item()]).to(img.dtype)
 
         else:   # self.noise_type.lower() == 'bernoulli':
-            noisy_img = img.to(torch.float64, copy=True) * BernoulliDist(param).sample(img.size()[1:])
+            noisy_img = img.to(torch.float64, copy=True) * BernoulliDist(param, generator=gen).sample(img.size()[1:])
 
         return noisy_img
 
@@ -151,6 +155,12 @@ class NoisyDataset(Dataset):
             # if noise type is raw, assume paired targets
             source = ground_truth.clone()
             target = self.targets[self.trgt_fnames[index]]
+
+        if self.crop_size > 0:
+            top = random.choice(range(self.images[self.img_fnames[index]].shape[1] - self.crop_size))
+            left = random.choice(range(self.images[self.img_fnames[index]].shape[2] - self.crop_size))
+            source = tvF.crop(source, top, left, self.crop_size, self.crop_size)
+            target = tvF.crop(target, top, left, self.crop_size, self.crop_size)
 
         return source.to(torch.float32), target.to(torch.float32)       # temporary fix for bug in pytorch... see https://github.com/pytorch/pytorch/issues/111671 (Jan 2024)
 

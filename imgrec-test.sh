@@ -12,18 +12,21 @@ set +a    # only need to export job info vars
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
 root="/Users/emnatin/Documents"
-data_dir="${root}/timgrec-extra-tiny-ImageNet"
-# data_dir="${root}/hs20mg_test_data/xyz"
-test_dir="${data_dir}/test"
-target_dir="${data_dir}/targets"
+# data_dir="${root}/timgrec-extra-tiny-ImageNet"
+# test_dir="${data_dir}/test"
+# target_dir="${data_dir}/targets"
+data_dir="${root}/hs20mg_test_data"
+test_dir="${data_dir}/xyz"
+target_dir="${test_dir}/targets"
 
-redux=0.95
+redux=0.9
 noise="raw"
 test_param=0.5
-results="results/tiny-ImageNet-epoch248"
+results="results/tiny-ImageNet-SSIMepoch15"
 channels=1
+crop=64
 
-ckpt="ckpts/tinyimagenet-raw/tinyimagenet-rawl2/train-epoch248-0.00458.pt"
+ckpt="ckpts/tinyimagenet-raw/tinyimagenet-rawl2/train-epoch476-0.00423.pt"
 
 # -------------------------------------------------------------------------------
 
@@ -48,9 +51,9 @@ python src/test.py \
     --output ${results} \
     --load-ckpt "${ckpt}" \
     --ch ${channels} \
+    --crop-size ${crop} \
     --paired-targets \
     --cuda \
-    --montage-only \
     --verbose
 # ===========================================================
 

@@ -50,15 +50,19 @@ if __name__ == '__main__':
 
     # debugging only
     # parent = '../combo_xyz_data'
+    # root = "/Users/emnatin/Documents"
+    # parent = os.path.join(root, "hs20mg_test_data")
+    # params.test_dir = os.path.join(parent, "xyz")
+    # params.target_dir = os.path.join(params.test_dir, "targets")
     # params.test_dir = os.path.join(parent, 'test')
     # params.target_dir = os.path.join(params.test_dir, 'targets')
-    # params.load_ckpt = '../ckpts/raw01261137/train-epoch10-0.01532.pt'
+    # params.load_ckpt = 'ckpts/tinyimagenet-raw/tinyimagenet-rawl2/train-epoch476-0.00423.pt'
     # params.montage_only = True
     # params.noise_type = 'raw'
     # # params.noise_param = 0.4
     # params.paired_targets = True
     # params.channels = 1
-    # params.output = '../test_results/'
+    # params.output = 'scratch_results'
     # params.verbose = True
 
     # Initialize model and test
