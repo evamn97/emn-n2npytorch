@@ -7,6 +7,8 @@ from datetime import timedelta
 
 import torch.nn as nn
 from torch.optim import Adam, lr_scheduler
+from ignite.metrics import SSIM as ig_SSIM
+from ignite.metrics import PSNR as ig_PSNR
 
 from tqdm import tqdm
 
@@ -58,8 +60,12 @@ class Noise2Noise(object):
                               eps=self.p.adam[2])
 
             # Learning rate adjustment
-            self.scheduler = lr_scheduler.ReduceLROnPlateau(self.optim,
-                                                            patience=self.p.nb_epochs / 4, factor=0.5, verbose=True)
+            # self.scheduler = lr_scheduler.ReduceLROnPlateau(self.optim,
+            #                                                 patience=self.p.nb_epochs / 4, 
+            #                                                 factor=0.5)
+            # self.scheduler = lr_scheduler.CosineAnnealingWarmRestarts(self.optim, 
+            #                                                           T_0=10, T_mult=2, 
+            #                                                           eta_min=self.p.learning_params[0])
 
             # Loss function
             if self.p.loss == 'l2':
@@ -138,8 +144,8 @@ class Noise2Noise(object):
         # Evaluate model on validation set
         valid_loss, valid_time, valid_time_td, valid_psnr, valid_ssim = self.eval(valid_loader)
 
-        # Decrease learning rate if plateau
-        self.scheduler.step(valid_loss)
+        # # Decrease learning rate if plateau (ReduceLRonPlateau scheduler)
+        # self.scheduler.step(valid_loss)
 
         # Save stats
         stats['train_loss'].append(train_loss)
@@ -238,6 +244,9 @@ class Noise2Noise(object):
         psnr_meter = AvgMeter()
         ssim_meter = AvgMeter()
 
+        ig_ssim_metric = ig_SSIM(data_range=1.0)
+        ig_psnr_metric = ig_PSNR(data_range=1.0)
+
         if self.p.verbose:
             print('\rTesting model on validation set... ', end='')
 
@@ -249,18 +258,14 @@ class Noise2Noise(object):
             # Denoise
             source_denoised = self.model(source)
 
-            # Calculate PSNR and SSIM for each image
-            # TODO: Find a way to offload to GPU
-            ssims = [SSIM(d.squeeze().numpy(), t.squeeze().numpy(), data_range=(t.max() - t.min()).item()) for d in source_denoised.detach().cpu() for t in target.detach().cpu()]
-            psnrs = [PSNR(d, t).item() for d in source_denoised.detach().cpu() for t in target.detach().cpu()]
-
-            # Update average meters
-            for S, P in zip(ssims, psnrs):
-                psnr_meter.update(P)
-                ssim_meter.update(S)
+            # Calculate metrics with Ignite
+            ig_ssim_metric.update((source_denoised, target))
+            ig_psnr_metric.update((source_denoised, target))
+            psnr_meter.update(ig_psnr_metric.compute())
+            ssim_meter.update(ig_ssim_metric.compute())
 
             # Update loss
-            loss = self.loss(source_denoised, target) + (1 - np.average(ssims))
+            loss = self.loss(source_denoised, target) + (1 - ig_ssim_metric.compute())
             loss_meter.update(loss.item())
 
         valid_loss = loss_meter.avg
@@ -289,6 +294,9 @@ class Noise2Noise(object):
                  'valid_psnr': [],
                  'valid_ssim': []}
 
+        ig_psnr_metric = ig_PSNR(data_range=1.0)
+        ig_ssim_metric = ig_SSIM(data_range=1.0)
+
         # Main training loop
         train_start = dt.now()
         for epoch in range(self.p.nb_epochs):
@@ -302,11 +310,11 @@ class Noise2Noise(object):
             loss_meter = AvgMeter()
             time_meter = AvgMeter()
         
-            # adjust learning rate for this epoch (if not constant)
-            if self.p.learning_params[0] != self.p.learning_params[1]:      
-                self.optim = adjust_lr(self.optim, epoch, self.p.nb_epochs, self.p.learning_params)
-                if self.p.verbose:
-                    print(f'Learning rate = {round(self.optim.param_groups[0]["lr"], 7)}')
+            # # adjust learning rate for this epoch (if not constant)
+            # if self.p.learning_params[0] != self.p.learning_params[1]:      
+            #     self.optim = adjust_lr(self.optim, epoch, self.p.nb_epochs, self.p.learning_params)
+            #     if self.p.verbose:
+            #         print(f'Learning rate = {round(self.optim.param_groups[0]["lr"], 7)}')
 
             # Minibatch SGD
             # loop_start = dt.now()
@@ -331,14 +339,19 @@ class Noise2Noise(object):
                         f"\nOr it can be caused by a dtype mismatch between the bias and input.",
                         f"\tBias type is usually float32, input dtype = {source.dtype}")
 
-                # Calculate ssims and update loss
-                ssims = np.average([SSIM(d.squeeze().numpy(), t.squeeze().numpy(), data_range=(t.max() - t.min()).item()) for d in source_denoised.detach().cpu() for t in target.detach().cpu()])
-
+                # Calculate ssims and update loss (with Ignite)
+                ig_psnr_metric.update((source_denoised, target))
+                ig_ssim_metric.update((source_denoised, target))
+                ssims = ig_ssim_metric.compute()
                 loss = self.loss(source_denoised, target) + (1 - ssims)
-                loss_meter.update(loss.item())
 
+                # Update loss and step optimizer
+                loss_meter.update(loss.item())
                 loss.backward()
                 self.optim.step()
+
+                # # Update learning rate with Cosine Annealing + Warm Restarts scheduler
+                # self.scheduler.step(epoch + batch_idx / num_batches)
 
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
@@ -358,6 +371,10 @@ class Noise2Noise(object):
             # Epoch end, save and reset tracker
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)
             train_loss_meter.reset()
+
+            # reset ignite metrics before the start of next epoch
+            ig_psnr_metric.reset()
+            ig_ssim_metric.reset()
 
         train_elapsed = time_elapsed_since(train_start)[0]
 

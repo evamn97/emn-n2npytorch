@@ -83,6 +83,22 @@ def plot_per_epoch(ckpt_dir, title, measurements, y_label):
 
 def trainvalid_metric_plots(ckpt_dir, train_metric, valid_metric, metric_name):
     fig, ax = plt.subplots(dpi=200)
+    if 'loss' in metric_name:
+        if train_metric is not None and abs(train_metric[0]) > 100 * abs(train_metric[1]):
+            temp_t = train_metric[1:]
+            temp_v = valid_metric[1:]
+            ylim=(0.98*min(train_metric.min(), valid_metric.min()), 1.02*max(temp_t.max(), temp_v.max()))
+            ax.set_ylim(ylim[0], ylim[1])
+            ax.text(0, 0.985*ylim[1], 
+                    '*Note: epoch 1 value(s) out of bounds', 
+                    fontsize='xx-small')
+        elif abs(valid_metric[0]) > 100 * abs(valid_metric[1]):
+            temp_v = valid_metric[1:]
+            ylim=(0.98*valid_metric.min(), 1.02*temp_v.max())
+            ax.set_ylim(ylim[0], ylim[1])
+            ax.text(0, 0.985*ylim[1], 
+                    '*Note: epoch 1 value(s) out of bounds', 
+                    fontsize='xx-small')
     if train_metric is not None:
         ax.plot(range(1, len(train_metric) + 1), train_metric, label=f'Train {metric_name}')
     ax.plot(range(1, len(valid_metric) + 1), valid_metric, label=f'Valid {metric_name}')
@@ -91,7 +107,6 @@ def trainvalid_metric_plots(ckpt_dir, train_metric, valid_metric, metric_name):
            title=f"{'Train and Valid' if train_metric is not None else 'Valid'} {metric_name}")
     ax.legend(loc='upper right')
     fig.tight_layout()
-
     plt.savefig(os.path.join(ckpt_dir,
                              f"{'train-valid' if train_metric is not None else 'valid'}-{metric_name.replace(' ', '-').lower()}.png"))
     plt.close()
@@ -331,7 +346,7 @@ def adjust_lr(optimizer, epoch, nb_epochs, learning_params=(0.0, 0.001, 6.5, 10.
     A = learning_params[1] - learning_params[0]
     alpha = learning_params[2]
     beta = learning_params[3]
-    sine_term = 0.5 * A * (np.cos(beta * epoch * 2 * np.pi / nb_epochs) + 1)
+    sine_term = 0.5 * A * (np.cos(beta * epoch * 2 * np.pi) + 1)
     exp_term = np.exp(-alpha * epoch / nb_epochs)
 
     if decay:
