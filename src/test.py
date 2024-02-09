@@ -48,22 +48,25 @@ if __name__ == '__main__':
         mag = len(str(int(params.noise_param)))
         params.noise_param = params.noise_param / (10 ** mag)
 
-    # debugging only
+    # ------------------------------------- debugging only! ------------------------------------
     # parent = '../combo_xyz_data'
     # root = "/Users/emnatin/Documents"
+    # parent = os.path.join(root, "timgrec-extra-tiny-ImageNet")
+    # params.test_dir = os.path.join(parent, "test")
+    # params.target_dir = os.path.join(parent, "targets")
     # parent = os.path.join(root, "hs20mg_test_data")
     # params.test_dir = os.path.join(parent, "xyz")
     # params.target_dir = os.path.join(params.test_dir, "targets")
     # params.test_dir = os.path.join(parent, 'test')
-    # params.target_dir = os.path.join(params.test_dir, 'targets')
-    # params.load_ckpt = 'ckpts/tinyimagenet-raw/tinyimagenet-rawl2/train-epoch476-0.00423.pt'
+    # params.load_ckpt = 'ckpts/scheduler-tests/lr-annealing-rawl2/train-epoch129-0.10325.pt'
     # params.montage_only = True
     # params.noise_type = 'raw'
     # # params.noise_param = 0.4
     # params.paired_targets = True
     # params.channels = 1
-    # params.output = 'scratch_results'
+    # params.output = 'results/annealed-epoch129'
     # params.verbose = True
+    # ------------------------------------------------------------------------------------------
 
     # Initialize model and test
     n2n = Noise2Noise(params, trainable=False)

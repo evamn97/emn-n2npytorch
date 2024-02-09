@@ -12,6 +12,7 @@ from torchvision.transforms import functional as tvF
 from pathos.helpers import cpu_count
 from pathos.pools import ProcessPool as Pool
 from tqdm import tqdm
+from time import sleep
 
 
 def normalize(arr, as_image=False):
@@ -401,7 +402,7 @@ def batch_rename(root_dir, location, add_string, save_dir=None, to_replace=''):
     """ Batch file renaming for all items in a given directory. """
     files = [f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))]  # for files only
     if location not in ['first', 'last', 'replace', 'ext']:
-        raise ValueError("Mode must be one of: 'first', 'last', 'replace', or 'ext'. You tried mode {}".format(location))
+        raise ValueError(f"Mode must be one of: 'first', 'last', 'replace', or 'ext'. You tried mode '{location}'")
     if save_dir is None:
         save_dir = root_dir
     for fname in tqdm(files, unit=' file', desc='Renaming files'):
@@ -421,3 +422,73 @@ def batch_rename(root_dir, location, add_string, save_dir=None, to_replace=''):
         if root_dir == save_dir:
             os.remove(old_path)
     print("Done!")
+
+
+def simple_image_import(filepath):
+    with Image.open(filepath) as im_pil:
+            im_pil.load()
+    im_tensor = tvF.pil_to_tensor(im_pil)
+    return os.path.basename(filepath), im_tensor    #(im_tensor, im_pil)
+
+
+def get_shape(tensor):
+    return tensor.shape
+
+
+def crop_and_remove_padded(in_dict_item, crop_size, pad_thresh=0.05):
+    fname, im_tensor = in_dict_item
+    c, h, w = im_tensor.shape
+    white = (1 - pad_thresh) * im_tensor.max()   # get white padding threshold
+    black = im_tensor.min() * (1 + pad_thresh)   # get black padding threshold
+
+    # check for padding using top left and bottom right corners
+    if any(im_tensor[:, 0:2, 0:2] < black, 
+           im_tensor[:, 0:2, 0:2] > white, 
+           im_tensor[:, -1:-3, -1:-3] < black, 
+           im_tensor[:, -1:-3, -1:-3] > white):
+        return 'none', None
+    
+    # if it doesn't have padding, crop to output size with random resized crop (in case crop size is bigger)
+    cropper = trf.RandomResizedCrop(crop_size)
+    if any(h != crop_size, w != crop_size):
+        return fname, cropper(im_tensor)
+    else:
+        return fname, im_tensor
+
+
+def uniform_image_set(root_dir, save_dir, tag=''):
+    """ Square crops an image set to the largest common size and removes images with outside padding.
+    """
+
+    if not os.path.isdir(root_dir):
+        raise NotADirectoryError('Your input file path is not a directory!')
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+
+    supported = ['.png', '.jpg', '.jpeg']
+    source_iter = tqdm([f for f in os.listdir(root_dir) if os.path.splitext(f)[1].lower() in supported], 
+                       desc=f'Loading {os.path.basename(root_dir)} images', unit='img')
+    images_in = {name: obj for (name, obj) in [simple_image_import(os.path.join(root_dir, s)) for s in source_iter]}
+    
+    # using pathos
+    # pool = Pool(cpu_count())
+    # res = pool.amap(get_shape, images_in.items())
+    # while not res.ready():
+    #     sleep(1)
+    # sizes = res.get()
+
+    # res2 = pool.amap(crop_and_remove_padded, images_in.items(), [min(sizes)] * len(images_in))
+    # while not res2.ready():
+    #     sleep(2)
+    # images_out = dict(res2.get())
+    # pool.close()
+    # pool.join()
+    # pool.clear()
+    # pool.terminate()
+
+    # using looping
+    sizes = [t.shape for _, t in images_in.items()]
+    images_out = {}
+    for fname, im_tensor in images_in.items():
+        images_out[fname] = crop_and_remove_padded(im_tensor, min(sizes))
+        

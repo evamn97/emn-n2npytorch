@@ -32,7 +32,7 @@ def parse_args():
 
     # Training hyperparameters
     parser.add_argument('-lr', '--learning-params', help='learning rate params [min, max, alpha, beta] for adam optimizer. set min=max for constant learning rate; set alpha=0 for no exp decay; set beta=0 for no sinusoid.', nargs='+', default=[0.0, 0.001, 6.5, 10.0], type=float)
-    # parser.add_argument('--lr-periods', help='num of sine periods per epoch for sinusoidal learning rate', default=5)
+    parser.add_argument('--lr-scheduler', help='use consine annealing lr scheduler', action='store_true')
     parser.add_argument('-a', '--adam', help='adam parameters', nargs='+', default=[0.9, 0.99, 1e-8], type=float)
     parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)', default=3, type=int)
     parser.add_argument('-b', '--batch-size', help='minibatch size', default=4, type=int)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     # Parse training parameters
     params = parse_args()
 
-    # debugging!! ------------------------------------------------------------------------------
+    # ------------------------------------- debugging only! ------------------------------------
 
     # print(f'lr = {params.learning_params} \ntype = {type(params.learning_params)} \nitem type = {type(params.learning_params[0])}\n')
     # input('waiting...')

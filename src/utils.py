@@ -83,8 +83,8 @@ def plot_per_epoch(ckpt_dir, title, measurements, y_label):
 
 def trainvalid_metric_plots(ckpt_dir, train_metric, valid_metric, metric_name):
     fig, ax = plt.subplots(dpi=200)
-    if 'loss' in metric_name:
-        if train_metric is not None and abs(train_metric[0]) > 100 * abs(train_metric[1]):
+    if train_metric is not None:
+        if abs(train_metric[0]) >= 100 * abs(train_metric[1]):
             temp_t = train_metric[1:]
             temp_v = valid_metric[1:]
             ylim=(0.98*min(train_metric.min(), valid_metric.min()), 1.02*max(temp_t.max(), temp_v.max()))
@@ -92,15 +92,15 @@ def trainvalid_metric_plots(ckpt_dir, train_metric, valid_metric, metric_name):
             ax.text(0, 0.985*ylim[1], 
                     '*Note: epoch 1 value(s) out of bounds', 
                     fontsize='xx-small')
-        elif abs(valid_metric[0]) > 100 * abs(valid_metric[1]):
-            temp_v = valid_metric[1:]
-            ylim=(0.98*valid_metric.min(), 1.02*temp_v.max())
-            ax.set_ylim(ylim[0], ylim[1])
-            ax.text(0, 0.985*ylim[1], 
-                    '*Note: epoch 1 value(s) out of bounds', 
-                    fontsize='xx-small')
-    if train_metric is not None:
         ax.plot(range(1, len(train_metric) + 1), train_metric, label=f'Train {metric_name}')
+        
+    if abs(valid_metric[0]) >= 100 * abs(valid_metric[1]):
+        temp_v = valid_metric[1:]
+        ylim=(0.98*valid_metric.min(), 1.02*temp_v.max())
+        ax.set_ylim(ylim[0], ylim[1])
+        ax.text(0, 0.985*ylim[1], 
+                '*Note: epoch 1 value(s) out of bounds', 
+                fontsize='xx-small')
     ax.plot(range(1, len(valid_metric) + 1), valid_metric, label=f'Valid {metric_name}')
     ax.set(xlabel='Epoch',
            ylabel=f'{metric_name}',
@@ -151,15 +151,13 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     # Build image montage
     psnr_vals = [PSNR(source_t, clean_t), PSNR(denoised_t, clean_t)]
     ssim_vals = [SSIM(np.asarray(source), np.asarray(clean)), SSIM(np.asarray(denoised), np.asarray(clean))]
+    specs = [f'PSNR={round(psnr_vals[0].item(), 2)} dB | SSIM={round(ssim_vals[0].item(), 2)}', 
+         f'PSNR={round(psnr_vals[1].item(), 2)} dB | SSIM={round(ssim_vals[1].item(), 2)}', 
+         '']
     titles = ['Input', 
               'Output', 
               'Clean Target']
-    specs = [f'PSNR={round(psnr_vals[0].item(), 2)} dB | SSIM={round(ssim_vals[0].item(), 2)}', 
-             f'PSNR={round(psnr_vals[1].item(), 2)} dB | SSIM={round(ssim_vals[1].item(), 2)}', 
-             '']
-    # titles = ['Input: {:.2f} dB'.format(psnr_vals[0]),
-    #           'Denoised: {:.2f} dB'.format(psnr_vals[1]),
-    #           'Clean target']
+
     zipped = zip(titles, [source, denoised, clean])
     for j, (title, img) in enumerate(zipped):
         ax[j].imshow(img, cmap='gray')  # cmap for height fields (not normalized)
@@ -174,7 +172,7 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     # Open pop up window, if requested
     # if show > 0:
     #     mpl.use('TkAgg')
-    # plt.show()
+    #     plt.show()
 
     # Save to files
     fname = os.path.splitext(img_name)[0]
@@ -334,29 +332,6 @@ def import_spm(filepath):
     im_tensor = rescale_tensor(im_tensor, dtype=torch.float64)  # rescales to [0, 1]
 
     return os.path.basename(filepath), im_tensor
-
-
-def adjust_lr(optimizer, epoch, nb_epochs, learning_params=(0.0, 0.001, 6.5, 10.0), decay=True):
-    """ Adjusts optimizer learning rate to a sine wave.
-    :param optimizer: optimizer object
-    :param epoch: current epoch
-    :param learning_params: [min, max, alpha, beta] learning rate parameters
-    """
-    lr_min = learning_params[0]
-    A = learning_params[1] - learning_params[0]
-    alpha = learning_params[2]
-    beta = learning_params[3]
-    sine_term = 0.5 * A * (np.cos(beta * epoch * 2 * np.pi) + 1)
-    exp_term = np.exp(-alpha * epoch / nb_epochs)
-
-    if decay:
-        lr_new = lr_min + sine_term * exp_term
-    else:
-        lr_new = lr_min + sine_term
-    
-    for group in optimizer.param_groups:
-        group['lr'] = lr_new
-    return optimizer
 
 
 class AvgMeter(object):

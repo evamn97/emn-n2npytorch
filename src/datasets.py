@@ -156,7 +156,7 @@ class NoisyDataset(Dataset):
             source = ground_truth.clone()
             target = self.targets[self.trgt_fnames[index]]
 
-        if self.crop_size > 0:
+        if self.crop_size > 0 and self.crop_size < min(self.images[0].shape[1:]):
             top = random.choice(range(self.images[self.img_fnames[index]].shape[1] - self.crop_size))
             left = random.choice(range(self.images[self.img_fnames[index]].shape[2] - self.crop_size))
             source = tvF.crop(source, top, left, self.crop_size, self.crop_size)

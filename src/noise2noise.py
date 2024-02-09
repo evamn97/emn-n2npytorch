@@ -7,8 +7,8 @@ from datetime import timedelta
 
 import torch.nn as nn
 from torch.optim import Adam, lr_scheduler
-from ignite.metrics import SSIM as ig_SSIM
-from ignite.metrics import PSNR as ig_PSNR
+from ignite.metrics import SSIM
+from ignite.metrics import PSNR
 
 from tqdm import tqdm
 
@@ -34,10 +34,8 @@ class Noise2Noise(object):
             self.job_id = os.environ["jobid"]  # ex: 193174
         else:
             self.job_id = f'{dt.now():%m%d%H%M}'  # ex: 05311336
-        if "jobname" in os.environ and "idv" not in os.environ["jobname"]:
-            self.job_name = os.environ["jobname"]  # ex: tgx-n2npt-train-bernoulli
-        elif "filename" in os.environ:
-            self.job_name = f'{os.environ["filename"].replace("-imgrec", "")}{("redux" + str(self.p.redux)) if self.p.redux > 0 else ""}-{self.p.noise_type}{"clean" if (trainable and self.p.clean_targets) else ""}{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss if trainable else ""}'  # ex: tinyimagenetredux0.9-bernoulli0.5l1
+        if "jobname" in os.environ:
+            self.job_name = f'{os.environ["jobname"].replace("-imgrec", "")}{("redux" + str(self.p.redux)) if self.p.redux > 0 else ""}-{self.p.noise_type}{"clean" if (trainable and self.p.clean_targets) else ""}{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss if trainable else ""}'  # ex: tinyimagenetredux0.9-bernoulli0.5l1
         else:
             self.job_name = f'{self.p.noise_type}{"-clean" if (trainable and self.p.clean_targets) else ""}{self.job_id}'
 
@@ -63,9 +61,11 @@ class Noise2Noise(object):
             # self.scheduler = lr_scheduler.ReduceLROnPlateau(self.optim,
             #                                                 patience=self.p.nb_epochs / 4, 
             #                                                 factor=0.5)
-            # self.scheduler = lr_scheduler.CosineAnnealingWarmRestarts(self.optim, 
-            #                                                           T_0=10, T_mult=2, 
-            #                                                           eta_min=self.p.learning_params[0])
+            if self.p.lr_scheduler:
+                self.scheduler = lr_scheduler.CosineAnnealingWarmRestarts(self.optim, 
+                                                                        T_0=int(self.p.learning_params[2]), 
+                                                                        T_mult=int(self.p.learning_params[3]), 
+                                                                        eta_min=self.p.learning_params[0])
 
             # Loss function
             if self.p.loss == 'l2':
@@ -92,6 +92,22 @@ class Noise2Noise(object):
         print('\n'.join('  {} = {}'.format(pretty(k), str(v)) for k, v in param_dict.items()))
         print()
         sys.stdout.flush()
+
+    def show_on_report(batch_idx, num_batches, loss, elapsed):
+        """Formats training stats."""
+
+        clear_line()
+        # dec = int(np.ceil(np.log10(num_batches)))
+        # print('Batch {:>{dec}d} / {:d} | Avg loss: {:>1.5f} | Avg train time / batch: {:d} ms'.format(batch_idx + 1,
+        #                                                                                               num_batches, loss,
+        #                                                                                               int(elapsed),
+        #                                                                                               dec=dec))
+        out_str = f'Batch {batch_idx + 1}/{num_batches} | Avg Loss: {loss} | Avg time per batch: {int(elapsed)}'
+        if self.p.lr_scheduler:
+            out_str += f' | LR: {self.scheduler.get_last_lr()}'
+
+        print(out_str)
+
 
     def save_model(self, epoch, stats, first=False):
         """Saves model to files; can be overwritten at every epoch to save disk space."""
@@ -159,9 +175,10 @@ class Noise2Noise(object):
 
 
         # save stat plots
-        trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_psnr'], 'PSNR')
-        trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_ssim'], 'SSIM')
-        trainvalid_metric_plots(self.ckpt_dir, stats['train_loss'], stats['valid_loss'], f'{self.p.loss.upper()} Loss')
+        if epoch > 0:
+            trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_psnr'], 'PSNR')
+            trainvalid_metric_plots(self.ckpt_dir, None, stats['valid_ssim'], 'SSIM')
+            trainvalid_metric_plots(self.ckpt_dir, stats['train_loss'], stats['valid_loss'], f'{self.p.loss.upper()} Loss')
 
         # save stats to json file
         fname_dict = '{}/n2n-stats.json'.format(self.ckpt_dir)
@@ -241,11 +258,9 @@ class Noise2Noise(object):
 
         valid_start = dt.now()
         loss_meter = AvgMeter()
-        psnr_meter = AvgMeter()
-        ssim_meter = AvgMeter()
 
-        ig_ssim_metric = ig_SSIM(data_range=1.0)
-        ig_psnr_metric = ig_PSNR(data_range=1.0)
+        ssim_meter = SSIM(data_range=1.0)
+        psnr_meter = PSNR(data_range=1.0)
 
         if self.p.verbose:
             print('\rTesting model on validation set... ', end='')
@@ -259,19 +274,17 @@ class Noise2Noise(object):
             source_denoised = self.model(source)
 
             # Calculate metrics with Ignite
-            ig_ssim_metric.update((source_denoised, target))
-            ig_psnr_metric.update((source_denoised, target))
-            psnr_meter.update(ig_psnr_metric.compute())
-            ssim_meter.update(ig_ssim_metric.compute())
+            ssim_meter.update((source_denoised, target))
+            psnr_meter.update((source_denoised, target))
 
             # Update loss
-            loss = self.loss(source_denoised, target) + (1 - ig_ssim_metric.compute())
+            loss = self.loss(source_denoised, target) + (1 - ssim_meter.compute())
             loss_meter.update(loss.item())
 
         valid_loss = loss_meter.avg
         valid_time, _, valid_time_td = time_elapsed_since(valid_start)
-        psnr_avg = psnr_meter.avg
-        ssim_avg = ssim_meter.avg
+        psnr_avg = psnr_meter.compute()
+        ssim_avg = ssim_meter.compute()
 
         clear_line()  # clears the "testing on validation.." line
 
@@ -290,12 +303,14 @@ class Noise2Noise(object):
         stats = {'noise_type': self.p.noise_type,
                  'noise_param': self.p.noise_param,
                  'train_loss': [],
+                 'train_psnr': [],
+                 'train_ssim': [],
                  'valid_loss': [],
                  'valid_psnr': [],
                  'valid_ssim': []}
 
-        ig_psnr_metric = ig_PSNR(data_range=1.0)
-        ig_ssim_metric = ig_SSIM(data_range=1.0)
+        psnr_meter = PSNR(data_range=1.0)
+        ssim_meter = SSIM(data_range=1.0)
 
         # Main training loop
         train_start = dt.now()
@@ -309,12 +324,6 @@ class Noise2Noise(object):
             train_loss_meter = AvgMeter()
             loss_meter = AvgMeter()
             time_meter = AvgMeter()
-        
-            # # adjust learning rate for this epoch (if not constant)
-            # if self.p.learning_params[0] != self.p.learning_params[1]:      
-            #     self.optim = adjust_lr(self.optim, epoch, self.p.nb_epochs, self.p.learning_params)
-            #     if self.p.verbose:
-            #         print(f'Learning rate = {round(self.optim.param_groups[0]["lr"], 7)}')
 
             # Minibatch SGD
             # loop_start = dt.now()
@@ -340,9 +349,9 @@ class Noise2Noise(object):
                         f"\tBias type is usually float32, input dtype = {source.dtype}")
 
                 # Calculate ssims and update loss (with Ignite)
-                ig_psnr_metric.update((source_denoised, target))
-                ig_ssim_metric.update((source_denoised, target))
-                ssims = ig_ssim_metric.compute()
+                psnr_meter.update((source_denoised, target))
+                ssim_meter.update((source_denoised, target))
+                ssims = ssim_meter.compute()
                 loss = self.loss(source_denoised, target) + (1 - ssims)
 
                 # Update loss and step optimizer
@@ -350,8 +359,9 @@ class Noise2Noise(object):
                 loss.backward()
                 self.optim.step()
 
-                # # Update learning rate with Cosine Annealing + Warm Restarts scheduler
-                # self.scheduler.step(epoch + batch_idx / num_batches)
+                # Update learning rate with Cosine Annealing + Warm Restarts scheduler
+                if self.p.lr_scheduler:
+                    self.scheduler.step(epoch + batch_idx / num_batches)
 
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
@@ -368,13 +378,13 @@ class Noise2Noise(object):
                 # print(f'batch time: {dt.now() - batch_start} | loop time: {dt.now() - loop_start}')
                 # loop_start = dt.now()
 
-            # Epoch end, save and reset tracker
+            # Epoch end, save and reset trackers
+            stats['train_psnr'].append(psnr_meter.compute())
+            stats['train_ssim'].append(ssim_meter.compute())
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)
             train_loss_meter.reset()
-
-            # reset ignite metrics before the start of next epoch
-            ig_psnr_metric.reset()
-            ig_ssim_metric.reset()
+            psnr_meter.reset()
+            ssim_meter.reset()
 
         train_elapsed = time_elapsed_since(train_start)[0]
 

@@ -12,21 +12,21 @@ set +a    # only need to export job info vars
 
 # !!!----------------------------- SET INPUT VARS -----------------------------!!!
 root="/Users/emnatin/Documents"
-# data_dir="${root}/timgrec-extra-tiny-ImageNet"
-# test_dir="${data_dir}/test"
-# target_dir="${data_dir}/targets"
-data_dir="${root}/hs20mg_test_data"
-test_dir="${data_dir}/xyz"
-target_dir="${test_dir}/targets"
+data_dir="${root}/timgrec-extra-tiny-ImageNet"
+test_dir="${data_dir}/test"
+target_dir="${data_dir}/targets"
+# data_dir="${root}/hs20mg_test_data"
+# test_dir="${data_dir}/xyz"
+# target_dir="${test_dir}/targets"
 
-redux=0.9
+redux=0.5
 noise="raw"
 test_param=0.5
-results="results/tiny-ImageNet-SSIMepoch15"
+results="results/annealed-epoch129"
 channels=1
-crop=64
+crop=128
 
-ckpt="ckpts/tinyimagenet-raw/tinyimagenet-rawl2/train-epoch476-0.00423.pt"
+ckpt="ckpts/scheduler-tests/lr-annealing-rawl2/train-epoch129-0.10325.pt"
 
 # -------------------------------------------------------------------------------
 
