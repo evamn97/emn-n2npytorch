@@ -7,12 +7,14 @@ import PIL.Image as Image
 import numpy as np
 import pandas as pd
 import torch
+import torchvision as tv
 import torchvision.transforms as trf
 from torchvision.transforms import functional as tvF
 from pathos.helpers import cpu_count
 from pathos.pools import ProcessPool as Pool
 from tqdm import tqdm
 from time import sleep
+import matplotlib.pyplot as plt
 
 
 def normalize(arr, as_image=False):
@@ -400,12 +402,15 @@ def get_test(test_path_in: str, test_path_out: str, num: int, target_path_in=Non
 
 def batch_rename(root_dir, location, add_string, save_dir=None, to_replace=''):
     """ Batch file renaming for all items in a given directory. """
+
     files = [f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))]  # for files only
-    if location not in ['first', 'last', 'replace', 'ext']:
+    if location.lower() not in ['first', 'last', 'replace', 'ext']:
         raise ValueError(f"Mode must be one of: 'first', 'last', 'replace', or 'ext'. You tried mode '{location}'")
     if save_dir is None:
         save_dir = root_dir
-    for fname in tqdm(files, unit=' file', desc='Renaming files'):
+    elif not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+    for fname in tqdm(files, unit=' file', desc=f'Renaming files in {root_dir}'):
         if location == 'first':
             renamed = add_string + fname
         elif location == 'last':
@@ -425,38 +430,59 @@ def batch_rename(root_dir, location, add_string, save_dir=None, to_replace=''):
 
 
 def simple_image_import(filepath):
+    """ Image file only import (does not support xyz/csv) """
+
     with Image.open(filepath) as im_pil:
             im_pil.load()
     im_tensor = tvF.pil_to_tensor(im_pil)
     return os.path.basename(filepath), im_tensor    #(im_tensor, im_pil)
 
 
-def get_shape(tensor):
-    return tensor.shape
+def crop_and_remove_padded(fpath, save_dir, crop_size, pad_thresh=0.05):
+    """ Determines if input image has black or white padding, and if not, crops to the given size.
+    :param fpath: input image filepath
+    :param save_dir: save directory for resulting image (if any)
+    :param crop_size: crop size for unpadded images
+    :param pad_thresh: value threshold for determining if an image is padded. 
+    """
 
-
-def crop_and_remove_padded(in_dict_item, crop_size, pad_thresh=0.05):
-    fname, im_tensor = in_dict_item
+    fname, im_tensor = simple_image_import(fpath)
     c, h, w = im_tensor.shape
     white = (1 - pad_thresh) * im_tensor.max()   # get white padding threshold
     black = im_tensor.min() * (1 + pad_thresh)   # get black padding threshold
 
     # check for padding using top left and bottom right corners
-    if any(im_tensor[:, 0:2, 0:2] < black, 
-           im_tensor[:, 0:2, 0:2] > white, 
-           im_tensor[:, -1:-3, -1:-3] < black, 
-           im_tensor[:, -1:-3, -1:-3] > white):
-        return 'none', None
-    
-    # if it doesn't have padding, crop to output size with random resized crop (in case crop size is bigger)
-    cropper = trf.RandomResizedCrop(crop_size)
-    if any(h != crop_size, w != crop_size):
-        return fname, cropper(im_tensor)
+    if not any([torch.all(im_tensor[:, :3, :3] < black), 
+           torch.all(im_tensor[:, :3, :3] > white), 
+           torch.all(im_tensor[:, -3:, -3:] < black), 
+           torch.all(im_tensor[:, -3:, -3:] > white)]):
+
+        # if it doesn't have padding, crop to output size with random resized crop (in case crop size is bigger)
+        if not (h == w == crop_size):
+            if (h > 2 * crop_size and w > 2 * crop_size):
+                out_tens_tup = trf.FiveCrop(crop_size)(im_tensor)
+            elif (h > (crop_size / 2) and w > (crop_size / 2)):
+                out_tens_tup = [trf.RandomResizedCrop(crop_size, antialias=True)(im_tensor)]
+            else:   # image is too small
+                return None
+        else:   # h == w == crop_size
+            out_tens_tup = [im_tensor]
+
+        # Save resulting image(s)
+        im_PIL_tup = []
+        for i in range(len(out_tens_tup)):
+            im_PIL_tup.append(tvF.to_pil_image(out_tens_tup[i]))
+            im_PIL_tup[i].save(os.path.join(save_dir, f'{os.path.splitext(fname)[0]+str(i)+os.path.splitext(fname)[1] if i > 0 else fname}'))
+
+        if len(out_tens_tup) == 1:
+            return fname, (out_tens_tup[0], im_PIL_tup[0])
+        else:
+            return fname, (out_tens_tup, tuple(im_PIL_tup))
     else:
-        return fname, im_tensor
+        return None
 
 
-def uniform_image_set(root_dir, save_dir, tag=''):
+def uniform_image_set(root_dir, save_dir, crop_size):
     """ Square crops an image set to the largest common size and removes images with outside padding.
     """
 
@@ -465,30 +491,97 @@ def uniform_image_set(root_dir, save_dir, tag=''):
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
 
+    # Get image filepaths
     supported = ['.png', '.jpg', '.jpeg']
-    source_iter = tqdm([f for f in os.listdir(root_dir) if os.path.splitext(f)[1].lower() in supported], 
-                       desc=f'Loading {os.path.basename(root_dir)} images', unit='img')
-    images_in = {name: obj for (name, obj) in [simple_image_import(os.path.join(root_dir, s)) for s in source_iter]}
-    
-    # using pathos
-    # pool = Pool(cpu_count())
-    # res = pool.amap(get_shape, images_in.items())
-    # while not res.ready():
-    #     sleep(1)
-    # sizes = res.get()
+    fpaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if os.path.splitext(f)[1].lower() in supported]
 
-    # res2 = pool.amap(crop_and_remove_padded, images_in.items(), [min(sizes)] * len(images_in))
-    # while not res2.ready():
-    #     sleep(2)
-    # images_out = dict(res2.get())
+    images_out = []
+    for f in tqdm(fpaths, desc=f'Cropping imgs in {root_dir}', unit='img'):
+        images_out.append(crop_and_remove_padded(f, save_dir, crop_size))
+    images_out = dict(images_out(list(filter(None, images_out))))
+    
+    # pool = Pool(cpu_count() - 1)
+
+    # pbar = tqdm(total=len(fpaths), unit='fi', desc=f'Cropping imgs in {root_dir}')
+    # recorded = 0
+    # res = pool.amap(crop_and_remove_padded, fpaths, [save_dir] * len(fpaths), [crop_size] * len(fpaths))
+    # while not res.ready():
+    #     val = res._value
+    #     to_update = len(list(filter(None, val))) - recorded
+    #     pbar.update(to_update)
+    #     recorded += to_update
+    # if recorded < len(fpaths):
+    #     pbar.update(len(fpaths) - recorded)
+    # pbar.close()
+    # images_out = dict(list(filter(None, res.get())))
+
     # pool.close()
     # pool.join()
     # pool.clear()
     # pool.terminate()
+     
+    return images_out
 
-    # using looping
-    sizes = [t.shape for _, t in images_in.items()]
-    images_out = {}
-    for fname, im_tensor in images_in.items():
-        images_out[fname] = crop_and_remove_padded(im_tensor, min(sizes))
+
+def get_sizes(fpath):
+    t = simple_image_import(fpath)[1]
+    size = list(t.shape[1:])
+    # print(size)
+    return size
+
+
+def get_size_dist(root_dir, save_dir):
+
+    fig, ax = plt.subplots(dpi=200)
+    ax.set(xlabel='width', ylabel='height', title='image sizes')
+    files = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if os.path.splitext(f)[1].lower() in ['.png', '.jpg', '.jpeg']]
+    pool = Pool(cpu_count())
+
+    for folder in os.listdir(root_dir):
+        pbar = tqdm(total=len(files), unit='fi', desc=f'Getting sizes in {folder}')
+        res = pool.amap(get_sizes, files)
+        recorded = 0
+        while not res.ready():
+            val = res._value
+            to_update = len(list(filter(None, val))) - recorded
+            pbar.update(to_update)
+            recorded += to_update
+        if recorded < len(files):
+            pbar.update(len(files) - recorded)
+        pbar.close()
+        sizes = res.get()
         
+        print(f'{folder} avg size: {int(np.average(sizes))} | min size: {np.min(sizes)}')
+        with open(os.path.join(save_dir, f'sizes.txt'), 'a') as f:
+            f.writelines([f'{h}, {w}\n' for (h, w) in sizes])
+        heights, widths = list(zip(*sizes))
+        # ax.scatter(widths, heights, label=f'{folder} img sizes', s=1, alpha=0.5)
+        ax.hist(widths, label=f'{folder} img widths')
+        ax.hist(heights, label=f'{folder} img heights')
+
+    ax.legend(loc='upper right')
+    fig.tight_layout()
+    plt.savefig(os.path.join(save_dir, 'image-sizes.png'))
+    plt.close()
+    
+    pool.close()
+    pool.join()
+    pool.clear()
+    pool.terminate()
+
+
+# if __name__ == '__main__':
+#     source_root = "/mnt/data/emnatin/ILSVRC"
+#     save_root = "/mnt/data/emnatin/norm-ILSVRC"
+#     # source_path = "./normtest_scratch/test"
+#     # save_path = './normtest_scratch/out'
+#     crop = 512
+
+#     # for folder in [d for d in os.listdir(source_root) if os.path.isdir(os.path.join(source_root, d))]:
+#     folder = 'train'
+#     source_path = os.path.join(source_root, folder)
+#     save_path = os.path.join(save_root, folder)
+#     outs = uniform_image_set(source_path, save_path, crop)
+
+
+
