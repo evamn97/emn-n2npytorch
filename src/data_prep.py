@@ -488,37 +488,42 @@ def uniform_image_set(root_dir, save_dir, crop_size):
 
     if not os.path.isdir(root_dir):
         raise NotADirectoryError('Your input file path is not a directory!')
-    if not os.path.isdir(save_dir):
-        os.makedirs(save_dir)
 
     # Get image filepaths
     supported = ['.png', '.jpg', '.jpeg']
-    fpaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if os.path.splitext(f)[1].lower() in supported]
-
     images_out = []
-    for f in tqdm(fpaths, desc=f'Cropping imgs in {root_dir}', unit='img'):
-        images_out.append(crop_and_remove_padded(f, save_dir, crop_size))
-    images_out = dict(images_out(list(filter(None, images_out))))
+
+    # fpaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if os.path.splitext(f)[1].lower() in supported]
+    # for f in tqdm(fpaths, desc=f'Cropping imgs in {root_dir}', unit='img'):
+    #     images_out.append(crop_and_remove_padded(f, save_dir, crop_size))
+    # images_out = dict(images_out(list(filter(None, images_out))))
     
-    # pool = Pool(cpu_count() - 1)
+    pool = Pool(cpu_count())
 
-    # pbar = tqdm(total=len(fpaths), unit='fi', desc=f'Cropping imgs in {root_dir}')
-    # recorded = 0
-    # res = pool.amap(crop_and_remove_padded, fpaths, [save_dir] * len(fpaths), [crop_size] * len(fpaths))
-    # while not res.ready():
-    #     val = res._value
-    #     to_update = len(list(filter(None, val))) - recorded
-    #     pbar.update(to_update)
-    #     recorded += to_update
-    # if recorded < len(fpaths):
-    #     pbar.update(len(fpaths) - recorded)
-    # pbar.close()
-    # images_out = dict(list(filter(None, res.get())))
+    for folder in [d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, folder))]:
+        source_path = os.path.join(root_dir, folder)
+        save_path = os.path.join(save_dir, folder)
+        if not os.path.isdir(save_path):
+            os.makedirs(save_path)
+        fpaths = [os.path.join(source_path, f) for f in os.listdir(source_path) if os.path.splitext(f)[1].lower() in supported]
+        print(f'Source dir: {source_path} | Imgs in: {len(fpaths)} | Save dir: {save_path}')
+        pbar = tqdm(total=len(fpaths), unit='fi', desc=f'Cropping imgs in {folder}')
+        recorded = 0
+        res = pool.amap(crop_and_remove_padded, fpaths, [save_path] * len(fpaths), [crop_size] * len(fpaths))
+        while not res.ready():
+            val = res._value
+            to_update = len(list(filter(None, val))) - recorded
+            pbar.update(to_update)
+            recorded += to_update
+        if recorded < len(fpaths):
+            pbar.update(len(fpaths) - recorded)
+        pbar.close()
+        images_out.append(dict(list(filter(None, res.get()))))
 
-    # pool.close()
-    # pool.join()
-    # pool.clear()
-    # pool.terminate()
+    pool.close()
+    pool.join()
+    pool.clear()
+    pool.terminate()
      
     return images_out
 
@@ -532,13 +537,19 @@ def get_sizes(fpath):
 
 def get_size_dist(root_dir, save_dir):
 
+    if not os.path.isdir(root_dir):
+        raise NotADirectoryError('Your input file path is not a directory!')
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+
     fig, ax = plt.subplots(dpi=200)
     ax.set(xlabel='width', ylabel='height', title='image sizes')
-    files = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if os.path.splitext(f)[1].lower() in ['.png', '.jpg', '.jpeg']]
     pool = Pool(cpu_count())
 
-    for folder in os.listdir(root_dir):
-        pbar = tqdm(total=len(files), unit='fi', desc=f'Getting sizes in {folder}')
+    for folder in [d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, folder))]:
+        source_path = os.path.join(root_dir, folder)
+        files = [os.path.join(source_path, f) for f in os.listdir(source_path) if os.path.splitext(f)[1].lower() in ['.png', '.jpg', '.jpeg']]
+        pbar = tqdm(total=len(files), unit='fi', desc=f'Getting sizes in {source_path}')
         res = pool.amap(get_sizes, files)
         recorded = 0
         while not res.ready():
@@ -551,7 +562,7 @@ def get_size_dist(root_dir, save_dir):
         pbar.close()
         sizes = res.get()
         
-        print(f'{folder} avg size: {int(np.average(sizes))} | min size: {np.min(sizes)}')
+        print(f'{source_path} avg size: {int(np.average(sizes))} | min size: {np.min(sizes)}')
         with open(os.path.join(save_dir, f'sizes.txt'), 'a') as f:
             f.writelines([f'{h}, {w}\n' for (h, w) in sizes])
         heights, widths = list(zip(*sizes))
