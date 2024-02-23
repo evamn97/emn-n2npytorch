@@ -3,17 +3,18 @@ import random
 import shutil
 from typing import Union
 
-import PIL.Image as Image
+from PIL import Image, UnidentifiedImageError
 import numpy as np
 import pandas as pd
 import torch
 import torchvision as tv
 import torchvision.transforms as trf
 from torchvision.transforms import functional as tvF
-from pathos.helpers import cpu_count
+from pathos.helpers import cpu_count, shutdown
 from pathos.pools import ProcessPool as Pool
 from tqdm import tqdm
 from time import sleep
+from datetime import datetime as dt
 import matplotlib.pyplot as plt
 
 
@@ -445,8 +446,11 @@ def crop_and_remove_padded(fpath, save_dir, crop_size, pad_thresh=0.05):
     :param crop_size: crop size for unpadded images
     :param pad_thresh: value threshold for determining if an image is padded. 
     """
-
-    fname, im_tensor = simple_image_import(fpath)
+    try:
+        fname, im_tensor = simple_image_import(fpath)
+    except UnidentifiedImageError:  # no idea why this keeps triggering on jpegs but I can't deal
+        print(f'\nCould not identify {fpath}, skipping...')
+        return None
     c, h, w = im_tensor.shape
     white = (1 - pad_thresh) * im_tensor.max()   # get white padding threshold
     black = im_tensor.min() * (1 + pad_thresh)   # get black padding threshold
@@ -482,7 +486,7 @@ def crop_and_remove_padded(fpath, save_dir, crop_size, pad_thresh=0.05):
         return None
 
 
-def uniform_image_set(root_dir, save_dir, crop_size):
+def uniform_image_set(root_dir, save_dir, crop_size, pool=None):
     """ Square crops an image set to the largest common size and removes images with outside padding.
     """
 
@@ -493,38 +497,36 @@ def uniform_image_set(root_dir, save_dir, crop_size):
     supported = ['.png', '.jpg', '.jpeg']
     images_out = []
 
-    # fpaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if os.path.splitext(f)[1].lower() in supported]
-    # for f in tqdm(fpaths, desc=f'Cropping imgs in {root_dir}', unit='img'):
-    #     images_out.append(crop_and_remove_padded(f, save_dir, crop_size))
-    # images_out = dict(images_out(list(filter(None, images_out))))
-    
-    pool = Pool(cpu_count())
-
-    for folder in [d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, folder))]:
-        source_path = os.path.join(root_dir, folder)
-        save_path = os.path.join(save_dir, folder)
+    for path, dirs, files in os.walk(root_dir):
+        if os.path.isdir(path) and path != root_dir:
+            source_path = path
+            save_path = os.path.join(save_dir, os.path.basename(path))
+        else:   # path is a file or root_dir
+            source_path = root_dir
+            save_path = save_dir
         if not os.path.isdir(save_path):
             os.makedirs(save_path)
-        fpaths = [os.path.join(source_path, f) for f in os.listdir(source_path) if os.path.splitext(f)[1].lower() in supported]
+        fpaths = [os.path.join(source_path, f) for f in files if os.path.splitext(f)[1].lower() in supported]
         print(f'Source dir: {source_path} | Imgs in: {len(fpaths)} | Save dir: {save_path}')
-        pbar = tqdm(total=len(fpaths), unit='fi', desc=f'Cropping imgs in {folder}')
-        recorded = 0
-        res = pool.amap(crop_and_remove_padded, fpaths, [save_path] * len(fpaths), [crop_size] * len(fpaths))
-        while not res.ready():
-            val = res._value
-            to_update = len(list(filter(None, val))) - recorded
-            pbar.update(to_update)
-            recorded += to_update
-        if recorded < len(fpaths):
-            pbar.update(len(fpaths) - recorded)
-        pbar.close()
-        images_out.append(dict(list(filter(None, res.get()))))
 
-    pool.close()
-    pool.join()
-    pool.clear()
-    pool.terminate()
-     
+        if isinstance(pool, Pool):
+            pbar = tqdm(total=len(fpaths), unit='fi', desc=f'Cropping imgs in {source_path}')
+            recorded = 0
+            res = pool.amap(crop_and_remove_padded, fpaths, [save_path] * len(fpaths), [crop_size] * len(fpaths))
+            while not res.ready():
+                val = res._value
+                to_update = len(list(filter(None, val))) - recorded
+                pbar.update(to_update)
+                recorded += to_update
+            if recorded < len(fpaths):
+                pbar.update(len(fpaths) - recorded)
+            pbar.close()
+            images_out.append(dict(list(filter(None, res.get()))))
+        else:
+            for f in tqdm(fpaths, desc=f'Cropping imgs in {root_dir}', unit='img'):
+                images_out.append(crop_and_remove_padded(f, save_dir, crop_size))
+            images_out = dict(images_out(list(filter(None, images_out))))
+              
     return images_out
 
 
@@ -535,7 +537,7 @@ def get_sizes(fpath):
     return size
 
 
-def get_size_dist(root_dir, save_dir):
+def get_size_dist(root_dir, save_dir, pool=None):
 
     if not os.path.isdir(root_dir):
         raise NotADirectoryError('Your input file path is not a directory!')
@@ -544,24 +546,36 @@ def get_size_dist(root_dir, save_dir):
 
     fig, ax = plt.subplots(dpi=200)
     ax.set(xlabel='width', ylabel='height', title='image sizes')
-    pool = Pool(cpu_count())
 
-    for folder in [d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, folder))]:
-        source_path = os.path.join(root_dir, folder)
-        files = [os.path.join(source_path, f) for f in os.listdir(source_path) if os.path.splitext(f)[1].lower() in ['.png', '.jpg', '.jpeg']]
-        pbar = tqdm(total=len(files), unit='fi', desc=f'Getting sizes in {source_path}')
-        res = pool.amap(get_sizes, files)
-        recorded = 0
-        while not res.ready():
-            val = res._value
-            to_update = len(list(filter(None, val))) - recorded
-            pbar.update(to_update)
-            recorded += to_update
-        if recorded < len(files):
-            pbar.update(len(files) - recorded)
-        pbar.close()
-        sizes = res.get()
+    for path, dirs, files in os.walk(root_dir):
+        if os.path.isdir(path) and path != root_dir:
+            folder = os.path.basename(path)
+            source_path = path
+        else:   # path is a file
+            folder = os.path.basename(root_dir)
+            source_path = root_dir
         
+        supported = ['.png', '.jpg', '.jpeg']
+        fpaths = [os.path.join(source_path, f) for f in files if os.path.splitext(f)[1].lower() in supported]
+
+        if isinstance(pool, Pool):
+            pbar = tqdm(total=len(files), unit='fi', desc=f'Getting sizes in {source_path}')
+            res = pool.amap(get_sizes, fpaths)
+            recorded = 0
+            while not res.ready():
+                val = res._value
+                to_update = len(list(filter(None, val))) - recorded
+                pbar.update(to_update)
+                recorded += to_update
+            if recorded < len(files):
+                pbar.update(len(files) - recorded)
+            pbar.close()
+            sizes = res.get()
+        else:
+            sizes = []
+            for fpath in tqdm(fpaths, unit='fi', desc=f'Getting sizes in {source_path}'):
+                sizes.append(get_sizes(fpath)) 
+
         print(f'{source_path} avg size: {int(np.average(sizes))} | min size: {np.min(sizes)}')
         with open(os.path.join(save_dir, f'sizes.txt'), 'a') as f:
             f.writelines([f'{h}, {w}\n' for (h, w) in sizes])
@@ -574,25 +588,20 @@ def get_size_dist(root_dir, save_dir):
     fig.tight_layout()
     plt.savefig(os.path.join(save_dir, 'image-sizes.png'))
     plt.close()
+
+
+if __name__ == '__main__':
+    start = dt.now()
+    source_root = "/mnt/data/emnatin/ILSVRC/train"
+    save_root = "/mnt/data/emnatin/norm-ILSVRC/train"
+    # source_path = "../normtest_scratch/"
+    # save_path = '../normtest_scratch/out'
+    crop = 512
+
+    mpool = Pool(cpu_count())
     
-    pool.close()
-    pool.join()
-    pool.clear()
-    pool.terminate()
+    outs = uniform_image_set(source_root, save_root, crop, mpool)
 
+    shutdown()
 
-# if __name__ == '__main__':
-#     source_root = "/mnt/data/emnatin/ILSVRC"
-#     save_root = "/mnt/data/emnatin/norm-ILSVRC"
-#     # source_path = "./normtest_scratch/test"
-#     # save_path = './normtest_scratch/out'
-#     crop = 512
-
-#     # for folder in [d for d in os.listdir(source_root) if os.path.isdir(os.path.join(source_root, d))]:
-#     folder = 'train'
-#     source_path = os.path.join(source_root, folder)
-#     save_path = os.path.join(save_root, folder)
-#     outs = uniform_image_set(source_path, save_path, crop)
-
-
-
+    print(f'Runtime: {dt.now() - start}')
