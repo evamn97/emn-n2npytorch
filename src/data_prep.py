@@ -434,7 +434,7 @@ def simple_image_import(filepath):
     """ Image file only import (does not support xyz/csv) """
 
     with Image.open(filepath) as im_pil:
-            im_pil.load()
+        im_pil.load()
     im_tensor = tvF.pil_to_tensor(im_pil)
     return os.path.basename(filepath), im_tensor    #(im_tensor, im_pil)
 
@@ -479,9 +479,9 @@ def crop_and_remove_padded(fpath, save_dir, crop_size, pad_thresh=0.05):
             im_PIL_tup[i].save(os.path.join(save_dir, f'{os.path.splitext(fname)[0]+str(i)+os.path.splitext(fname)[1] if i > 0 else fname}'))
 
         if len(out_tens_tup) == 1:
-            return fname, (out_tens_tup[0], im_PIL_tup[0])
+            return 1    # fname, (out_tens_tup[0], im_PIL_tup[0])
         else:
-            return fname, (out_tens_tup, tuple(im_PIL_tup))
+            return 1    # fname, (out_tens_tup, tuple(im_PIL_tup))
     else:
         return None
 
@@ -495,7 +495,6 @@ def uniform_image_set(root_dir, save_dir, crop_size, pool=None):
 
     # Get image filepaths
     supported = ['.png', '.jpg', '.jpeg']
-    images_out = []
 
     for path, dirs, files in os.walk(root_dir):
         if os.path.isdir(path) and path != root_dir:
@@ -521,14 +520,11 @@ def uniform_image_set(root_dir, save_dir, crop_size, pool=None):
             if recorded < len(fpaths):
                 pbar.update(len(fpaths) - recorded)
             pbar.close()
-            images_out.append(dict(list(filter(None, res.get()))))
+            
         else:
             for f in tqdm(fpaths, desc=f'Cropping imgs in {root_dir}', unit='img'):
-                images_out.append(crop_and_remove_padded(f, save_dir, crop_size))
-            images_out = dict(images_out(list(filter(None, images_out))))
+                crop_and_remove_padded(f, save_dir, crop_size)
               
-    return images_out
-
 
 def get_sizes(fpath):
     t = simple_image_import(fpath)[1]
@@ -546,13 +542,12 @@ def get_size_dist(root_dir, save_dir, pool=None):
 
     fig, ax = plt.subplots(dpi=200)
     ax.set(xlabel='width', ylabel='height', title='image sizes')
+    sizes = []
 
     for path, dirs, files in os.walk(root_dir):
         if os.path.isdir(path) and path != root_dir:
-            folder = os.path.basename(path)
             source_path = path
         else:   # path is a file
-            folder = os.path.basename(root_dir)
             source_path = root_dir
         
         supported = ['.png', '.jpg', '.jpeg']
@@ -570,20 +565,22 @@ def get_size_dist(root_dir, save_dir, pool=None):
             if recorded < len(files):
                 pbar.update(len(files) - recorded)
             pbar.close()
-            sizes = res.get()
+            if sizes == []:
+                sizes = res.get()
+            else:
+                sizes.append(res.get())
         else:
-            sizes = []
             for fpath in tqdm(fpaths, unit='fi', desc=f'Getting sizes in {source_path}'):
-                sizes.append(get_sizes(fpath)) 
+                sizes.append(get_sizes(fpath))
+    sizes = np.array(sizes).reshape((-1, 2))
 
-        print(f'{source_path} avg size: {int(np.average(sizes))} | min size: {np.min(sizes)}')
-        with open(os.path.join(save_dir, f'sizes.txt'), 'a') as f:
-            f.writelines([f'{h}, {w}\n' for (h, w) in sizes])
-        heights, widths = list(zip(*sizes))
-        # ax.scatter(widths, heights, label=f'{folder} img sizes', s=1, alpha=0.5)
-        ax.hist(widths, label=f'{folder} img widths')
-        ax.hist(heights, label=f'{folder} img heights')
-
+    print(f'{root_dir} avg size: {int(np.average(sizes))} | min size: {np.min(sizes)}')
+    with open(os.path.join(save_dir, f'sizes.txt'), 'a') as f:
+        f.writelines([f'{h}, {w}\n' for (h, w) in sizes])
+    heights, widths = list(zip(*sizes))
+    # ax.scatter(widths, heights, label='img sizes', s=1, alpha=0.5)
+    bins = round(sizes.max() / 128) if round(sizes.max() / 128) > 10 else 10
+    ax.hist((widths, heights), label=['widths', 'heights'], bins=bins)
     ax.legend(loc='upper right')
     fig.tight_layout()
     plt.savefig(os.path.join(save_dir, 'image-sizes.png'))
@@ -592,14 +589,14 @@ def get_size_dist(root_dir, save_dir, pool=None):
 
 if __name__ == '__main__':
     start = dt.now()
-    source_root = "/mnt/data/emnatin/ILSVRC/train"
-    save_root = "/mnt/data/emnatin/norm-ILSVRC/train"
-    # source_path = "../normtest_scratch/"
-    # save_path = '../normtest_scratch/out'
+    source_root = "/mnt/data/emnatin/ILSVRC/"
+    save_root = "/mnt/data/emnatin/norm-ILSVRC/"
+    # source_root = "../../normtest_scratch/"
+    # save_root = '.'#./../normtest_scratch/out'
     crop = 512
 
     mpool = Pool(cpu_count())
-    
+    # get_size_dist(source_root, save_root, pool=mpool)
     outs = uniform_image_set(source_root, save_root, crop, mpool)
 
     shutdown()

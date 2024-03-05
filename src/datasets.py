@@ -51,7 +51,6 @@ class NoisyDataset(Dataset):
         self.crop_size = crop_size
         self.clean_targets = clean_targets
         self.paired_targets = paired_targets
-        self.channels = channels
 
         # Noise parameters
         self.noise_type = noise_dist[0]
@@ -118,13 +117,13 @@ class NoisyDataset(Dataset):
 
         elif self.noise_type.lower() == 'gradient':
             std = param * img.std()
-            noise = torch.from_numpy(np.tile(np.linspace(0, 1, w), (h, 1))).unsqueeze(dim=0) * NormalDist(0, std, generator=gen).sample(img.size())
+            noise = torch.from_numpy(np.tile(np.linspace(0, 1, w), (h, 1))).unsqueeze(dim=0) * NormalDist(0, std).sample(img.size())
             noisy_img = img.to(torch.float64, copy=True) + noise
             if not img.is_floating_point():     # assumes int type means it's an image format (e.g., 0-255 range), so need rescale after summing
                 noisy_img = rescale_tensor(noisy_img, bounds=[img.min().item(), img.max().item()]).to(img.dtype)
 
         else:   # self.noise_type.lower() == 'bernoulli':
-            noisy_img = img.to(torch.float64, copy=True) * BernoulliDist(param, generator=gen).sample(img.size()[1:])
+            noisy_img = img.to(torch.float64, copy=True) * BernoulliDist(param).sample(img.size()[1:])
 
         return noisy_img
 
