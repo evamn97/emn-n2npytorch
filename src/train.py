@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument('--report-per-epoch', help='num of reports on batch loss per epoch (may not be exact if batch division is uneven)', default=1, type=int)
 
     # Training hyperparameters
-    parser.add_argument('-lr', '--learning-params', help='learning rate params [min, max, alpha, beta] for adam optimizer. set min=max for constant learning rate; set alpha=0 for no exp decay; set beta=0 for no sinusoid.', nargs='+', default=[0.0, 0.001, 6.5, 10.0], type=float)
+    parser.add_argument('-lr', '--learning-params', help='learning rate params [min, max, alpha, beta] for scheduler. set min=max for constant learning rate; set alpha=0 for no exp decay; set beta=0 for no sinusoid.', nargs='+', default=[0.0, 0.001, 6.5, 10.0], type=float)
     parser.add_argument('--lr-scheduler', help='use consine annealing lr scheduler', action='store_true')
     parser.add_argument('-a', '--adam', help='adam parameters', nargs='+', default=[0.9, 0.99, 1e-8], type=float)
     parser.add_argument('-ch', '--channels', help='change the number of input/output channels for Unet (ex: RGB=3, L=1, LA=2)', default=3, type=int)
