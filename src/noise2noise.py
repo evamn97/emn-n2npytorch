@@ -7,8 +7,8 @@ from datetime import timedelta
 
 import torch.nn as nn
 from torch.optim import Adam, lr_scheduler
-from ignite.metrics import SSIM
-from ignite.metrics import PSNR
+from torchmetrics.image import StructuralSimilarityIndexMeasure as SSIM
+from torchmetrics.image import PeakSignalNoiseRatio as PSNR
 
 from tqdm import tqdm
 
@@ -93,7 +93,7 @@ class Noise2Noise(object):
         print()
         sys.stdout.flush()
 
-    def show_on_report(batch_idx, num_batches, loss, elapsed):
+    def show_on_report(self, batch_idx, num_batches, loss, elapsed):
         """Formats training stats."""
 
         clear_line()
@@ -260,7 +260,7 @@ class Noise2Noise(object):
         loss_meter = AvgMeter()
 
         ssim_meter = SSIM(data_range=1.0)
-        psnr_meter = PSNR(data_range=1.0)
+        psnr_meter = PSNR()
 
         if self.p.verbose:
             print('\rTesting model on validation set... ', end='')
@@ -274,8 +274,8 @@ class Noise2Noise(object):
             source_denoised = self.model(source)
 
             # Calculate metrics with Ignite
-            ssim_meter.update((source_denoised, target))
-            psnr_meter.update((source_denoised, target))
+            ssim_meter.update(source_denoised, target)
+            psnr_meter.update(source_denoised, target)
 
             # Update loss
             loss = self.loss(source_denoised, target) + (1 - ssim_meter.compute())
@@ -309,7 +309,7 @@ class Noise2Noise(object):
                  'valid_psnr': [],
                  'valid_ssim': []}
 
-        psnr_meter = PSNR(data_range=1.0)
+        psnr_meter = PSNR()
         ssim_meter = SSIM(data_range=1.0)
 
         # Main training loop
@@ -349,8 +349,8 @@ class Noise2Noise(object):
                         f"\tBias type is usually float32, input dtype = {source.dtype}")
 
                 # Calculate ssims and update loss (with Ignite)
-                psnr_meter.update((source_denoised, target))
-                ssim_meter.update((source_denoised, target))
+                psnr_meter.update(source_denoised, target)
+                ssim_meter.update(source_denoised, target)
                 ssims = ssim_meter.compute()
                 loss = self.loss(source_denoised, target) + (1 - ssims)
 

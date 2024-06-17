@@ -7,14 +7,14 @@ start=$(date +%s)
 
 # set job name for file saving in python script
 set -a
-jobname="lr-annealing"  # "$(basename -s .sh "$0")"
+jobname="network-debugging"  # "$(basename -s .sh "$0")"
 set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
 
 root="/mnt/data/emnatin"
 # data_dir="${root}/timgrec-extra-tiny-ImageNet"
-data_dir="${root}/imgrec-tiny-ImageNet2"
+data_dir="${root}/AFMNet"
 train_dir="${data_dir}/train"
 valid_dir="${data_dir}/valid"
 target_dir="${data_dir}/targets"
@@ -23,22 +23,22 @@ channels=1
 # for finetuning a pretrained model (leave empty to create a new ckpt):
 train_ckpt=""
 
-redux=0
+redux=0.999
 noise="raw"
 train_param=0.25
-batch_size=100
+batch_size=20
 report=8
-epochs=200
+epochs=10
 loss_fun='l2'
 # learning_params="0.001 0.001 0.75 0.2"  # [min, max, alpha, beta] for exp decay cosine
-learning_params="0.0 0.001 10 2"  # [min, max, T_0, T_mult] for cosine annealing scheduler
+learning_params="0.005 0.001 10 2"  # [min, max, T_0, T_mult] for cosine annealing scheduler
 
 # --------------------------------------------------------------------------------------------------
 
 # get ckpt name (set substring to remove from jobname if necessary)
 sub="-imgrec"
 ckpt_string="${filename%$sub}-${noise}"     # ex: tinyimagenet-raw
-ckpt_save="ckpts/scheduler-tests"     #${ckpt_string}"
+ckpt_save="ckpts/net-debug"     #${ckpt_string}"
 
 # --------------------------------------------------------------------------------------------------
 
@@ -72,6 +72,7 @@ python src/train.py \
     --cuda \
     --paired-targets \
     --verbose \
+    --show-progress \
     --load-ckpt "${train_ckpt}"
 
 

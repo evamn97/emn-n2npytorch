@@ -17,7 +17,9 @@ from matplotlib import rcParams
 from matplotlib.ticker import MaxNLocator
 from pathos.helpers import cpu_count
 from pathos.pools import ProcessPool as Pool
-from skimage.metrics import structural_similarity as SSIM
+from torchmetrics.functional.image import structural_similarity_index_measure as ssim_F
+from torchmetrics.functional.image import peak_signal_noise_ratio as psnr_F
+# from skimage.metrics import structural_similarity as SSIM
 
 rcParams['font.family'] = 'serif'
 # mpl.use('QtAgg')
@@ -119,10 +121,10 @@ def reinhard_tonemap(tensor):
     return torch.pow(tensor / (1 + tensor), 1 / 2.2)
 
 
-def PSNR(input, target):
-    """Computes peak signal-to-noise ratio."""
+# def PSNR(input, target):
+#     """Computes peak signal-to-noise ratio."""
 
-    return 10 * torch.log10(1 / F.mse_loss(input, target))
+#     return 10 * torch.log10(1 / F.mse_loss(input, target))
 
 
 def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoised_t, clean_t, show,
@@ -149,8 +151,8 @@ def create_montage(img_name, noise_type, noise_param, save_path, source_t, denoi
     # torch.clamp() is like clipping, why is it necessary? (like for RGB?)
 
     # Build image montage
-    psnr_vals = [PSNR(source_t, clean_t), PSNR(denoised_t, clean_t)]
-    ssim_vals = [SSIM(np.asarray(source), np.asarray(clean)), SSIM(np.asarray(denoised), np.asarray(clean))]
+    psnr_vals = [psnr_F(source_t, clean_t), psnr_F(denoised_t, clean_t)]
+    ssim_vals = [ssim_F(source_t, clean_t), ssim_F(denoised_t, clean_t)]
     specs = [f'PSNR={round(psnr_vals[0].item(), 2)} dB | SSIM={round(ssim_vals[0].item(), 2)}', 
          f'PSNR={round(psnr_vals[1].item(), 2)} dB | SSIM={round(ssim_vals[1].item(), 2)}', 
          '']
