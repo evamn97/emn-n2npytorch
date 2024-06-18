@@ -6,7 +6,7 @@ import os
 from argparse import ArgumentParser
 
 from datasets import load_dataset
-from noise2noise import Noise2Noise
+from noise2noise_mod import Noise2Noise
 
 
 def parse_args():

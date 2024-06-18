@@ -23,15 +23,15 @@ channels=1
 # for finetuning a pretrained model (leave empty to create a new ckpt):
 train_ckpt=""
 
-redux=0.999
+redux=0.99
 noise="raw"
 train_param=0.25
-batch_size=20
+batch_size=5
 report=8
-epochs=10
+epochs=20
 loss_fun='l2'
 # learning_params="0.001 0.001 0.75 0.2"  # [min, max, alpha, beta] for exp decay cosine
-learning_params="0.005 0.001 10 2"  # [min, max, T_0, T_mult] for cosine annealing scheduler
+learning_params="0.0005 0.003 10 2"  # [min, max, T_0, T_mult] for cosine annealing scheduler
 
 # --------------------------------------------------------------------------------------------------
 
@@ -72,6 +72,7 @@ python src/train.py \
     --paired-targets \
     --verbose \
     --show-progress \
+    --cuda \
     --load-ckpt "${train_ckpt}"
 
 
