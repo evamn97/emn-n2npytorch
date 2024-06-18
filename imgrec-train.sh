@@ -12,9 +12,9 @@ set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
 
-root="/mnt/data/emnatin"
-# data_dir="${root}/timgrec-extra-tiny-ImageNet"
-data_dir="${root}/AFMNet"
+# root="/mnt/data/emnatin"
+# data_dir="${root}/AFMNet"
+data_dir="../miniDCNI"
 train_dir="${data_dir}/train"
 valid_dir="${data_dir}/valid"
 target_dir="${data_dir}/targets"
@@ -69,7 +69,6 @@ python src/train.py \
     -l ${loss_fun} \
     -lr ${learning_params} \
     --lr-scheduler \
-    --cuda \
     --paired-targets \
     --verbose \
     --show-progress \
