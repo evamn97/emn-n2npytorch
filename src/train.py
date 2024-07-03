@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-import datetime
 import os
 from argparse import ArgumentParser
 
@@ -57,9 +55,9 @@ def parse_args():
 if __name__ == '__main__':
     """Trains Noise2Noise."""
 
-    python_start = datetime.datetime.now()
-    local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
-    print(f'python start time:  {python_start.strftime("%H:%M:%S.%f")[:-4]} {local_tz}')
+    # python_start = datetime.datetime.now()
+    # local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+    # print(f'python start time:  {python_start.strftime("%H:%M:%S.%f")[:-4]} {local_tz}')
 
     # Parse training parameters
     params = parse_args()
@@ -124,5 +122,5 @@ if __name__ == '__main__':
     valid_loader = load_dataset(params.valid_dir, params, shuffled=False)
 
     # start training
-    print(f'training begin:      {datetime.datetime.now().strftime("%H:%M:%S.%f")[:-4]}')
+    # print(f'training begin:      {datetime.datetime.now().strftime("%H:%M:%S.%f")[:-4]}')
     n2n.train(train_loader, valid_loader)

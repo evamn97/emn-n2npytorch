@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from typing import Union, List, Sequence, Optional, Tuple
+from typing import Union, List, Sequence, Optional, Tuple, Literal, Any
 
 import torch
 from torch import Tensor
 from torchmetrics import Metric
-from torchmetrics.functional import mean_squared_error as mse_F
-from torchmetrics.functional.image import structural_similarity_index_measure as ssim_F
-from torchmetrics.functional.image.ssim import _ssim_update
-from torchmetrics.functional.image.lpips import _NoTrainLpips
-# import lpips
-from typing import Literal, Any, Dict
+from torchmetrics.functional.regression import mean_squared_error as mse_F
+from torchmetrics.functional.image.psnr import peak_signal_noise_ratio as psnr_F
+from torchmetrics.functional.image.lpips import learned_perceptual_image_patch_similarity as lpips_F
+from torchmetrics.functional.image.ssim import structural_similarity_index_measure as ssim_F
+from torchmetrics.functional.image.lpips import learned_perceptual_image_patch_similarity as lpips_F
 from typing_extensions import override
 from functools import partial
 from numpy import ndarray
-import pandas as pd
 
 
 def stack_zero_dim(state_list: List[Tensor]) -> ndarray:
@@ -51,10 +49,7 @@ class CustomFittingMetric(Metric):
 
     sum_metric: Tensor
     total: Tensor
-
-    sum_metric_val: Tensor
-    total_val: Tensor
-
+    
     per_epoch: List
     per_epoch_val: List
 
@@ -64,60 +59,74 @@ class CustomFittingMetric(Metric):
     def __init__(
         self, 
         data_range: Optional[Tuple[float, float]] = None, 
-        **kwargs
+        **kwargs: Any
         ) -> None:
         
         super().__init__(**kwargs)
 
+        if isinstance(data_range, tuple):
+            self._data_range = data_range
+            self.data_range = data_range
+            self.clamping_fn = partial(torch.clamp, min=data_range[0], max=data_range[1])
+        else:
+            self._data_range = None
+            self.data_range = None
+            self.clamping_fn = None
+
         self.add_state("sum_metric", default=torch.tensor(0.0), dist_reduce_fx="sum")
         self.add_state("total", default=torch.tensor(0.0), dist_reduce_fx="sum")
 
-        self.add_state("sum_metric_val", default=torch.tensor(0.0), dist_reduce_fx="sum")
-        self.add_state("total_val", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self._reset_all()
 
-        # TODO: try changing to 'per_epoch = []' instead of using add_state so reset() doesn't clear it, and reset at end of each epoch
-        # self.add_state("per_epoch", default=[], dist_reduce_fx="cat")
-        # self.add_state("per_epoch_val", default=[], dist_reduce_fx="cat")
+    def _reset_all(self) -> None:
         self.per_epoch = []
         self.per_epoch_val = []
 
-        if isinstance(data_range, tuple):
-            self.add_state("data_range", default=torch.tensor(data_range[1] - data_range[0]), dist_reduce_fx="mean")
-            self.clamping_fn = partial(torch.clamp, min=data_range[0], max=data_range[1])
-        else:
+        if not self._data_range:
             self.data_range = None
             self.clamping_fn = None
+
+        self.reset()
+
+    def _pre_calc(self, 
+                  preds: Tensor, 
+                  target: Tensor
+                  ) -> Tuple[Tensor, Tensor]:
+        """ Some setup steps required prior to calculation. """
+
+        # set data_range and clamping function if they aren't defined
+        if self.data_range is None:
+            self.data_range = (target.min().item(), target.max().item())
+            self.clamping_fn = partial(torch.clamp, min=self.data_range[0], max=self.data_range[1])
+        
+        # clamp preds and target to data_range
+        preds = self.clamping_fn(preds)
+        target = self.clamping_fn(target)
+        
+        return preds, target
     
     def calculate(self, 
-                  *_: Any) -> Any:
+                  *_: Any) -> Tensor:
         raise NotImplementedError
     
     @override
     def update(self, 
                preds: Tensor, 
                target: Tensor, 
-               val: bool = False, 
                ) -> None:
         """ Update state with preds and target. """
 
-        value = self.calculate(preds, target, reduction='sum')
-
-        if val:
-            self.sum_metric_val += value
-            self.total_val += preds.shape[0]
-        else:
-            self.sum_metric += value
-            self.total += preds.shape[0]
+        self.sum_metric += self.calculate(preds, target)
+        self.total += 1
     
     @override
     def forward(self, 
                 preds: Tensor, 
                 target: Tensor, 
-                val: bool = False, 
                 ) -> Tensor:
         """ Calculate metric and update state. """
 
-        self.update(preds, target, val)
+        self.update(preds, target)
         return self.calculate(preds, target)
     
     def update_on_epoch(self, 
@@ -125,24 +134,54 @@ class CustomFittingMetric(Metric):
                         ) -> None:
         """ Update epoch-level state variables. """
 
-        if val and self.total_val > 0:
-            self.per_epoch_val.append((self.sum_metric_val / self.total_val).item())
-        elif self.total > 0:
-            self.per_epoch.append((self.sum_metric / self.total).item())
+        if self.total > 0:
+            if val:
+                self.per_epoch_val.append((self.sum_metric / self.total).item())
+            else:
+                self.per_epoch.append((self.sum_metric / self.total).item())
 
     @override
     def compute(self, 
-                val: bool = False
                 ) -> Tensor:
         """ Compute metric over state and update epoch tracker. """
+
+        return self.sum_metric / self.total
+
+class MSE_Loss(CustomFittingMetric):
+    """Averaging meter for tracking MSE-SSIM+1 loss over training and validation epochs. 
+    Based on torchmetrics.regression.mse.MeanSquaredError class."""
+
+    higher_is_better: bool = False
+    is_differentiable: bool = True
+    full_state_update: bool = False
+
+    def __init__(
+        self,
+        data_range: Optional[Tuple[float, float]] = None,
+        **kwargs: Any
+        ) -> None:
         
-        if val:
-            return self.sum_metric_val / self.total_val
-        else:
-            return self.sum_metric / self.total
+        super().__init__(data_range, **kwargs)
+    
+    @property
+    def name(self) -> str:
+        return "mse"
+
+    @override
+    def calculate(self, 
+                  preds: Tensor, 
+                  target: Tensor
+                  ) -> Tensor:
+        """Calculate metric from preds and target. """
+
+        preds, target = self._pre_calc(preds, target)
+
+        return mse_F(preds, target)
 
 
 class MSE_SSIM_Loss(CustomFittingMetric):
+    """Averaging meter for tracking MSE-SSIM+1 loss over training and validation epochs. 
+    Based on torchmetrics.image.ssim.StructuralSimilarityIndexMeasure and torchmetrics.regression.mse.MeanSquaredError classes."""
 
     higher_is_better: bool = False
     is_differentiable: bool = True
@@ -153,9 +192,10 @@ class MSE_SSIM_Loss(CustomFittingMetric):
         gaussian_kernel: bool = True,
         sigma: Union[float, Sequence[float]] = 1.5,
         kernel_size: Union[int, Sequence[int]] = 11,
-        data_range: Optional[Union[float, Tuple[float, float]]] = None,
+        data_range: Optional[Tuple[float, float]] = None,
         k1: float = 0.01,
-        k2: float = 0.03, **kwargs
+        k2: float = 0.03, 
+        **kwargs
         ) -> None:
 
         super().__init__(data_range, **kwargs)
@@ -173,58 +213,63 @@ class MSE_SSIM_Loss(CustomFittingMetric):
     @override
     def calculate(self, 
                   preds: Tensor, 
-                  target: Tensor, 
-                  reduction: Literal["mean", "sum"] = 'mean'
+                  target: Tensor
                   ) -> Tensor:
         """ Calculate metric from preds and target. """
-
-        if len(preds.shape) not in (4, 5):
-            raise ValueError(
-                "Expected `preds` and `target` to have BxCxHxW or BxCxDxHxW shape."
-                f" Got preds: {preds.shape} and target: {target.shape}.")
         
-        if self.data_range is None:
-            self.data_range = (target.min().item(), target.max().item())
-            self.clamping_fn = partial(torch.clamp, min=self.data_range[0], max=self.data_range[1])
+        preds, target = self._pre_calc(preds, target)
         
-        preds = self.clamping_fn(preds)
-        target = self.clamping_fn(target)
+        mse = mse_F(preds, target)
+        similarity = ssim_F(preds, target)
         
-        mse = torch.sum((preds - target).squeeze()**2, dim=-1).sum(dim=-1) / target.numel()
+        return mse - similarity + 1
 
-        similarity = _ssim_update(preds, target, 
-                                  gaussian_kernel=self.gaussian_kernel, 
-                                  sigma=self.sigma, 
-                                  kernel_size=self.kernel_size, 
-                                  data_range=self.data_range, 
-                                  k1=self.k1, 
-                                  k2=self.k2)
+
+class MSE_LPIPS_Loss(CustomFittingMetric):
+    """Averaging meter for tracking MSE+LPIPS loss over training and validation epochs. 
+    Based on torchmetrics.image.lpip.LearnedPerceptualImagePatchSimilarity and torchmetrics.regression.mse.MeanSquaredError classes."""
+
+    is_differentiable: bool = True
+    higher_is_better: bool = False
+    full_state_update: bool = False
+
+    def __init__(
+        self, 
+        net_type: Literal["vgg", "alex", "squeeze"] = 'vgg', 
+        normalize: bool = True, 
+        **kwargs
+        ) -> None:
+
+        super().__init__(**kwargs)
+
+        self.net_type = net_type
+        self.normalize = normalize
+        if normalize:
+            self.data_range = (0, 1)
+        else:
+            self.data_range = (-1, 1)
+        self.clamping_fn = partial(torch.clamp, min=self.data_range[0], max=self.data_range[1])
+
+    @property
+    def name(self) -> str:
+        return "mse-lpips"
         
-        combo = mse - similarity + 1
-        if reduction == 'sum':
-            return combo.sum()
-        else: # reduction == 'mean':
-            return combo.mean()
+    @override
+    def calculate(self, 
+                  preds: Tensor, 
+                  target: Tensor
+                  ) -> Tensor:
+                
+        preds, target = self._pre_calc(preds, target)
 
+        mse = mse_F(preds, target)
+        lpips = lpips_F(preds.tile((1, 3, 1, 1)), 
+                        target.tile((1, 3, 1, 1)), 
+                        net_type=self.net_type, normalize=self.normalize)
+        # combo = mse + lpips
+        # combo.grad_fn = lpips.grad_fn
 
-def F_MSE_SSIM(preds: Tensor, target: Tensor,
-               gaussian_kernel: bool = True,
-               sigma: Union[float, Sequence[float]] = 1.5,
-               kernel_size: Union[int, Sequence[int]] = 11,
-               data_range: Optional[Union[float, Tuple[float, float]]] = None,
-               k1: float = 0.01,
-               k2: float = 0.03):
-    """ Functional method for calculating mse + (1 - ssim) directly """
-
-    mse = mse_F(preds, target)
-    ssim = ssim_F(preds, target,
-                  gaussian_kernel=gaussian_kernel,
-                  sigma=sigma,
-                  kernel_size=kernel_size,
-                  data_range=data_range,
-                  k1=k1, k2=k2)
-
-    return mse + (1 - ssim)
+        return mse + lpips
 
 
 class LPIPS_Loss(CustomFittingMetric):
@@ -244,14 +289,7 @@ class LPIPS_Loss(CustomFittingMetric):
 
         super().__init__(**kwargs)
 
-        valid_net_type = ("vgg", "alex", "squeeze")
-        if net_type not in valid_net_type:
-            raise ValueError(f"Argument `net_type` must be one of {valid_net_type}, but got {net_type}.")
-        self.net = _NoTrainLpips(net=net_type)
-        # self.net = lpips.LPIPS(net=net_type, verbose=False)
-
-        if not isinstance(normalize, bool):
-            raise ValueError(f"Argument `normalize` should be an bool but got {normalize}")
+        self.net_type = net_type
         self.normalize = normalize
 
         if normalize:
@@ -260,7 +298,6 @@ class LPIPS_Loss(CustomFittingMetric):
             self.data_range = (-1, 1)
         self.clamping_fn = partial(torch.clamp, min=self.data_range[0], max=self.data_range[1])
 
-    
     @property
     def name(self) -> str:
         return "lpips"
@@ -268,21 +305,14 @@ class LPIPS_Loss(CustomFittingMetric):
     @override
     def calculate(self, 
                   preds: Tensor, 
-                  target: Tensor, 
-                  reduction: Literal["sum", "mean"] = 'mean'
-                  ) -> Tensor:
+                  target: Tensor) -> Tensor:
         
-        preds = self.clamping_fn(preds)
-        target = self.clamping_fn(target)
+        preds, target = self._pre_calc(preds, target)
 
-        lpips = self.net.forward(preds.tile((1, 3, 1, 1)), 
-                                 target.tile((1, 3, 1, 1)), 
-                                 normalize=self.normalize)
-
-        if reduction == 'sum':
-            return lpips.sum()
-        else:   # reduction == 'mean'
-            return lpips.mean()
+        return lpips_F(preds.tile((1, 3, 1, 1)), 
+                       target.tile((1, 3, 1, 1)), 
+                       net_type=self.net_type, 
+                       normalize=self.normalize)
 
 
 class PSNR_Meter(CustomFittingMetric):
@@ -295,7 +325,7 @@ class PSNR_Meter(CustomFittingMetric):
 
     def __init__(
         self,
-        data_range: Optional[Union[float, Tuple[float, float]]] = None,
+        data_range: Optional[Tuple[float, float]] = None,
         **kwargs: Any,
         ) -> None:
         
@@ -305,45 +335,17 @@ class PSNR_Meter(CustomFittingMetric):
     def name(self) -> str:
         return "psnr"
 
-    def _mse(self, 
-             preds: Tensor, 
-             target: Tensor
-             ) -> Tensor:
-        # sets class-level data range for compute method on the first usage
-        # !!! assumes data_range is the same for all targets !!!
-        if self.data_range is None:
-            self.data_range = (target.min().item(), target.max().item())
-            self.clamping_fn = partial(torch.clamp, min=self.data_range[0], max=self.data_range[1])
-
-        preds = self.clamping_fn(preds)
-        target = self.clamping_fn(target)
-
-        mse = torch.sum((preds - target).squeeze()**2, dim=-1).sum(dim=-1) / target.numel()
-        return mse
-    
-    def _psnr(self, 
-              mse: Tensor, 
-              data_range: Union[float, Tensor], 
-              ) -> Tensor:
-        psnr = 10 * torch.log10(data_range**2 / mse)
-        return psnr
-
     @override
     def calculate(self, 
                   preds: Tensor, 
-                  target: Tensor, 
-                  reduction: Literal["mean", "sum"] = 'mean') -> Union[Tuple, Tensor]:
+                  target: Tensor
+                  ) -> Union[Tuple, Tensor]:
         """Calculate metric from preds and target. """
 
-        mse = self._mse(preds, target)
-        data_range = self.data_range[1] - self.data_range[0]
+        preds, target = self._pre_calc(preds, target)
 
-        psnr = self._psnr(mse, data_range)
-
-        if reduction == 'sum':
-            return psnr.sum()
-        else: # reduction == 'mean'
-            return psnr.mean()
+        # set requires_grad = False because this isn't a loss function and we can save memory
+        return psnr_F(preds, target, data_range=self.data_range).requires_grad_(False)
     
 
 class SSIM_Meter(CustomFittingMetric):
@@ -359,10 +361,10 @@ class SSIM_Meter(CustomFittingMetric):
         gaussian_kernel: bool = True,
         sigma: Union[float, Sequence[float]] = 1.5,
         kernel_size: Union[int, Sequence[int]] = 11,
-        data_range: Optional[Union[float, Tuple[float, float]]] = None,
+        data_range: Optional[Tuple[float, float]] = None,
         k1: float = 0.01,
         k2: float = 0.03,
-        **kwargs: Any,
+        **kwargs: Any
         ) -> None:
         
         super().__init__(data_range, **kwargs)
@@ -380,28 +382,16 @@ class SSIM_Meter(CustomFittingMetric):
     @override
     def calculate(self, 
                   preds: Tensor, 
-                  target: Tensor, 
-                  reduction: Literal["mean", "sum"] = 'mean'
+                  target: Tensor
                   ) -> Tensor:
         
-        if self.data_range is None:
-            self.data_range = (target.min().item(), target.max().item())
-            self.clamping_fn = partial(torch.clamp, min=self.data_range[0], max=self.data_range[1])
-        
-        preds = self.clamping_fn(preds)
-        target = self.clamping_fn(target)
+        preds, target = self._pre_calc(preds, target)
 
-        similarity = _ssim_update(
-            preds,
-            target,
-            self.gaussian_kernel,
-            self.sigma,
-            self.kernel_size,
-            self.data_range,
-            self.k1,
-            self.k2)
-        
-        if reduction == 'sum':
-            return similarity.sum()
-        else: # reduction == 'mean':
-            return similarity.mean()
+        # set requires_grad = False because this isn't a loss function and we can save memory
+        return ssim_F(preds, target, 
+                      gaussian_kernel=self.gaussian_kernel, 
+                      sigma=self.sigma, 
+                      kernel_size=self.kernel_size, 
+                      data_range=self.data_range, 
+                      k1=self.k1, 
+                      k2=self.k2).requires_grad_(False)

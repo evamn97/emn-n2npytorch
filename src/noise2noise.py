@@ -12,7 +12,7 @@ from ignite.metrics import PSNR
 
 from tqdm import tqdm
 
-from unet import UNetold as UNet
+from unet import UNet
 from utils import *
 
 
@@ -371,7 +371,7 @@ class Noise2Noise(object):
                 time_meter.update(time_elapsed_since(batch_start)[1])
                 if (batch_idx + 1) % report_interval == 0 and batch_idx:
                     if self.p.verbose and not self.p.show_progress:
-                        show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
+                        self.show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
                         sys.stdout.flush()
                     train_loss_meter.update(loss_meter.avg)
                     loss_meter.reset()

@@ -22,8 +22,7 @@ def load_dataset(root_dir, params, shuffled=False, single=False):
     noise = (params.noise_type, params.noise_param)
 
     dataset = NoisyDataset(root_dir, params.target_dir, params.redux, params.crop_size,
-                           clean_targets=params.clean_targets, paired_targets=params.paired_targets,
-                           channels=params.channels, noise_dist=noise, seed=params.seed, verbose=params.verbose)
+                           clean_targets=params.clean_targets, paired_targets=params.paired_targets, noise_dist=noise, seed=params.seed, verbose=params.verbose)
 
     # Use batch size of 1, if requested (e.g. test set)
     if single:
@@ -35,8 +34,7 @@ def load_dataset(root_dir, params, shuffled=False, single=False):
 class NoisyDataset(Dataset):
     """Class for injecting random noise into dataset."""
 
-    def __init__(self, root_dir, target_dir, redux=0, crop_size=0, clean_targets=False, paired_targets=False,
-                 channels=3, noise_dist=('bernoulli', 0.7), seed=None, verbose=False):
+    def __init__(self, root_dir, target_dir, redux=0, crop_size=0, clean_targets=True, paired_targets=True, noise_dist=('raw', 0.7), seed=None, verbose=True):
         """Initializes noisy image dataset."""
 
         super(NoisyDataset, self).__init__()

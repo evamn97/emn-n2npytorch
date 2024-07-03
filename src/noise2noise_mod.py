@@ -8,9 +8,6 @@ from datetime import timedelta
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts as CosAnn
 from torchmetrics import MeanAbsoluteError as MAE
-from torchmetrics import MeanSquaredError as MSE
-from torchmetrics.image import PeakSignalNoiseRatio as PSNR
-from torchmetrics.image import StructuralSimilarityIndexMeasure as SSIM
 from metrics import MSE_SSIM_Loss, LPIPS_Loss, PSNR_Meter, SSIM_Meter
 from tqdm import tqdm
 
@@ -35,8 +32,8 @@ class Noise2Noise(object):
         self.job_name = f'{self.p.noise_type}{"-clean" if (trainable and self.p.clean_targets) else ""}{self.job_id}'
 
         # debugging
-        print(f'n2n initialized in:  {str(dt.now() - self.n2n_start)[:-4]}')
-        sys.stdout.flush()
+        # print(f'n2n initialized in:  {str(dt.now() - self.n2n_start)[:-4]}')
+        # sys.stdout.flush()
 
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
@@ -99,7 +96,7 @@ class Noise2Noise(object):
         print('\r', end='')
         out_str = f'Batch {batch_idx + 1}/{num_batches} | Avg Loss: {loss} | Avg time per batch: {int(elapsed)}'
         if self.p.lr_scheduler:
-            out_str += f' | LR: {self.scheduler.get_last_lr()}'
+            out_str += f' | LR: {self.scheduler.get_last_lr()[0]}'
 
         print(out_str)
 
@@ -185,14 +182,14 @@ class Noise2Noise(object):
 
         if self.p.verbose:
             print(
-                'Epoch time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB | Avg SSIM: {:.2f}'.format(epoch_time[:-4],
+                'Epoch time: {} | Valid loss: {:>1.5f} | Valid PSNR: {:.2f} dB | Valid SSIM: {:.2f}'.format(epoch_time[:-4],
                                                                                                         valid_loss,
                                                                                                         valid_psnr,
                                                                                                         valid_ssim))
             est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (
                     self.p.nb_epochs - (epoch + 1))
             print(
-                f'Current model runtime:    {str(dt.now() - self.n2n_start)[:-4]} (from N2N init)\nEstimated time remaining: {str(est_remain)[:-4]}')
+                f'Current fit runtime:  {str(dt.now() - self._train_start)[:-4]}\nEst. time remaining:  {str(est_remain)[:-4]}')
 
             sys.stdout.flush()  # force print to out file
 
@@ -291,7 +288,7 @@ class Noise2Noise(object):
     def train(self, train_loader, valid_loader):
         """Trains denoiser on training set."""
 
-        self.model.train(True)
+        self._train_start = dt.now()
 
         self._print_params()
         num_batches = len(train_loader)
@@ -308,8 +305,8 @@ class Noise2Noise(object):
                  'valid_ssim': []}
 
         # Main training loop
-        train_start = dt.now()
         for epoch in range(self.p.nb_epochs):
+            self.model.train(True)
             if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
                 print('\nEPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
                 sys.stdout.flush()
@@ -347,12 +344,10 @@ class Noise2Noise(object):
                 # Update loss and step optimizer
                 loss.backward()
                 self.optim.step()
-
-                # Update learning rate with Cosine Annealing + Warm Restarts scheduler
-                # self.scheduler.step(epoch + batch_idx / num_batches)
+                self.scheduler.step(epoch + batch_idx / num_batches)
 
                 pbar.update()
-                pbar.set_postfix({'lr': self.scheduler.get_last_lr()[0],
+                pbar.set_postfix({'lr': round(self.scheduler.get_last_lr()[0], 6),
                                   'loss': self.loss.compute().item(),
                                   'psnr': self.psnr.compute().item(),
                                   'ssim': self.ssim.compute().item()})
@@ -362,7 +357,7 @@ class Noise2Noise(object):
                 time_meter.reset()
 
             # Epoch end, save and reset trackers
-            self.scheduler.step()
+            # self.scheduler.step()
             pbar.close()
             stats['train_psnr'].append(self.psnr.compute().item())
             stats['train_ssim'].append(self.ssim.compute().item())
@@ -372,7 +367,7 @@ class Noise2Noise(object):
             self.ssim.reset()
             self._on_epoch_end(stats, epoch_loss, epoch, epoch_start, valid_loader)
 
-        train_elapsed = time_elapsed_since(train_start)[0]
+        train_elapsed = time_elapsed_since(self._train_start)[0]
 
         print('\nTraining done! Total elapsed time: {}'.format(str(train_elapsed)[:-3]))
         print('Average training time per epoch:   {}\n'.format(
