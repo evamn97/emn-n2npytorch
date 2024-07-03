@@ -5,11 +5,10 @@ import json
 import sys
 from datetime import timedelta
 
-import torch.nn as nn
-from torch.optim import Adam, lr_scheduler
-from ignite.metrics import SSIM
-from ignite.metrics import PSNR
-
+from torch.optim import Adam
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts as CosAnn
+from torchmetrics import MeanAbsoluteError as MAE
+from metrics import MSE_SSIM_Loss, LPIPS_Loss, PSNR_Meter, SSIM_Meter
 from tqdm import tqdm
 
 from unet import UNet
@@ -22,7 +21,6 @@ class Noise2Noise(object):
     def __init__(self, params, trainable):
         """Initializes model."""
         self.n2n_start = dt.now()
-        # print(f'N2N start time:     {self.n2n_start.strftime("%H:%M:%S.%f")[:-4]}')
         self.epoch_times = []  # added 6/24/22
         self.p = params
         self.trainable = trainable
@@ -30,18 +28,12 @@ class Noise2Noise(object):
         self.ckpt_dir = ''
 
         # try to sync montage output with SLURM output filenames by getting job ID and name - emn 05/19/22
-        if "jobid" in os.environ:
-            self.job_id = os.environ["jobid"]  # ex: 193174
-        else:
-            self.job_id = f'{dt.now():%m%d%H%M}'  # ex: 05311336
-        if "jobname" in os.environ:
-            self.job_name = f'{os.environ["jobname"].replace("-imgrec", "")}{("redux" + str(self.p.redux)) if self.p.redux > 0 else ""}-{self.p.noise_type}{"clean" if (trainable and self.p.clean_targets) else ""}{self.p.noise_param if self.p.noise_type != "raw" else ""}{self.p.loss if trainable else ""}'  # ex: tinyimagenetredux0.9-bernoulli0.5l1
-        else:
-            self.job_name = f'{self.p.noise_type}{"-clean" if (trainable and self.p.clean_targets) else ""}{self.job_id}'
+        self.job_id = f'{dt.now():%m%d%H%M}'  # ex: 05311336
+        self.job_name = f'{self.p.noise_type}{"-clean" if (trainable and self.p.clean_targets) else ""}{self.job_id}'
 
         # debugging
-        print(f'n2n initialized in:  {str(dt.now() - self.n2n_start)[:-4]}')
-        sys.stdout.flush()
+        # print(f'n2n initialized in:  {str(dt.now() - self.n2n_start)[:-4]}')
+        # sys.stdout.flush()
 
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
@@ -58,20 +50,24 @@ class Noise2Noise(object):
                               eps=self.p.adam[2])
 
             # Learning rate adjustment
-            # self.scheduler = lr_scheduler.ReduceLROnPlateau(self.optim,
-            #                                                 patience=self.p.nb_epochs / 4,
-            #                                                 factor=0.5)
-            if self.p.lr_scheduler:
-                self.scheduler = lr_scheduler.CosineAnnealingWarmRestarts(self.optim,
-                                                                          T_0=int(self.p.learning_params[2]),
-                                                                          T_mult=int(self.p.learning_params[3]),
-                                                                          eta_min=self.p.learning_params[0])
+            self.scheduler = CosAnn(self.optim,
+                                    T_0=int(self.p.learning_params[2]),
+                                    T_mult=int(self.p.learning_params[3]),
+                                    eta_min=self.p.learning_params[0])
 
             # Loss function
             if self.p.loss == 'l2':
-                self.loss = nn.MSELoss()
+                # self.loss = nn.MSELoss()
+                # self.loss = MSE()
+                self.loss = MSE_SSIM_Loss(data_range=(0.0, 1.0))
             else:
-                self.loss = nn.L1Loss()
+                # self.loss = nn.L1Loss()
+                self.loss = MAE()
+                
+        # self.psnr = PSNR(data_range=(0.0, 1.0))
+        # self.ssim = SSIM(data_range=(0.0, 1.0))
+        self.psnr = PSNR_Meter(data_range=(0.0, 1.0))
+        self.ssim = SSIM_Meter(data_range=(0.0, 1.0))
 
         # CUDA support
         self.use_cuda = torch.cuda.is_available() and self.p.cuda
@@ -79,6 +75,8 @@ class Noise2Noise(object):
             self.model = self.model.cuda()
             if self.trainable:
                 self.loss = self.loss.cuda()
+            self.psnr = self.psnr.cuda()
+            self.ssim = self.ssim.cuda()
 
     def _print_params(self):
         """Formats parameters to print when training."""
@@ -95,16 +93,10 @@ class Noise2Noise(object):
 
     def show_on_report(self, batch_idx, num_batches, loss, elapsed):
         """Formats training stats."""
-
-        clear_line()
-        # dec = int(np.ceil(np.log10(num_batches)))
-        # print('Batch {:>{dec}d} / {:d} | Avg loss: {:>1.5f} | Avg train time / batch: {:d} ms'.format(batch_idx + 1,
-        #                                                                                               num_batches, loss,
-        #                                                                                               int(elapsed),
-        #                                                                                               dec=dec))
+        print('\r', end='')
         out_str = f'Batch {batch_idx + 1}/{num_batches} | Avg Loss: {loss} | Avg time per batch: {int(elapsed)}'
         if self.p.lr_scheduler:
-            out_str += f' | LR: {self.scheduler.get_last_lr()}'
+            out_str += f' | LR: {self.scheduler.get_last_lr()[0]}'
 
         print(out_str)
 
@@ -190,14 +182,14 @@ class Noise2Noise(object):
 
         if self.p.verbose:
             print(
-                'Epoch time: {} | Valid loss: {:>1.5f} | Avg PSNR: {:.2f} dB | Avg SSIM: {:.2f}'.format(epoch_time[:-4],
+                'Epoch time: {} | Valid loss: {:>1.5f} | Valid PSNR: {:.2f} dB | Valid SSIM: {:.2f}'.format(epoch_time[:-4],
                                                                                                         valid_loss,
                                                                                                         valid_psnr,
                                                                                                         valid_ssim))
             est_remain = (sum(self.epoch_times, timedelta(0)) / len(self.epoch_times)) * (
                     self.p.nb_epochs - (epoch + 1))
             print(
-                f'Current model runtime:    {str(dt.now() - self.n2n_start)[:-4]} (from N2N init)\nEstimated time remaining: {str(est_remain)[:-4]}')
+                f'Current fit runtime:  {str(dt.now() - self._train_start)[:-4]}\nEst. time remaining:  {str(est_remain)[:-4]}')
 
             sys.stdout.flush()  # force print to out file
 
@@ -261,10 +253,6 @@ class Noise2Noise(object):
         self.model.train(False)
 
         valid_start = dt.now()
-        loss_meter = AvgMeter()
-
-        ssim_meter = SSIM(data_range=1.0)
-        psnr_meter = PSNR(data_range=1.0)
 
         if self.p.verbose:
             print('\rTesting model on validation set... ', end='')
@@ -277,18 +265,21 @@ class Noise2Noise(object):
             # Denoise
             source_denoised = self.model(source)
 
-            # Calculate metrics with Ignite
-            ssim_meter.update((source_denoised, target))
-            psnr_meter.update((source_denoised, target))
+            # Calculate metrics
+            self.psnr.update(source_denoised, target)
+            self.ssim.update(source_denoised, target)
 
             # Update loss
-            loss = self.loss(source_denoised, target) + (1 - ssim_meter.compute())
-            loss_meter.update(loss.item())
+            self.loss.update(source_denoised, target)
 
-        valid_loss = loss_meter.avg
+        valid_loss = self.loss.compute().item()
         valid_time, _, valid_time_td = time_elapsed_since(valid_start)
-        psnr_avg = psnr_meter.compute()
-        ssim_avg = ssim_meter.compute()
+        psnr_avg = self.psnr.compute().item()
+        ssim_avg = self.ssim.compute().item()
+
+        self.loss.reset()
+        self.psnr.reset()
+        self.ssim.reset()
 
         clear_line()  # clears the "testing on validation.." line
 
@@ -297,7 +288,7 @@ class Noise2Noise(object):
     def train(self, train_loader, valid_loader):
         """Trains denoiser on training set."""
 
-        self.model.train(True)
+        self._train_start = dt.now()
 
         self._print_params()
         num_batches = len(train_loader)
@@ -313,28 +304,21 @@ class Noise2Noise(object):
                  'valid_psnr': [],
                  'valid_ssim': []}
 
-        psnr_meter = PSNR(data_range=1.0)
-        ssim_meter = SSIM(data_range=1.0)
-
         # Main training loop
-        train_start = dt.now()
         for epoch in range(self.p.nb_epochs):
+            self.model.train(True)
             if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
                 print('\nEPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
                 sys.stdout.flush()
 
             # Some stats trackers
             epoch_start = dt.now()
-            train_loss_meter = AvgMeter()
-            loss_meter = AvgMeter()
             time_meter = AvgMeter()
 
             # Minibatch SGD
-            # loop_start = dt.now()
+            pbar = tqdm(total=len(train_loader), desc=f'Train Epoch {epoch + 1}', unit='batch')
             for batch_idx, (source, target) in enumerate(train_loader):
                 batch_start = dt.now()
-                if self.p.show_progress:
-                    progress_bar(batch_idx, num_batches, report_interval, loss_meter.val)
 
                 if self.use_cuda:
                     source = source.cuda()
@@ -352,43 +336,38 @@ class Noise2Noise(object):
                         f"\nOr it can be caused by a dtype mismatch between the bias and input.",
                         f"\tBias type is usually float32, input dtype = {source.dtype}")
 
-                # Calculate ssims and update loss (with Ignite)
-                psnr_meter.update((source_denoised, target))
-                ssim_meter.update((source_denoised, target))
-                ssims = ssim_meter.compute()
-                loss = self.loss(source_denoised, target) + (1 - ssims)
+                # Calculate ssims and update loss
+                self.psnr.update(source_denoised, target)
+                self.ssim.update(source_denoised, target)
+                loss = self.loss(source_denoised, target)
 
                 # Update loss and step optimizer
-                loss_meter.update(loss.item())
                 loss.backward()
                 self.optim.step()
+                self.scheduler.step(epoch + batch_idx / num_batches)
 
-                # Update learning rate with Cosine Annealing + Warm Restarts scheduler
-                if self.p.lr_scheduler:
-                    self.scheduler.step(epoch + batch_idx / num_batches)
+                pbar.update()
+                pbar.set_postfix({'lr': round(self.scheduler.get_last_lr()[0], 6),
+                                  'loss': self.loss.compute().item(),
+                                  'psnr': self.psnr.compute().item(),
+                                  'ssim': self.ssim.compute().item()})
 
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
-                if (batch_idx + 1) % report_interval == 0 and batch_idx:
-                    if self.p.verbose and not self.p.show_progress:
-                        self.show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
-                        sys.stdout.flush()
-                    train_loss_meter.update(loss_meter.avg)
-                    loss_meter.reset()
-                    time_meter.reset()
-
-                # print(f'batch time: {dt.now() - batch_start} | loop time: {dt.now() - loop_start}')
-                # loop_start = dt.now()
+                time_meter.reset()
 
             # Epoch end, save and reset trackers
-            stats['train_psnr'].append(psnr_meter.compute())
-            stats['train_ssim'].append(ssim_meter.compute())
-            self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)
-            train_loss_meter.reset()
-            psnr_meter.reset()
-            ssim_meter.reset()
+            # self.scheduler.step()
+            pbar.close()
+            stats['train_psnr'].append(self.psnr.compute().item())
+            stats['train_ssim'].append(self.ssim.compute().item())
+            epoch_loss = self.loss.compute().item()
+            self.loss.reset()
+            self.psnr.reset()
+            self.ssim.reset()
+            self._on_epoch_end(stats, epoch_loss, epoch, epoch_start, valid_loader)
 
-        train_elapsed = time_elapsed_since(train_start)[0]
+        train_elapsed = time_elapsed_since(self._train_start)[0]
 
         print('\nTraining done! Total elapsed time: {}'.format(str(train_elapsed)[:-3]))
         print('Average training time per epoch:   {}\n'.format(
