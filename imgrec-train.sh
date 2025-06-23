@@ -12,9 +12,9 @@ set +a    # only need to export job info vars
 
 # !!!-------------------------------------- SET INPUT VARS --------------------------------------!!!
 
-root="/mnt/data/emnatin"
+root="/Users/emnatin/Documents/AFM_Data/afm_training_data"
 # data_dir="${root}/timgrec-extra-tiny-ImageNet"
-data_dir="${root}/AFMNet"
+data_dir="${root}/pt-scaled"
 train_dir="${data_dir}/train"
 valid_dir="${data_dir}/valid"
 target_dir="${data_dir}/targets"
@@ -23,15 +23,15 @@ channels=1
 # for finetuning a pretrained model (leave empty to create a new ckpt):
 train_ckpt=""
 
-redux=0.999
+redux=0.6
 noise="raw"
 train_param=0.25
-batch_size=20
+batch_size=4
 report=8
 epochs=10
 loss_fun='l2'
 # learning_params="0.001 0.001 0.75 0.2"  # [min, max, alpha, beta] for exp decay cosine
-learning_params="0.005 0.001 10 2"  # [min, max, T_0, T_mult] for cosine annealing scheduler
+learning_params="1e-5 2e-4 5 2"  # [min, max, T_0, T_mult] for cosine annealing scheduler
 
 # --------------------------------------------------------------------------------------------------
 

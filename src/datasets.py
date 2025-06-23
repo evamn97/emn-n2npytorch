@@ -10,7 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 from random import shuffle
 
 from data_prep import *
-from utils import rescale_tensor, import_spm
+from utils import rescale_tensor, import_spm, SUPPORTED
 
 rcParams['font.family'] = 'serif'
 matplotlib.use('agg')
@@ -58,8 +58,7 @@ class NoisyDataset(Dataset):
         self.seed = seed
 
         # load filenames and redux, if applicable
-        ext_list = ['.png', '.jpeg', '.jpg', '.xyz', '.txt', '.csv']  # acceptable extensions/filetypes
-        self.img_fnames = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in ext_list]
+        self.img_fnames = [s for s in os.listdir(root_dir) if os.path.splitext(s)[-1].lower() in SUPPORTED]
 
         if self.paired_targets and not os.path.isdir(target_dir):
             raise NotADirectoryError(f"Paired targets are requested but the target directory ({target_dir}) does not exist!")

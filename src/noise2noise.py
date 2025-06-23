@@ -260,10 +260,13 @@ class Noise2Noise(object):
         loss_meter = AvgMeter()
 
         ssim_meter = SSIM(data_range=1.0)
-        psnr_meter = PSNR()
+        psnr_meter = PSNR(data_range=1.0)
+        if self.use_cuda:
+            ssim_meter = ssim_meter.cuda()
+            psnr_meter = psnr_meter.cuda()
 
         if self.p.verbose:
-            print('\rTesting model on validation set... ', end='')
+            print('\nTesting model on validation set... ', end='')
 
         for batch_idx, (source, target) in enumerate(valid_loader):
             if self.use_cuda:
@@ -273,7 +276,7 @@ class Noise2Noise(object):
             # Denoise
             source_denoised = self.model(source)
 
-            # Calculate metrics with Ignite
+            # Calculate metrics
             ssim_meter.update(source_denoised, target)
             psnr_meter.update(source_denoised, target)
 
@@ -283,8 +286,8 @@ class Noise2Noise(object):
 
         valid_loss = loss_meter.avg
         valid_time, _, valid_time_td = time_elapsed_since(valid_start)
-        psnr_avg = psnr_meter.compute()
-        ssim_avg = ssim_meter.compute()
+        psnr_avg = psnr_meter.compute().item()
+        ssim_avg = ssim_meter.compute().item()
 
         clear_line()  # clears the "testing on validation.." line
 
@@ -309,8 +312,14 @@ class Noise2Noise(object):
                  'valid_psnr': [],
                  'valid_ssim': []}
 
-        psnr_meter = PSNR()
+        # Some stats trackers
+        psnr_meter = PSNR(data_range=1.0)
         ssim_meter = SSIM(data_range=1.0)
+        if self.use_cuda:
+            ssim_meter = ssim_meter.cuda()
+            psnr_meter = psnr_meter.cuda()
+        loss_meter = AvgMeter()
+        time_meter = AvgMeter()
 
         # Main training loop
         train_start = dt.now()
@@ -318,19 +327,20 @@ class Noise2Noise(object):
             if self.p.verbose or (epoch + 1) == self.p.nb_epochs:
                 print('\nEPOCH {:d} / {:d}'.format(epoch + 1, self.p.nb_epochs))
                 sys.stdout.flush()
+            
+            psnr_meter.reset()
+            ssim_meter.reset()
+            loss_meter.reset()
+            time_meter.reset()
 
-            # Some stats trackers
             epoch_start = dt.now()
-            train_loss_meter = AvgMeter()
-            loss_meter = AvgMeter()
-            time_meter = AvgMeter()
 
             # Minibatch SGD
             # loop_start = dt.now()
             for batch_idx, (source, target) in enumerate(train_loader):
                 batch_start = dt.now()
                 if self.p.show_progress:
-                    progress_bar(batch_idx, num_batches, report_interval, loss_meter.val)
+                    progress_bar(batch_idx, num_batches, report_interval, loss_meter.avg, time_meter.avg)
 
                 if self.use_cuda:
                     source = source.cuda()
@@ -348,16 +358,29 @@ class Noise2Noise(object):
                         f"\nOr it can be caused by a dtype mismatch between the bias and input.",
                         f"\tBias type is usually float32, input dtype = {source.dtype}")
 
-                # Calculate ssims and update loss (with Ignite)
+                # Calculate ssims and update loss
                 psnr_meter.update(source_denoised, target)
                 ssim_meter.update(source_denoised, target)
                 ssims = ssim_meter.compute()
                 loss = self.loss(source_denoised, target) + (1 - ssims)
+                # print(loss.requires_grad)
 
                 # Update loss and step optimizer
                 loss_meter.update(loss.item())
                 loss.backward()
                 self.optim.step()
+                
+                if batch_idx % 10 == 0:
+                    plot_tensors(source[0].detach().cpu(), 
+                                #  source_denoised0[0].detach().cpu(), 
+                                 source_denoised[0].detach().cpu(), 
+                                 target[0].detach().cpu(), 
+                                 titles=['source', 
+                                         'denoised', 
+                                        #  'denoised clamp', 
+                                         'target'], 
+                                 colorscale=True, 
+                                 show=False, save_dir='.', f_name='debugtrain.png')
 
                 # Update learning rate with Cosine Annealing + Warm Restarts scheduler
                 if self.p.lr_scheduler:
@@ -366,25 +389,17 @@ class Noise2Noise(object):
                 # Report/update statistics
                 time_meter.update(time_elapsed_since(batch_start)[1])
                 if (batch_idx + 1) % report_interval == 0 and batch_idx:
-                    if self.p.verbose:
-                        if self.p.show_progress:
-                            print("")
+                    if self.p.verbose and not self.p.show_progress:
                         show_on_report(batch_idx, num_batches, loss_meter.avg, time_meter.avg)
-                        sys.stdout.flush()
-                    train_loss_meter.update(loss_meter.avg)
-                    loss_meter.reset()
-                    time_meter.reset()
+                    sys.stdout.flush()
 
                 # print(f'batch time: {dt.now() - batch_start} | loop time: {dt.now() - loop_start}')
                 # loop_start = dt.now()
 
             # Epoch end, save and reset trackers
-            stats['train_psnr'].append(psnr_meter.compute())
-            stats['train_ssim'].append(ssim_meter.compute())
-            self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)
-            train_loss_meter.reset()
-            psnr_meter.reset()
-            ssim_meter.reset()
+            stats['train_psnr'].append(psnr_meter.compute().item())
+            stats['train_ssim'].append(ssim_meter.compute().item())
+            self._on_epoch_end(stats, loss_meter.avg, epoch, epoch_start, valid_loader)
 
         train_elapsed = time_elapsed_since(train_start)[0]
 
