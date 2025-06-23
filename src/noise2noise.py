@@ -370,17 +370,18 @@ class Noise2Noise(object):
                 loss.backward()
                 self.optim.step()
                 
-                if batch_idx % 10 == 0:
-                    plot_tensors(source[0].detach().cpu(), 
-                                #  source_denoised0[0].detach().cpu(), 
-                                 source_denoised[0].detach().cpu(), 
-                                 target[0].detach().cpu(), 
-                                 titles=['source', 
-                                         'denoised', 
-                                        #  'denoised clamp', 
-                                         'target'], 
-                                 colorscale=True, 
-                                 show=False, save_dir='.', f_name='debugtrain.png')
+                # for debugging
+                # if batch_idx % 10 == 0:
+                #     plot_tensors(source[0].detach().cpu(), 
+                #                 #  source_denoised0[0].detach().cpu(), 
+                #                  source_denoised[0].detach().cpu(), 
+                #                  target[0].detach().cpu(), 
+                #                  titles=['source', 
+                #                          'denoised', 
+                #                         #  'denoised clamp', 
+                #                          'target'], 
+                #                  colorscale=True, 
+                #                  show=False, save_dir='.', f_name='debugtrain.png')
 
                 # Update learning rate with Cosine Annealing + Warm Restarts scheduler
                 if self.p.lr_scheduler:
